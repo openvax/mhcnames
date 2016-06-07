@@ -1,2 +1,2 @@
 # mhcnames
-All the fun and adventure of MHC naming, now in Python
+All the fun and adventure of MHC nomenclature, now in Python
