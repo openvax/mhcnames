@@ -37,6 +37,6 @@ install:
   - pip install coveralls
 script:
   # run tests
-  - nosetests test --with-coverage --cover-package=mhcflurry  && ./lint.sh
+  - nosetests test --with-coverage --cover-package=mhcnames  && ./lint.sh
 after_success:
   coveralls
