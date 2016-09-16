@@ -35,3 +35,16 @@ def test_hla_short_names():
     for name in hla_02_01_names:
         result = compact_allele_name(name)
         eq_(result, expected)
+
+def test_hla_with_3_digit_allele_code():
+    # B*15:120
+    eq_(normalize_allele_name("HLA-B*15:120"), "HLA-B*15:120")
+    eq_(compact_allele_name("HLA-B*15:120"), "B15120")
+    eq_(normalize_allele_name("B15120"), "HLA-B*15:120")
+    eq_(compact_allele_name("B15120"), "B15120")
+
+    # A*02*123
+    eq_(normalize_allele_name("HLA-A*02:123"), "HLA-A*02:123")
+    eq_(compact_allele_name("HLA-A*02:123"), "A02123")
+    eq_(normalize_allele_name("A02123"), "HLA-A*02:123")
+    eq_(compact_allele_name("A02123"), "A02123")

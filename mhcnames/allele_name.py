@@ -116,7 +116,6 @@ def parse_allele_name(name, species_prefix=None):
 
     if len(name) == 0:
         raise AlleleParseError("Incomplete MHC allele name: %s" % (original,))
-
     elif not species:
         # assume that a missing species name means we're dealing with a
         # human HLA allele
@@ -147,9 +146,12 @@ def parse_allele_name(name, species_prefix=None):
 
     # skip initial separator
     sep, name = parse_separator(name)
-    # if all that's left is e.g. "0201" then only parse the
-    # first two digits as the family code
-    if len(name) == 4:
+    # If all that's left is e.g. "0201" then only parse the
+    # first two digits as the family code. Also, human Class I alleles
+    # seem to be exceptional in that they have only 2 digit allele
+    # families but 3 digit allele codes
+    # (other species like sheep have 3 digits followed by 2 digits)
+    if len(name) == 4 or (species == "HLA" and gene in ("A", "B", "C")):
         family, name = parse_numbers(name, max_len=2)
     else:
         family, name = parse_numbers(name, max_len=3)
@@ -169,8 +171,9 @@ def parse_allele_name(name, species_prefix=None):
         # change HLA-A*2:01 into HLA-A*02:01
         allele_code = "0" + allele_code
     elif len(allele_code) == 3 and allele_code[0] == "0":
-        # normalize HLA-A*002:01 into HLA-A*02:01
+        # normalize HLA-A*02:001 into HLA-A*02:01
         allele_code = allele_code[1:]
+
     return AlleleName(species, gene, family, allele_code)
 
 _normalized_allele_cache = {}
