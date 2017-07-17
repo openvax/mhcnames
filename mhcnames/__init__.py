@@ -9,11 +9,13 @@ from .species import (
     species_name_to_prefixes,
     prefix_to_species_name,
 )
+from .allele_parse_error import AlleleParseError
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 __all__ = [
     "AlleleName",
+    "AlleleParseError",
     "compact_allele_name",
     "normalize_allele_name",
     "parse_allele_name",

@@ -16,6 +16,7 @@ from __future__ import print_function, division, absolute_import
 
 from .species import split_species_prefix
 from .allele_name import parse_allele_name
+from .allele_parse_error import AlleleParseError
 
 def parse_classi_or_classii_allele_name(name):
     """
@@ -43,7 +44,9 @@ def parse_classi_or_classii_allele_name(name):
     name = name.replace("_", "")
 
     parts = name.split("-")
-    assert len(parts) <= 2, "Allele has too many parts: %s" % name
+    if len(parts) > 2:
+        raise AlleleParseError(
+            "Allele has too many parts: %s" % name)
     if len(parts) == 1:
         return (parse_allele_name(name, species),)
     else:

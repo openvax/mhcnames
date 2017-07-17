@@ -17,7 +17,6 @@ from __future__ import print_function, division, absolute_import
 from collections import namedtuple
 
 from .parsing_helpers import (
-    AlleleParseError,
     parse_separator,
     parse_alphanum,
     parse_numbers,
@@ -25,6 +24,7 @@ from .parsing_helpers import (
 )
 from .mouse import parse_mouse_allele_name
 from .species import split_species_prefix
+from .allele_parse_error import AlleleParseError
 
 AlleleName = namedtuple("AlleleName", [
     "species",
