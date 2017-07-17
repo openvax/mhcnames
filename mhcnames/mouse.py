@@ -15,10 +15,8 @@
 from __future__ import print_function, division, absolute_import
 
 
-from .parsing_helpers import (
-    AlleleParseError,
-    parse_separator,
-)
+from .allele_parse_error import AlleleParseError
+from .parsing_helpers import parse_separator
 
 def parse_mouse_allele_name(name):
     """Parses mouse MHc alleles such as H2-Kd, H-2-Db, H2-IAb.
