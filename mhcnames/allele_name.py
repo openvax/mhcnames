@@ -60,8 +60,9 @@ def parse_classi_or_classii_allele_name(name):
     name = name.replace("_", "")
 
     parts = name.split("-")
-    assert len(parts) <= 2, "Allele has too many parts: %s : %s" % (
-        name, parts)
+    if len(parts) > 2:
+        raise AlleleParseError(
+            "Allele has too many parts: %s : %s" % (name, parts))
     if len(parts) == 1:
         return (parse_allele_name(name, species),)
     else:
