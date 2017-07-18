@@ -14,6 +14,7 @@
 
 from __future__ import print_function, division, absolute_import
 
+from .allele_parse_error import AlleleParseError
 
 def parse_substring(allele, pred, max_len=None):
     """
