@@ -81,21 +81,21 @@ for (species, prefixes) in species_name_to_prefixes.items():
         prefix_to_species_name[prefix] = species
 
 
-def split_species_prefix(name):
+def split_species_prefix(name, seps="-:_ "):
     """
     Splits off the species component of the allele name from the rest of it.
 
     Given "HLA-A*02:01", returns ("HLA", "A*02:01").
     """
     species = None
+    name_upper = name.upper()
+    name_len = len(name)
     for curr_prefix in prefix_to_species_name.keys():
         n = len(curr_prefix)
-        if len(name) <= n:
+        if name_len <= n:
             continue
-        if name[n] != "-":
-            continue
-        if name[:n].upper() == curr_prefix.upper():
+        if name_upper.startswith(curr_prefix.upper()):
             species = curr_prefix
-            name = name[n + 1:]
+            name = name[n:].strip(seps)
             break
     return (species, name)

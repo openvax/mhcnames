@@ -66,6 +66,7 @@ def parse_allele_name(name, species_prefix=None):
         raise ValueError("Can't normalize empty MHC allele name")
 
     species_from_name, name = split_species_prefix(name)
+
     if species_prefix:
         if species_from_name:
             raise ValueError("If a species is passed in, we better not have another "
