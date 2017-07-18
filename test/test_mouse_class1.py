@@ -31,3 +31,7 @@ def test_mouse_class1_alleles_H2_Db():
         AlleleName("H-2", "D", "", "b"))
     eq_(normalize_allele_name("H-2-Db"), "H-2-Db")
     eq_(compact_allele_name("H-2-Db"), "Db")
+
+def test_H2_Kd_without_seps():
+    eq_(parse_allele_name("H2Kd"),
+        AlleleName("H-2", "K", "", "d"))
