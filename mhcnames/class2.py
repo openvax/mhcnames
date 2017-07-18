@@ -15,7 +15,7 @@
 from __future__ import print_function, division, absolute_import
 
 from .species import split_species_prefix
-from .allele_name import parse_allele_name
+from .allele_name import parse_allele_name, AlleleName
 from .allele_parse_error import AlleleParseError
 
 def parse_classi_or_classii_allele_name(name):
@@ -41,14 +41,25 @@ def parse_classi_or_classii_allele_name(name):
     name = name.replace("/", "-")
 
     # Ignored underscores, such as with DRB1_0102
-    name = name.replace("_", "")
+    name = name.replace("_", "*")
 
     parts = name.split("-")
     if len(parts) > 2:
         raise AlleleParseError(
             "Allele has too many parts: %s" % name)
     if len(parts) == 1:
-        return (parse_allele_name(name, species),)
+        parsed = parse_allele_name(name, species)
+        if parsed.species == "HLA" and parsed.gene.startswith("DRB"):
+            alpha = AlleleName(
+                species="HLA",
+                gene="DRA1",
+                allele_family="01",
+                allele_code="01")
+            return (alpha, parsed)
+        else:
+            return (parsed,)
     else:
-        return (parse_allele_name(parts[0], species),
-                parse_allele_name(parts[1], species))
+        alpha_string, beta_string = parts
+        alpha = parse_allele_name(alpha_string)
+        beta = parse_allele_name(beta_string)
+        return (alpha, beta)
