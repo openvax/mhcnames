@@ -34,42 +34,6 @@ AlleleName = namedtuple("AlleleName", [
 ])
 
 
-def parse_classi_or_classii_allele_name(name):
-    """
-    Handle different forms of both single and alpha-beta allele names.
-    Alpha-beta alleles may look like:
-
-    DPA10105-DPB110001
-    HLA-DPA1*01:05-DPB1*100:01
-    hla-dpa1*0105-dpb1*10001
-    dpa1*0105-dpb1*10001
-    HLA-DPA1*01:05/DPB1*100:01
-
-    Other class II alleles may look like:
-
-    DRB1_0102
-    DRB101:02
-    HLA-DRB1_0102
-    """
-    species, name = split_species_prefix(name)
-
-    # Handle the case where alpha/beta pairs are separated with a /.
-    name = name.replace("/", "-")
-
-    # Ignored underscores, such as with DRB1_0102
-    name = name.replace("_", "")
-
-    parts = name.split("-")
-    if len(parts) > 2:
-        raise AlleleParseError(
-            "Allele has too many parts: %s : %s" % (name, parts))
-    if len(parts) == 1:
-        return (parse_allele_name(name, species),)
-    else:
-        return (parse_allele_name(parts[0], species),
-                parse_allele_name(parts[1], species))
-
-
 def parse_allele_name(name, species_prefix=None):
     """Takes an allele name and splits it into four parts:
         1) species prefix
@@ -128,6 +92,13 @@ def parse_allele_name(name, species_prefix=None):
         # MHC class II genes like "DQA1" need to be parsed with both
         # letters and numbers
         gene, name = parse_alphanum(name, 4)
+        # TODO: make a list of known species/gene pairs, along with
+        # gene synonyms. That should significantly imporve on this kind of
+        # ad-hoc synonym handling.
+        if gene == "DRA":
+            gene = "DRA1"
+        elif gene == "DRB":
+            gene = "DRB1"
     elif name[0].isalpha():
         # if there are more separators to come, then assume the gene names
         # can have the form "DQA1"
