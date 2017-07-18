@@ -6,7 +6,7 @@ from mhcnames import (
 )
 
 def test_human_class2():
-    expected = "HLA-DRB1*01:02"
+    expected = "HLA-DRA1*01:01-DRB1*01:02"
     expected_compact = "DRB10102"
     for name in ["DRB1_0102",
                  "DRB101:02",

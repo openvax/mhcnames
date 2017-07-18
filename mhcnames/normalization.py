@@ -14,6 +14,7 @@
 
 from __future__ import print_function, division, absolute_import
 
+from .allele_name import AlleleName
 from .class2 import parse_classi_or_classii_allele_name
 
 _normalized_allele_cache = {}
@@ -82,6 +83,12 @@ def normalize_allele_name(raw_allele):
     _normalized_allele_cache[raw_allele] = normalized
     return normalized
 
+_DRA1_0101 = AlleleName(
+    species="HLA",
+    gene="DRA1",
+    allele_family="01",
+    allele_code="01")
+
 def compact_allele_name(raw_allele):
     """
     Turn HLA-A*02:01 into A0201 or H-2-D-b into H-2Db or
@@ -89,6 +96,13 @@ def compact_allele_name(raw_allele):
     """
     parsed_alleles = parse_classi_or_classii_allele_name(raw_allele)
     normalized_list = []
+    if len(parsed_alleles) == 2:
+        alpha, beta = parsed_alleles
+        # by convention the alpha allelle is omitted since it's assumed
+        # to be DRA1*01:01
+        if alpha == _DRA1_0101:
+            parsed_alleles = [beta]
+
     for parsed_allele in parsed_alleles:
         if len(parsed_allele.allele_family) > 0:
             normalized_list.append("%s%s%s" % (
