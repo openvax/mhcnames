@@ -19,7 +19,13 @@ from .class2 import parse_classi_or_classii_allele_name
 
 _normalized_allele_cache = {}
 
-def normalize_allele_name(raw_allele):
+_DRA1_0101 = AlleleName(
+    species="HLA",
+    gene="DRA1",
+    allele_family="01",
+    allele_code="01")
+
+def normalize_allele_name(raw_allele, omit_dra1=False):
     """MHC alleles are named with a frustratingly loose system. It's not uncommon
     to see dozens of different forms for the same allele.
 
@@ -64,6 +70,13 @@ def normalize_allele_name(raw_allele):
     parsed_alleles = parse_classi_or_classii_allele_name(raw_allele)
     species = parsed_alleles[0].species
     normalized_list = [species]
+    # Optionally omit the alpha allele, e.g. for IEDB predictors.
+    if omit_dra1 and len(parsed_alleles) == 2:
+        alpha, beta = parsed_alleles
+        # by convention the alpha allelle is omitted since it's assumed
+        # to be DRA1*01:01
+        if alpha == _DRA1_0101:
+            parsed_alleles = [beta]
     for parsed_allele in parsed_alleles:
         if len(parsed_allele.allele_family) > 0:
             normalized_list.append("%s*%s:%s" % (
@@ -82,12 +95,6 @@ def normalize_allele_name(raw_allele):
     normalized = "-".join(normalized_list)
     _normalized_allele_cache[raw_allele] = normalized
     return normalized
-
-_DRA1_0101 = AlleleName(
-    species="HLA",
-    gene="DRA1",
-    allele_family="01",
-    allele_code="01")
 
 def compact_allele_name(raw_allele):
     """
