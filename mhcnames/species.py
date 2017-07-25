@@ -22,7 +22,7 @@ species_name_to_prefixes = dict(
     cattle="BoLA",
     bison="Bibi",
     dog="DLA",
-    sheep=["OVA", "Ovar", "Ovca"],
+    sheep=["Ovar", "OLA", "Ovca"],
     swine="SLA",
     mouse=["H2", "H-2"],
     rainbow_trout="Onmy",
@@ -74,12 +74,21 @@ species_name_to_prefixes = dict(
 
 prefix_to_species_name = {}
 
+_preferred_prefixes = []
+_alternate_prefixes = []
+
 for (species, prefixes) in species_name_to_prefixes.items():
     if isinstance(prefixes, string_types):
         prefixes = [prefixes]
-    for prefix in prefixes:
+    for i, prefix in enumerate(prefixes):
         prefix_to_species_name[prefix] = species
+        if i == 0:
+            _preferred_prefixes.append(prefix)
+        else:
+            _alternate_prefixes.append(prefix)
 
+# list of all species specific prefixes in search order
+_all_prefixes = _preferred_prefixes + _alternate_prefixes
 
 def split_species_prefix(name, seps="-:_ "):
     """
@@ -90,7 +99,7 @@ def split_species_prefix(name, seps="-:_ "):
     species = None
     name_upper = name.upper()
     name_len = len(name)
-    for curr_prefix in prefix_to_species_name.keys():
+    for curr_prefix in _all_prefixes:
         n = len(curr_prefix)
         if name_len <= n:
             continue

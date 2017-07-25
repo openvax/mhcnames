@@ -137,7 +137,6 @@ def parse_allele_name(name, species_prefix=None):
         family = "0" + family
     elif len(family) == 3 and family[0] == "0":
         family = family[1:]
-
     if len(allele_code) == 0:
         allele_code = "01"
     elif len(allele_code) == 1:
