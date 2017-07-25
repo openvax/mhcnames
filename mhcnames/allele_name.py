@@ -66,6 +66,7 @@ def parse_allele_name(name, species_prefix=None):
         raise ValueError("Can't normalize empty MHC allele name")
 
     species_from_name, name = split_species_prefix(name)
+
     if species_prefix:
         if species_from_name:
             raise ValueError("If a species is passed in, we better not have another "
@@ -136,7 +137,6 @@ def parse_allele_name(name, species_prefix=None):
         family = "0" + family
     elif len(family) == 3 and family[0] == "0":
         family = family[1:]
-
     if len(allele_code) == 0:
         allele_code = "01"
     elif len(allele_code) == 1:
