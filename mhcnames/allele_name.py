@@ -131,7 +131,13 @@ def parse_allele_name(name, species_prefix=None):
 
     sep, name = parse_separator(name)
 
-    allele_code, name = parse_numbers(name)
+    allele_code, rest_of_text = parse_numbers(name)
+
+    rest_of_text = rest_of_text.strip()
+    if len(rest_of_text) > 0:
+        raise AlleleParseError("The suffix '%s' of '%s' was not parsed" % (
+            original,
+            rest_of_text))
 
     if len(family) == 1:
         family = "0" + family
