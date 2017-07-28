@@ -20,12 +20,6 @@ before_install:
   - conda update -q conda
   # Useful for debugging any issues with conda
   - conda info -a
-addons:
-  apt:
-    packages:
-    # install pandoc for use with pypandoc for converting the README
-    # from markdown to RST
-    - pandoc
 install:
   - >
       conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION
@@ -40,3 +34,12 @@ script:
   - nosetests test --with-coverage --cover-package=mhcnames  && ./lint.sh
 after_success:
   coveralls
+deploy:
+  provider: pypi
+  distributions: sdist
+  skip_cleanup: true
+  user: hammerlab
+  password: # See http://docs.travis-ci.com/user/encryption-keys/
+    secure: "BwIahNcb4koDiC8xP3ZsesqrYPzcNM2KuYA4CCtRNGntmY4Sjgb6Kcd3FXFwUtIbvFCqMHkRKHtx3uC8ZDNHPRnZ4VW1M3pyWyj9UYzX447imgsgQNDJJnbjotJ2c2jkfSQ6MyfbFdY5WALRUZTX6GcaZV4PzsHFBI/Ty8COtrnowUryLUs1amAIIBrOCSS/0TYd9Rh9Or8s3y/OqEDNHQDbZQ+ywQNt0wCwQWYtRIILgtR9grVM6k647S8gcTXudX8sJ7uzR8ebooXDdAF2ZxXJGX6kPongReghc9xliYuVzjhRvTJ0o4bDLhOrtpUGtbheTZdGv+OQohmiKlpr0mr833xGYq607BNUf1dUkuyyQt3D+lEEWyWQxScmq8feMvfNj1LKZ/eFR+6Svessh8S1NPfrfn8NMTC/d2u6oagqYb0zZXKYCs83zKjRX6uc4/PXVDLJvgQvpyiCD3SW48RVoLZbiyQ1TO36ph5Xxj9egPnRtIGu1obL3T1UyR31ZykU1NZ/kJHGVRFzU8sKJLAmnzYbe7NMS3AQoocM7af9UTDWBuHIqP5+NqljLkwlIITITEje9cYMgEiZaDCqzkFeKAJLchWPmoT6Bu9ECTB2mfAVVhy8/8XbFYu4CsnEXre28/iofVjO8u5wOkUCYNx2qqkuDBWtv7yUSstXItc="
+  on:
+    branch: master
