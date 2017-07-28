@@ -15,7 +15,6 @@ def test_human_class2():
                  "DRB1*0102",
                  "HLA-DRB1*0102",
                  "HLA-DRB1*01:02",
-                 "DRB10102",
                  "DRB0102"]:
         eq_(normalize_allele_name(name), expected)
         eq_(compact_allele_name(name), expected_compact)
