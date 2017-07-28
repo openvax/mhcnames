@@ -31,7 +31,7 @@ except:
 try:
     import pypandoc
     readme = pypandoc.convert(readme, to='rst', format='md')
-    logging.info('\n' + readme)
+    
 except:
     logging.warn("Conversion of long_description from MD to RST failed")
     pass
