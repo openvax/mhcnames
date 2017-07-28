@@ -19,7 +19,7 @@ import re
 from setuptools import setup
 
 readme_dir = os.path.dirname(__file__)
-readme_filename = os.path.join(readme_dir, 'README.rst')
+readme_filename = os.path.join(readme_dir, 'README.md')
 
 try:
     with open(readme_filename, 'r') as f:
@@ -27,6 +27,13 @@ try:
 except:
     logging.warn("Failed to load %s" % readme_filename)
     readme = ""
+
+try:
+    import pypandoc
+    readme = pypandoc.convert(readme, to='rst', format='md')
+except:
+    logging.warn("Conversion of long_description from MD to RST failed")
+    pass
 
 with open('mhcnames/__init__.py', 'r') as f:
     version = re.search(
