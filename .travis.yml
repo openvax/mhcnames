@@ -3,12 +3,6 @@ language: python
 python:
   - "2.7"
   - "3.5"
-addons:
-  apt:
-    packages:
-      # install pandoc for use with pypandoc for converting the README
-      # from markdown to RST
-      - pandoc
 before_install:
   # Commands below copied from: http://conda.pydata.org/docs/travis.html
   # We do this conditionally because it saves us some downloading if the
@@ -29,7 +23,7 @@ before_install:
 install:
   - >
       conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION
-      nose pylint
+      nose pylint pandoc
   - source activate test-environment
   - pip install pypandoc
   - pip install -r requirements.txt
