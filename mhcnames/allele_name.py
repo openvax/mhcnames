@@ -90,16 +90,20 @@ def parse_allele_name(name, species_prefix=None):
         species = "HLA"
 
     if name[0].upper() == "D":
-        # MHC class II genes like "DQA1" need to be parsed with both
-        # letters and numbers
-        gene, name = parse_alphanum(name, 4)
+        if len(name) == 7:
+            # sometimes we get very compact names like DRB0101
+            gene, name = parse_letters(name, 3)
+        else:
+            # MHC class II genes like "DQA1" need to be parsed with both
+            # letters and numbers
+            gene, name = parse_alphanum(name, 4)
         # TODO: make a list of known species/gene pairs, along with
         # gene synonyms. That should significantly imporve on this kind of
         # ad-hoc synonym handling.
-        if gene == "DRA":
-            gene = "DRA1"
-        elif gene == "DRB":
-            gene = "DRB1"
+
+        if gene.isalpha():
+            # expand e.g. DRA -> DRA1, DQB -> DQB1
+            gene = gene + "1"
     elif name[0].isalpha():
         # if there are more separators to come, then assume the gene names
         # can have the form "DQA1"
