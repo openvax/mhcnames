@@ -20,7 +20,6 @@ from setuptools import setup
 
 readme_dir = os.path.dirname(__file__)
 readme_filename = os.path.join(readme_dir, 'README.md')
-readme_rst_filename = os.path.join(readme_dir, 'README.rst')
 
 try:
     with open(readme_filename, 'r') as f:
@@ -32,8 +31,7 @@ except:
 try:
     import pypandoc
     readme = pypandoc.convert(readme, to='rst', format='md')
-    with open(readme_rst_filename, 'w') as f:
-        f.write(readme)
+    logging.info('\n' + readme)
 except:
     logging.warn("Conversion of long_description from MD to RST failed")
     pass
