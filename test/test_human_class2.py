@@ -14,7 +14,8 @@ def test_human_class2():
                  "DRB10102",
                  "DRB1*0102",
                  "HLA-DRB1*0102",
-                 "HLA-DRB1*01:02"]:
+                 "HLA-DRB1*01:02",
+                 "DRB0102"]:
         eq_(normalize_allele_name(name), expected)
         eq_(compact_allele_name(name), expected_compact)
 
@@ -25,6 +26,7 @@ def test_human_class2_alpha_beta():
                  "HLA-DPA1*01:05-DPB1*100:01",
                  "hla-dpa1*0105-dpb1*10001",
                  "dpa1*0105-dpb1*10001",
-                 "HLA-DPA1*01:05/DPB1*100:01"]:
+                 "HLA-DPA1*01:05/DPB1*100:01",
+                 "DPA10105/DPB110001"]:
         eq_(normalize_allele_name(name), expected)
         eq_(compact_allele_name(name), expected_compact)
