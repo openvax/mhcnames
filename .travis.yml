@@ -1,8 +1,20 @@
+dist: trusty
 sudo: false  # Use container-based infrastructure
 language: python
 python:
   - "2.7"
   - "3.5"
+addons:
+  apt:
+    packages:
+      # Needed for NetMHC
+      - tcsh
+cache:
+  pip: true
+  # cache directory used for Ensembl downloads of GTF and FASTA files
+  # along with the indexed db of intervals and ID mappings and pickles
+  # of sequence dictionaries
+  directories: /home/travis/.cache/pyensembl/
 before_install:
   # Commands below copied from: http://conda.pydata.org/docs/travis.html
   # We do this conditionally because it saves us some downloading if the
@@ -20,6 +32,22 @@ before_install:
   - conda update -q conda
   # Useful for debugging any issues with conda
   - conda info -a
+  # install netmhcbundle: needed for mhctools tests
+  - git clone https://mhcbundle:$MHC_BUNDLE_PASS@github.com/hammerlab/netmhc-bundle.git
+  - export NETMHC_BUNDLE_HOME=$PWD/netmhc-bundle
+  - mkdir tmp
+  - export NETMHC_BUNDLE_TMPDIR=$PWD/tmp
+  - export PATH=$PATH:$NETMHC_BUNDLE_HOME/bin
+  # needed for MHCflurry predictor test
+  - export KERAS_BACKEND=theano
+  # we want to include mhctools and vaxrank unit tests as a general integration test to make sure
+  # the stack isn't broken in an obvious way
+  - git clone https://github.com/hammerlab/vaxrank.git
+  - git clone https://github.com/hammerlab/mhctools.git
+env:
+  global:
+    # MHC_BUNDLE_PASS
+    - secure: "XRBjwg9/3Ezk+idkyH4LBdWr4BTq4KbGpKHkeltJAu7qN257/VQKUeb4oYlArRjauXJvuTx+AIm+Vre84bKRypeOKZB96R6nAP+aRVKfXx1PDFOnb9VlisZCTtvwZeQ0fucdXHEsspMnR5qJ/smuvIvl5ga2qQFpmVNijavBDphgPsTNsXvN3XjzcPtWEL7DpzsYGkCOweSFhPO6Y5B8Mauns5hUq1QAF3RFPuTFzd3J28TkJ2HvBIBO8fKxXJM3DB7AD9uzL82Ttd6ePpafZZa1RXmQLmSN59oWXP8vvqSm9tV2iqNP3HrqjGIoXLXGFFOydl6IVJX7KTVrwYxEh0CgEhPXXX2F4I8zzNG/CQdU3ys292VSs3KShVTVUwAB4wwZp2zjb/UA7T/+T7QZiS4c9OdMWgUyGpXKQEgQSeRFvlSI8eDe3RTkRU9khINbvCgMKtEw5YDi3jcQ1V0wZs8a7A1hoNvA6xav2hgnfKS5iHm/wYBade/IU8cgBrE7C4MCvP9xt8X4GFKs/MC2Ef0aXEVKkGgMuAZxP2OPDWbcgk7kNRLpBQzWHrNJfNo+6ZDkXgSM3R2/XdQe+3BKQ7YFiwuJPpuMiYkjpaQyRw2rvnh6FSvZd9UKVB6AePxnPtm9YcYWsXiTwdmsnFiIELbdkOELLtKrv3mamDaQXXM="
 install:
   - >
       conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION
@@ -29,15 +57,25 @@ install:
   - pip install -r requirements.txt
   - pip install .
   - pip install coveralls
+  # install mhctools, vaxrank and its dependent data
+  - pip install --upgrade -r $PWD/mhctools/requirements.txt
+  - pip install --upgrade -r $PWD/vaxrank/requirements.txt
+  - pyensembl install --release 87 --species human
+  - pyensembl install --release 87 --species mouse
+before_script:
+  # needed for MHCflurry predictor test
+  - mhcflurry-downloads fetch
 script:
-  # run tests
-  - nosetests test --with-coverage --cover-package=mhcnames  && ./lint.sh
+  - ./lint.sh
+  # -a '!skip' lets us skip certain tests on travis (relevant for vaxrank)
+  # this command runs both mhctools and vaxrank tests. Sometimes they don't print output for a long
+  # time; travis_wait extends the time allowed with no output.
+  - travis_wait nosetests -sv test --with-coverage --cover-package=mhcnames -a '!skip' $PWD/vaxrank $PWD/mhctools
 after_success:
   coveralls
 deploy:
   provider: pypi
   distributions: sdist
-  skip_cleanup: true
   user: hammerlab
   password: # See http://docs.travis-ci.com/user/encryption-keys/
     secure: "BwIahNcb4koDiC8xP3ZsesqrYPzcNM2KuYA4CCtRNGntmY4Sjgb6Kcd3FXFwUtIbvFCqMHkRKHtx3uC8ZDNHPRnZ4VW1M3pyWyj9UYzX447imgsgQNDJJnbjotJ2c2jkfSQ6MyfbFdY5WALRUZTX6GcaZV4PzsHFBI/Ty8COtrnowUryLUs1amAIIBrOCSS/0TYd9Rh9Or8s3y/OqEDNHQDbZQ+ywQNt0wCwQWYtRIILgtR9grVM6k647S8gcTXudX8sJ7uzR8ebooXDdAF2ZxXJGX6kPongReghc9xliYuVzjhRvTJ0o4bDLhOrtpUGtbheTZdGv+OQohmiKlpr0mr833xGYq607BNUf1dUkuyyQt3D+lEEWyWQxScmq8feMvfNj1LKZ/eFR+6Svessh8S1NPfrfn8NMTC/d2u6oagqYb0zZXKYCs83zKjRX6uc4/PXVDLJvgQvpyiCD3SW48RVoLZbiyQ1TO36ph5Xxj9egPnRtIGu1obL3T1UyR31ZykU1NZ/kJHGVRFzU8sKJLAmnzYbe7NMS3AQoocM7af9UTDWBuHIqP5+NqljLkwlIITITEje9cYMgEiZaDCqzkFeKAJLchWPmoT6Bu9ECTB2mfAVVhy8/8XbFYu4CsnEXre28/iofVjO8u5wOkUCYNx2qqkuDBWtv7yUSstXItc="
