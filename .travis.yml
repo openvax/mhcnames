@@ -1,9 +1,8 @@
-dist: trusty
 sudo: false  # Use container-based infrastructure
 language: python
 python:
   - "2.7"
-  - "3.5"
+  - "3.6"
 addons:
   apt:
     packages:
@@ -34,7 +33,7 @@ before_install:
   # Useful for debugging any issues with conda
   - conda info -a
   # install netmhcbundle: needed for mhctools tests
-  - git clone https://mhcbundle:$MHC_BUNDLE_PASS@github.com/hammerlab/netmhc-bundle.git
+  - git clone https://mhcbundle:$MHC_BUNDLE_PASS@github.com/openvax/netmhc-bundle.git
   - export NETMHC_BUNDLE_HOME=$PWD/netmhc-bundle
   - mkdir tmp
   - export NETMHC_BUNDLE_TMPDIR=$PWD/tmp
@@ -43,12 +42,12 @@ before_install:
   - export KERAS_BACKEND=theano
   # we want to include mhctools and vaxrank unit tests as a general integration test to make sure
   # the stack isn't broken in an obvious way
-  - git clone https://github.com/hammerlab/vaxrank.git
-  - git clone https://github.com/hammerlab/mhctools.git
+  - git clone https://github.com/openvax/vaxrank.git
+  - git clone https://github.com/openvax/mhctools.git
 env:
   global:
     # MHC_BUNDLE_PASS
-    - secure: "XRBjwg9/3Ezk+idkyH4LBdWr4BTq4KbGpKHkeltJAu7qN257/VQKUeb4oYlArRjauXJvuTx+AIm+Vre84bKRypeOKZB96R6nAP+aRVKfXx1PDFOnb9VlisZCTtvwZeQ0fucdXHEsspMnR5qJ/smuvIvl5ga2qQFpmVNijavBDphgPsTNsXvN3XjzcPtWEL7DpzsYGkCOweSFhPO6Y5B8Mauns5hUq1QAF3RFPuTFzd3J28TkJ2HvBIBO8fKxXJM3DB7AD9uzL82Ttd6ePpafZZa1RXmQLmSN59oWXP8vvqSm9tV2iqNP3HrqjGIoXLXGFFOydl6IVJX7KTVrwYxEh0CgEhPXXX2F4I8zzNG/CQdU3ys292VSs3KShVTVUwAB4wwZp2zjb/UA7T/+T7QZiS4c9OdMWgUyGpXKQEgQSeRFvlSI8eDe3RTkRU9khINbvCgMKtEw5YDi3jcQ1V0wZs8a7A1hoNvA6xav2hgnfKS5iHm/wYBade/IU8cgBrE7C4MCvP9xt8X4GFKs/MC2Ef0aXEVKkGgMuAZxP2OPDWbcgk7kNRLpBQzWHrNJfNo+6ZDkXgSM3R2/XdQe+3BKQ7YFiwuJPpuMiYkjpaQyRw2rvnh6FSvZd9UKVB6AePxnPtm9YcYWsXiTwdmsnFiIELbdkOELLtKrv3mamDaQXXM="
+  secure: "pQmPFVW1HshFDTd4BcwA8sbREjmKEH8o+WO4YF0WAWF1jGb1gWEAs/kLfDpVqAmhH1CJTstFHDj2m4V6i+0+qE6SjJzL+30HdjouNMia9PJa8CXoNXUBMcwginEx512xrRk6X3Q95DY1e3ClZNGjVxCBdi8MzLzo+zCtQyOV+3oCIBPOCl8kIhJwtlHrvrz3S0l1jAyOjRrVRnAWzPBiPH1UPIXkZb5ZkP2sqKKegib/NJ9+Y/J3IV4PAANwObulCJpn7tEHn0x2j4cpHZ77/HEV6Mcn5mjR+kvBBV/1/9yYBJIVt+Ke73ydVJYtk4gMdI93wGDmqwO7oEI39YUTadA+jS1LZo5Kcb2IzK95k7Dqd3X5dqS627m+lo/xpIxcvYK1Vq/5mXacugm4/3H9DYYBJpIBsTdzxZnzGBQWkefok8jVpQDYohSXCRrjWTJlNW3R91cJdY7YdUvhcExyDSaJY74KLouX+vFHr+gXowEC4W/QN4QTEPC5WlJtOC9bo3I0FmHvOe8CEyDlvYLbjvYyVWpHLTOF+L+M6s0msjRenmLXnxra10U/uD8afByI6Fixs/hXo3lrEOO3iIG2bs0wH4aB6FKHfXNE3uXFw68u/Jc4cQp65D0+87/kGBth2792CQ+4gwZ4IVn/4rccGW8WzlGZ5ppn4yRy3WPOXg8="
 install:
   - >
       conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION
@@ -78,8 +77,9 @@ after_success:
 deploy:
   provider: pypi
   distributions: sdist
-  user: hammerlab
+  user: openvax
   password: # See http://docs.travis-ci.com/user/encryption-keys/
-    secure: "BwIahNcb4koDiC8xP3ZsesqrYPzcNM2KuYA4CCtRNGntmY4Sjgb6Kcd3FXFwUtIbvFCqMHkRKHtx3uC8ZDNHPRnZ4VW1M3pyWyj9UYzX447imgsgQNDJJnbjotJ2c2jkfSQ6MyfbFdY5WALRUZTX6GcaZV4PzsHFBI/Ty8COtrnowUryLUs1amAIIBrOCSS/0TYd9Rh9Or8s3y/OqEDNHQDbZQ+ywQNt0wCwQWYtRIILgtR9grVM6k647S8gcTXudX8sJ7uzR8ebooXDdAF2ZxXJGX6kPongReghc9xliYuVzjhRvTJ0o4bDLhOrtpUGtbheTZdGv+OQohmiKlpr0mr833xGYq607BNUf1dUkuyyQt3D+lEEWyWQxScmq8feMvfNj1LKZ/eFR+6Svessh8S1NPfrfn8NMTC/d2u6oagqYb0zZXKYCs83zKjRX6uc4/PXVDLJvgQvpyiCD3SW48RVoLZbiyQ1TO36ph5Xxj9egPnRtIGu1obL3T1UyR31ZykU1NZ/kJHGVRFzU8sKJLAmnzYbe7NMS3AQoocM7af9UTDWBuHIqP5+NqljLkwlIITITEje9cYMgEiZaDCqzkFeKAJLchWPmoT6Bu9ECTB2mfAVVhy8/8XbFYu4CsnEXre28/iofVjO8u5wOkUCYNx2qqkuDBWtv7yUSstXItc="
+      secure: "ZzskPyarYLTHTxxTAvD4IVmA7m/YsLlo4ARdXaSGPoIvsMRcv44PxodU+tSBSHW1GdiYzeZvpOa5dVBYr/SrnDVeGUhf6TEzw/oUuTgE22cXpBLPpXO2XOFW0Qy8HNaNJJyyZ2BX9hxhBhTRV2llDbaB02tfPjG/7ApUZT9oJzm6rAW+Ukzjw5tWbpP2cDJc3MhcPwtMGpXILcwA0OTxX61WketGe++Drefwy0jtsrzNEQyezXUY1n12AIgVh8xNbqWGKo0jf9PtddFUO4t6r+X+ITNtZKspsE9RQwqVZLdoKmWG2PSX2dcGRKAXSXrflfvmx7VhSJcsHSKZGbY70QoUTz2hjNgT6nCRq2EMen5RSZUOPFJVla4TSXNj5CUigtEDweqk+jZxi8CqrNrsAKVhudT8kyHrEmtFCsx5DGKZ3gN2CzQbkXKU4VMG/6endBeGZoMNLqPBzCQP9bbAzCsMu8bYFCGByFTpB5KeiPosLftaTaYd7URnwZvZJmXUVJ1MYs+T/bTY74O7Enix2rKa9V7Cw1y2V6/tVzyTzTAW3eX9yokOePZoMutHKvdEh5AWdsa1KZTmRHJeUeA+aY5owXEiu7I4ElsdsRiYC/2vlvlVrbw02vR5GSXZH89xOOXNFKQEnrGagYmglw4Ao625N5Clh4RUAeQ38jViS6Q="
   on:
     branch: master
+  condition: $TRAVIS_PYTHON_VERSION = "2.7"
