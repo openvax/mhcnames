@@ -18,8 +18,6 @@ from .allele_name import AlleleName
 from .class2 import parse_classi_or_classii_allele_name
 
 _normalized_allele_cache = {}
-for omit_dra1 in [True, False]:
-    _normalized_allele_cache[omit_dra1] = {}
 
 _DRA1_0101 = AlleleName(
     species="HLA",
@@ -27,7 +25,7 @@ _DRA1_0101 = AlleleName(
     allele_family="01",
     allele_code="01")
 
-def normalize_allele_name(raw_allele, omit_dra1=False):
+def normalize_allele_name(raw_allele, omit_dra1=False, infer_class2_pair=True):
     """MHC alleles are named with a frustratingly loose system. It's not uncommon
     to see dozens of different forms for the same allele.
 
@@ -67,9 +65,12 @@ def normalize_allele_name(raw_allele, omit_dra1=False):
     These should all be normalized to:
         HLA-A*02:01
     """
-    if raw_allele in _normalized_allele_cache[omit_dra1]:
-        return _normalized_allele_cache[omit_dra1][raw_allele]
-    parsed_alleles = parse_classi_or_classii_allele_name(raw_allele)
+    cache_key = (raw_allele, omit_dra1, infer_class2_pair)
+    if cache_key in _normalized_allele_cache:
+        return _normalized_allele_cache[cache_key]
+
+    parsed_alleles = parse_classi_or_classii_allele_name(
+        raw_allele, infer_pair=infer_class2_pair)
     species = parsed_alleles[0].species
     normalized_list = [species]
     # Optionally omit the alpha allele, e.g. for IEDB predictors.
@@ -95,7 +96,8 @@ def normalize_allele_name(raw_allele, omit_dra1=False):
                 parsed_allele.gene,
                 parsed_allele.allele_code))
     normalized = "-".join(normalized_list)
-    _normalized_allele_cache[omit_dra1][raw_allele] = normalized
+
+    _normalized_allele_cache[cache_key] = normalized
     return normalized
 
 def compact_allele_name(raw_allele):
