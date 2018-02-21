@@ -140,8 +140,9 @@ def parse_allele_name(name, species_prefix=None):
             family, name = parts
         elif len(name) < 2:
                 raise AlleleParseError("Unable to parse '%s'" % original)
-        elif len(name) == 2:
-            # parse sequences like SLA-1-HB as shorthand for SLA-1-HB01
+        elif name.isalpha() or len(name) == 2:
+            # parse sequences serotypes like SLA-1-HB
+            # as shorthand for SLA-1-HB01
             family = name
             name = "01"
         else:
