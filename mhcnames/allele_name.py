@@ -110,6 +110,13 @@ def parse_allele_name(name, species_prefix=None):
         gene, name = parse_letters(name)
     elif name[0].isdigit():
         gene, name = parse_numbers(name)
+    elif len(name) == 5:
+        # example: SLA-30101
+        gene, name = name[0], name[1:]
+    elif len(name) in (6, 7) and ("*" in name or "-" in name or ":" in name):
+        # example: SLA-3*0101 or SLA-3*01:01
+        gene, name = parse_alphanum(name)
+        _, name = parse_separator(name)
     else:
         raise AlleleParseError(
             "Can't parse gene name from allele: %s" % original)
