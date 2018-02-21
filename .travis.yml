@@ -50,7 +50,7 @@ env:
 install:
   - >
       conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION
-      nose pylint pandoc
+      nose pylint pandoc theano keras
   - source activate test-environment
   - pip install pypandoc
   - pip install -r requirements.txt
