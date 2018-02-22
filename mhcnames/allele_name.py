@@ -89,8 +89,6 @@ def parse_allele_name(name, species_prefix=None):
             raise AlleleParseError("Can't parse allele name: %s" % original)
         species = "HLA"
 
-    print(species, name)
-
     if name[0].upper() == "D":
         if len(name) == 7:
             # sometimes we get very compact names like DRB0101
