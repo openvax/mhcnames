@@ -89,6 +89,8 @@ def parse_allele_name(name, species_prefix=None):
             raise AlleleParseError("Can't parse allele name: %s" % original)
         species = "HLA"
 
+    print(species, name)
+
     if name[0].upper() == "D":
         if len(name) == 7:
             # sometimes we get very compact names like DRB0101
@@ -104,15 +106,15 @@ def parse_allele_name(name, species_prefix=None):
         if gene.isalpha():
             # expand e.g. DRA -> DRA1, DQB -> DQB1
             gene = gene + "1"
+    elif len(name) == 5:
+        # example: SLA-30101
+        gene, name = name[0], name[1:]
     elif name[0].isalpha():
         # if there are more separators to come, then assume the gene names
         # can have the form "DQA1"
         gene, name = parse_letters(name)
     elif name[0].isdigit():
         gene, name = parse_numbers(name)
-    elif len(name) == 5:
-        # example: SLA-30101
-        gene, name = name[0], name[1:]
     elif len(name) in (6, 7) and ("*" in name or "-" in name or ":" in name):
         # example: SLA-3*0101 or SLA-3*01:01
         gene, name = parse_alphanum(name)
@@ -127,7 +129,6 @@ def parse_allele_name(name, species_prefix=None):
         raise AlleleParseError("Malformed MHC type %s" % original)
 
     gene = gene.upper()
-
     # skip initial separator
     sep, name = parse_separator(name)
 
