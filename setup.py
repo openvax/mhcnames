@@ -1,4 +1,4 @@
-# Copyright (c) 2014. Mount Sinai School of Medicine
+# Copyright (c) 2014-2018. Mount Sinai School of Medicine
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,20 +19,22 @@ import re
 from setuptools import setup
 
 readme_dir = os.path.dirname(__file__)
-readme_filename = os.path.join(readme_dir, 'README.md')
+readme_path = os.path.join(readme_dir, 'README.md')
 
 try:
-    with open(readme_filename, 'r') as f:
-        readme = f.read()
+    with open(readme_path, 'r') as f:
+        readme_markdown = f.read()
 except:
-    logging.warn("Failed to load %s" % readme_filename)
-    readme = ""
+    logging.warn("Failed to load %s" % readme_path)
+    readme_markdown = ""
 
 try:
     import pypandoc
-    readme = pypandoc.convert(readme, to='rst', format='md')
-    
+    readme_restructured = pypandoc.convert(readme_markdown, to='rst', format='md')
+    with open(readme_path.replace(".md", ".rst"), "w") as f:
+        f.write(readme_restructured)
 except:
+    readme_restructured = readme_markdown
     logging.warn("Conversion of long_description from MD to RST failed")
     pass
 
@@ -64,6 +66,6 @@ if __name__ == '__main__':
             'Topic :: Scientific/Engineering :: Bio-Informatics',
         ],
         install_requires=['six>=1.9.0'],
-        long_description=readme,
+        long_description=readme_restructured,
         packages=['mhcnames'],
     )
