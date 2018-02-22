@@ -13,8 +13,9 @@ cache:
   # along with the indexed db of intervals and ID mappings and pickles
   # of sequence dictionaries
   directories:
-    - /home/travis/.cache/pyensembl/
-    - /home/travis/.cache/pip
+    - $HOME/.cache/pyensembl/
+    - $HOME/.cache/pip
+    - $HOME/miniconda
 before_install:
   # Commands below copied from: http://conda.pydata.org/docs/travis.html
   # We do this conditionally because it saves us some downloading if the
@@ -40,6 +41,10 @@ before_install:
   - export PATH=$PATH:$NETMHC_BUNDLE_HOME/bin
   # needed for MHCflurry predictor test
   - export KERAS_BACKEND=theano
+  # try to speed up Theano as a compiler
+  - export THEANO_FLAGS=mode=FAST_COMPILE,device=cpu,floatX=float32
+  # make MKL work with Theano
+  - export MKL_THREADING_LAYER=GNU
   # we want to include mhctools and vaxrank unit tests as a general integration test to make sure
   # the stack isn't broken in an obvious way
   - git clone https://github.com/openvax/mhctools.git
@@ -66,7 +71,7 @@ script:
   # -a '!skip' lets us skip certain tests on travis (relevant for vaxrank)
   # this command runs both mhctools and vaxrank tests. Sometimes they don't print output for a long
   # time; travis_wait extends the time allowed with no output.
-  - travis_wait nosetests -sv test --with-coverage --cover-package=mhcnames -a '!skip' $PWD/mhctools
+  - nosetests -sv test --with-coverage --cover-package=mhcnames -a '!skip' $PWD/mhctools
 after_success:
   coveralls
 deploy:
