@@ -19,13 +19,19 @@ cache:
 before_install:
   # don't install miniconda if it's already cached
   # if not yet installed, use different versions for py2 vs. py3
-  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
+  - |
+    if test -e $HOME/miniconda/bin ; then
+      echo "miniconda already installed"
+    else
+      rm -rf $HOME/miniconda
+      if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
         wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh;
       else
         wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
       fi
-  - bash miniconda.sh  -u -b -p $HOME/miniconda
-  - export PATH="$HOME/miniconda/bin:$PATH"
+      bash miniconda.sh -b -p $HOME/miniconda
+      export PATH="$HOME/miniconda/bin:$PATH"
+    fi
   # reset the shell's lookup table for program name to path mappings
   - hash -r
   - conda config --set always_yes yes --set changeps1 no
@@ -42,12 +48,6 @@ before_install:
   # the stack isn't broken in an obvious way
   - git clone https://github.com/openvax/mhctools.git
 env:
-  # needed for MHCflurry predictor test
-  - KERAS_BACKEND=theano
-  # try to speed up Theano as a compiler
-  - THEANO_FLAGS=mode=FAST_COMPILE,device=cpu,floatX=float32
-  # make MKL work with Theano
-  - MKL_THREADING_LAYER=GNU
   # MHC_BUNDLE_PASS
   secure: "WbchjXY8MhdOb/eoHb75Sx80ucT70bNsvWtFTszXqXOkEsvA4EB4QkgdCRUvK1p6pOAnNYjFwctacJv76PlHJUnaZUv3KYCIGHQaJI6r82/u7BzALKl4DAP2gUhxVjmnHd/CaK6USiDemdROw6x5RToN9q/0wD6CLMYFatcjSgeLJ6J1fCIDA9frQWy7U04khIA5rNrIVBSpChifLBxnHm0oTXA0vExb5iNjMFLtkTIVOx6PQCeBv3XQdvzBTmdhA16zWPFwQq2lBJ+dFIsC4PprO+gPzL3afS/Mmk88pArAVv0/RZeAGOtvJKVdAs+h66ioVq0r6/3klkiNwNTC8f4c8UfVaQSuAIJ5/Kj+5XmNxQAje5ZQ8U+YDmm3FXRx6vaV83134LOHWVX1rK9lspqGfrkoidYQq6ENfnlN5G1G/TZiE2aX72eU65f+vUbgNWRSAnemd2Sa0s9P92XzKqwvd9QLSMNvDAnbvW2n8Pl48hIj9zbAemI1V52Ro6yuWPiNkfpbfhQ9QYd6Okwyz7A2aHh99ulc+RxLZgDpJP/KNNzywQvWyJtGigI+6/PAW0rJ8E3Z2lDL3ZAcRtc0Hom/gR3lAhJBmhbIWfSer4INTJ0JG4spOS/KBJvh42Aon1W73fwf8Nao9AXWDACNg5HOFoE6yk6ICsVBgcC2tDI="
 install:
