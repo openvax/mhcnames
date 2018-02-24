@@ -39,6 +39,7 @@ before_install:
   - conda update -q conda
   # Useful for debugging any issues with conda
   - conda info -a
+  - python --version
   # install netmhcbundle: needed for mhctools tests
   - git clone https://mhcbundle:$MHC_BUNDLE_PASS@github.com/openvax/netmhc-bundle.git
   - export NETMHC_BUNDLE_HOME=$PWD/netmhc-bundle
