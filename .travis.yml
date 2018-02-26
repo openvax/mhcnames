@@ -3,6 +3,12 @@ language: python
 python:
   - "2.7"
   - "3.6"
+git:
+  # don't need the default depth of 50
+  # but don't want to use a depth of 1 since that affects
+  # whether jobs run when you have multiple commits queued
+  # https://github.com/travis-ci/travis-ci/issues/4575
+  depth: 10
 addons:
   apt:
     packages:
@@ -20,7 +26,7 @@ before_install:
   # don't install miniconda if it's already cached
   # if not yet installed, use different versions for py2 vs. py3
   - |
-    if [ -f $HOME/miniconda/bin ];
+    if [ -d $HOME/miniconda/bin ];
       then
       echo "miniconda already installed"
     else
@@ -31,8 +37,8 @@ before_install:
         wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
       fi
       bash miniconda.sh -b -p $HOME/miniconda
-      export PATH="$HOME/miniconda/bin:$PATH"
     fi
+  - export PATH="$HOME/miniconda/bin:$PATH"
   # reset the shell's lookup table for program name to path mappings
   - hash -r
   - conda config --set always_yes yes --set changeps1 no
@@ -75,7 +81,9 @@ script:
   # -a '!skip' lets us skip certain tests on travis (relevant for vaxrank)
   # this command runs both mhctools and vaxrank tests. Sometimes they don't print output for a long
   # time; travis_wait extends the time allowed with no output.
-  - nosetests -sv test --with-coverage --cover-package=mhcnames -a '!skip' $PWD/mhctools
+  - >
+    nosetests -sv test --with-coverage --cover-package=mhcnames -a '!skip' &&
+    nosetests -sv -a "!skip" $PWD/mhctools/test
 after_success:
   coveralls
 deploy:
