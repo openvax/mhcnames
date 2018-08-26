@@ -1,0 +1,45 @@
+
+human:
+  # copied table of primary human MHC alleles from:
+  # http://www.imgt.org/IMGTrepertoireMHC/LocusGenes/nomenclatures/human/MHC/human_MHCnom.html
+  prefix: HLA
+  class I:
+    - A
+    - B
+    - C
+  nonclassical class I:
+    - E
+    - F
+    - G
+  class II:
+    - DR:
+      - DRA
+      - DRB
+    - DP:
+      - DPA
+      - DPB
+    - DQ:
+      - DQA
+      - DQB
+  nonclassical class II:
+    - DO:
+      - DOA
+      - DOB
+    - DM:
+      - DMA
+      - DMB
+mouse:
+  # copied table of primary mouse MHC alleles from:
+  #
+  prefix: H-2
+  class I:
+    - D
+    - K
+    - L
+  nonclassical class I:
+    - M
+    - Q
+    - T
+  class II:
+  nonclassical class II:
+

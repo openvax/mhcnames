@@ -1,4 +1,4 @@
-# Copyright (c) 2016. Mount Sinai School of Medicine
+# Copyright (c) 2016-2018. Mount Sinai School of Medicine
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 
 from __future__ import print_function, division, absolute_import
 
-from collections import namedtuple
+from serializable import Serializable
 
 from .parsing_helpers import (
     parse_separator,
@@ -26,13 +26,166 @@ from .mouse import parse_mouse_allele_name
 from .species import split_species_prefix
 from .allele_parse_error import AlleleParseError
 
-AlleleName = namedtuple("AlleleName", [
-    "species",
-    "gene",
-    "allele_family",
-    "allele_code"
-])
+class Species(Serializable):
+    def __init__(self, species_prefix):
+        self.species_prefix = species_prefix
 
+    def __repr__(self):
+        return str(self)
+
+    def __str__(self):
+        return self.species_prefix
+
+class Locus(Species):
+    def __init__(self, species_prefix, gene_name):
+        Species.__init__(self, species_prefix)
+        self.gene_name = gene_name
+
+    def __str__(self):
+        return "%s-%s" % (self.species_prefix, self.gene_name)
+
+    def to_locus(self):
+        """
+        For Locus objects this acts as a simple copy but descendant classes
+        use this method to project their fields down to a Locus object.
+        """
+        return Locus(self.species_prefix, self.gene_name)
+
+class AlleleGroup(Locus):
+    def __init__(self, species_prefix, gene_name, group):
+        Locus.__init__(self, species_prefix, gene_name)
+        self.group = group
+
+    def __str__(self):
+        return "%s*%s" % (
+            Locus.__str__(self),
+            self.group)
+
+    def to_allele_group(self):
+        """
+        For AlleleGroup objects this acts as a simple copy but descendant classes
+        use this method to project their fields down to a AlleleGroup object.
+        """
+        return AlleleGroup(self.species_prefix, self.gene_name, self.group)
+
+class FourDigitAllele(AlleleGroup):
+    def __init__(self, species_prefix, gene_name, group, protein_id, modifier=None):
+        AlleleGroup.__init__(self, species_prefix, gene_name, group)
+        self.protein_id = protein_id
+        self.modifier = modifier
+
+    def to_four_digit_allele(self):
+        """
+        On FourDigitAllele objects this acts as a simple copy but descendant
+        classes use this method to project their fields down to a FourDigitAllele
+        object.
+        """
+        return FourDigitAllele(
+            self.species_prefix,
+            self.gene_name,
+            self.group,
+            self.protein_id,
+            modifier=self.modifier)
+
+    def to_six_digit_allele(self):
+        """
+        Invent a 'default' six-digit allele for a four-digit allele
+        by append ":01" at the end of the name.
+        For example, HLA-A*02:01 becomes HLA-A*02:01:01
+        """
+        return SixDigitAllele(
+            self.species_prefix,
+            self.gene_name,
+            self.group,
+            protein_id=self.protein_id,
+            coding_sequence_id="01",
+            modifier=self.modifier)
+
+    def to_eight_digit_allele(self):
+        """
+        Invent a 'default' eight-digit allele for a four-digit allele
+        by append ":01:01" at the end of the name.
+        For example, HLA-A*02:01 becomes HLA-A*02:01:01:01
+        """
+        return EightDigitAllele(
+            self.species_prefix,
+            self.gene_name,
+            self.group,
+            protein_id=self.protein_id,
+            coding_sequence_id="01",
+            genomic_sequence_id="01",
+            modifier=self.modifier)
+
+    def __str__(self):
+        return "%s:%s%s" % (
+            AlleleGroup.__str__(self),
+            self.nonsyn,
+            self.modifier if self.modifier else "")
+
+class SixDigitAllele(FourDigitAllele):
+    def __init__(
+            self,
+            species_prefix,
+            gene_name,
+            group,
+            protein_id,
+            coding_sequence_id,
+            modifier=None):
+        FourDigitAllele.__init__(
+            self,
+            species_prefix,
+            gene_name,
+            group,
+            protein_id,
+            modifier)
+        self.coding_sequence_id = coding_sequence_id
+
+    def to_six_digit_allele(self):
+        """
+        Acts as a copy function for SixDigitAllele functions
+        but the descendant class EightDigitAllele can use this
+        to project its fields down to only the subset used by SixDigitAllele
+        """
+        return SixDigitAllele(
+            self.species_prefix,
+            self.gene_name,
+            self.group,
+            self.protein_id,
+            self.coding_sequence_id,
+            self.modifier)
+
+    def to_eight_digit_allele(self):
+        """
+        Create a 'default' eight-digit allele for a six-digit allele
+        by append ":01" at the end of the name.
+        For example, HLA-A*02:01:01 becomes HLA-A*02:01:01:01
+        """
+        return EightDigitAllele(
+            self.species_prefix,
+            self.gene_name,
+            self.group,
+            self.protein_id,
+            self.coding_sequence_id,
+            genomic_sequence_id="01",
+            modifier=self.modifier)
+
+class EightDigitAllele(SixDigitAllele):
+    def __init__(
+            self,
+            species_prefix,
+            gene_name,
+            group,
+            protein_id,
+            coding_sequence_id,
+            genomic_sequence_id,
+            modifier=None):
+        self.species_prefix = species_prefix
+        self.gene_name = gene_name
+        self.group = group
+        self.protein_id = protein_id
+        self.coding_sequence_id = coding_sequence_id
+        self.genomic_sequence_id = genomic_sequence_id
+        self.modifier = modifier
 
 def parse_allele_name(name, species_prefix=None):
     """Takes an allele name and splits it into four parts:
@@ -69,16 +222,15 @@ def parse_allele_name(name, species_prefix=None):
 
     if species_prefix:
         if species_from_name:
-            raise ValueError("If a species is passed in, we better not have another "
-                             "species in the name itself.")
+            raise ValueError(
+                ("If a species is passed in, we better not have another "
+                 "species in the name itself."))
         species = species_prefix
     else:
         species = species_from_name
 
     if species in ("H-2", "H2"):
-        gene, allele_code = parse_mouse_allele_name("H-2-" + name)
-        # mice don't have allele families
-        return AlleleName("H-2", gene, "", allele_code)
+        return parse_mouse_allele_name("H-2-" + name)
 
     if len(name) == 0:
         raise AlleleParseError("Incomplete MHC allele name: %s" % (original,))
@@ -181,4 +333,4 @@ def parse_allele_name(name, species_prefix=None):
         # normalize HLA-A*02:001 into HLA-A*02:01
         allele_code = allele_code[1:]
 
-    return AlleleName(species, gene, family, allele_code)
+    return FourDigitAllele(species, gene, family, allele_code)
