@@ -12,11 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .normalization import normalized_string, compact_string
+from __future__ import print_function, division, absolute_import
 
-__version__ = "1.0.0"
+from serializable import Serializable
 
-__all__ = [
-    "normalized_string",
-    "compact_string"
-]
+class AlphaBetaPair(Serializable):
+    def __init__(self, alpha, beta):
+        self.alpha = alpha
+        self.beta = beta
+
+    def normalized_string(self):
+        return "%s/%s" % (
+            self.alpha.normalized_string(include_species=True),
+            self.beta.normalized_string(include_species=False))

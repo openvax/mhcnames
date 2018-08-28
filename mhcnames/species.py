@@ -1,4 +1,4 @@
-# Copyright (c) 2016. Mount Sinai School of Medicine
+# Copyright (c) 2018. Mount Sinai School of Medicine
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,97 +14,101 @@
 
 from __future__ import print_function, division, absolute_import
 
-from six import string_types
+from .data import gene_ontology as gene_ontology_dict
 
-# copied from https://www.ebi.ac.uk/ipd/mhc/species.html
-species_name_to_prefixes = dict(
-    human="HLA",
-    cattle="BoLA",
-    bison="Bibi",
-    dog="DLA",
-    sheep=["Ovar", "OLA", "Ovca"],
-    swine="SLA",
-    mouse=["H2", "H-2"],
-    rainbow_trout="Onmy",
-    rat=["Rano", "Rara", "RT1"],
-    salmon="Sasa",
-    cat="FLA",
-    horse=["ELA", "Eqca"],
-    chimp=["Patr", "ChLA"],
-    bonobo="Papa",
-    white_handed_gibbon="Hyla",
-    gorilla="Gogo",
-    orangutan=["Popy", "OrLA"],
-    blue_monkey="Cemi",
-    de_brazzas_monkey="Cene",
-    vervet_monkey="Chae",
-    mantled_colobus="Cogu",
-    black_mangabey="Loat",
-    stump_tailed_macaque="Maar",
-    crab_eating_macaque="Mafa",
-    japanese_macaque="Mafu",
-    rhesus_macaque=["Mamu", "RhLA"],
-    pig_tailed_macaque="Mane",
-    lion_tailed_macaque="Masi",
-    drill="Male",
-    mandrill="Masp",
-    olive_baboon="Paan",
-    yellow_baboon="Pacy",
-    hamadryas_baboon="Paha",
-    guinea_baboon="Papp",
-    chacma_baboon="Paur",
-    entelus_langur="Pren",
-    gelada_baboon="Thge",
-    owl_monkey=["Aoaz", "Aovo"],
-    northern_night_owl_monkey=["Aona", "Aoni", "OmLA"],
-    long_haired_spider_monkey="Atbe",
-    brown_headed_spider_monkey="Atfu",
-    marmoset=["Caja", "MaLA"],
-    pygmy_marmoset="Cepy",
-    dusk_titi_monkey="Camo",
-    tufted_capuchin="Ceap",
-    golden_lion_tamarin="Lero",
-    white_faced_saki="Pipi",
-    saddle_backed_tamarin="Safu",
-    red_crested_tamarin="Sage",
-    moustached_tamarin="Samy",
-    cotton_top_tamarin="Saoe",
-    squirrel_monkey="Sasc",
-    lemur="Leca")
+# Many old-fasioned naming systems like "equine" ELA now correspond
+# to multiple species. For each species-ambiguous prefix, map it to the
+# species which has the most complete gene annotations.
+exemplar_species = {
+    "DLA": "Calu",
+    "ELA": "Eqca",
+    "OLA": "Ovar",
+    "SLA": "Susc",
+    "RT1": "Rano"
+}
 
-prefix_to_species_name = {}
+special_prefixes = set(exemplar_species.keys())
 
-_preferred_prefixes = []
-_alternate_prefixes = []
 
-for (species, prefixes) in species_name_to_prefixes.items():
-    if isinstance(prefixes, string_types):
-        prefixes = [prefixes]
-    for i, prefix in enumerate(prefixes):
-        prefix_to_species_name[prefix] = species
-        if i == 0:
-            _preferred_prefixes.append(prefix)
-        else:
-            _alternate_prefixes.append(prefix)
+def create_aliases():
+    aliases = exemplar_species.copy()
 
-# list of all species specific prefixes in search order
-_all_prefixes = _preferred_prefixes + _alternate_prefixes
+    for key, value in list(gene_ontology_dict.items()):
+        upper = key.upper()
+        if upper != key:
+            aliases[upper] = key
+        lower = key.lower()
+        if lower != key:
+            aliases[lower] = key
+    return aliases
 
-def split_species_prefix(name, seps="-:_ "):
+gene_name_aliases = create_aliases()
+
+def find_matching_species_prefix(name):
     """
-    Splits off the species component of the allele name from the rest of it.
-
-    Given "HLA-A*02:01", returns ("HLA", "A*02:01").
+    Returns either normalized species prefix or None
     """
-    species = None
-    name_upper = name.upper()
-    name_len = len(name)
-    for curr_prefix in _all_prefixes:
-        n = len(curr_prefix)
-        if name_len <= n:
-            continue
-        if name_upper.startswith(curr_prefix.upper()):
-            species = curr_prefix
-            name = name[n:].strip(seps)
-            break
-    return (species, name)
+    if name in gene_ontology_dict:
+        return name
+
+    upper_no_dash = name.upper().replace("-", "")
+
+    if upper_no_dash in gene_name_aliases:
+        return gene_name_aliases[upper_no_dash]
+
+    return None
+
+def get_species_info(name):
+    """
+    Returns a dictionary with gene lists for classes "Ia", "Ib", "IIa", "IIb"
+    or None if species can't be found
+    """
+    # change H-2 -> H2 and RT-1 to RT1
+    species_prefix = find_matching_species_prefix(name)
+    if species_prefix:
+        return gene_ontology_dict[species_prefix]
+    else:
+        raise ValueError("Could not find species information for '%s'" % name)
+
+def get_mhc_class(species_name, gene_name):
+    """
+    Returns either one of "Ia", "Ib", "IIa", "IIb" or None
+    if species can't be found
+    """
+    species_info = get_species_info(species_name)
+    for mhc_class, mhc_class_members in species_info.items():
+        if mhc_class == "Ia" or mhc_class == "Ib":
+            for member_gene in mhc_class_members:
+                if member_gene == gene_name:
+                    return mhc_class
+        elif mhc_class == "IIa" or mhc_class == "IIb":
+            for locus, genes in mhc_class_members.items():
+                if locus == gene_name:
+                    return mhc_class
+                for candidate_gene_name in genes:
+                    if candidate_gene_name == gene_name:
+                        return mhc_class
+    return None
+
+def infer_species_prefix(allele_string):
+    """
+    Example the beginning of string to see if it matches any of the
+    known species prefixes.
+
+    Examples:
+        * "hla-a" -> "HLA"
+        * "RT1" -> "RT1"
+        * "RT-1" -> "RT1"
+        * "rano" -> "Rano"
+        * "H-2" -> "H2"
+
+    """
+    for n in [2, 3, 4]:
+        substring = allele_string[:n]
+        upper_no_dash = substring.upper().replace("-", "")
+        if upper_no_dash in special_prefixes:
+            return upper_no_dash
+        species_prefix = find_matching_species_prefix(upper_no_dash)
+        if species_prefix is not None:
+            return species_prefix
+    return None

@@ -1,0 +1,294 @@
+HLA:
+  # copied table of primary human MHC alleles from:
+  # http://www.imgt.org/IMGTrepertoireMHC/LocusGenes/nomenclatures/human/MHC/human_MHCnom.html
+  Ia:
+    - A
+    - B
+    - C
+  Ib:
+    - E
+    - F
+    - G
+  IIa:
+    - DR:
+      - DRA
+      - DRB
+    - DP:
+      - DPA
+      - DPB
+    - DQ:
+      - DQA
+      - DQB
+  IIb:
+    - DO:
+      - DOA
+      - DOB
+    - DM:
+      - DMA
+      - DMB
+######################################################
+#
+# Mouse MHC gene data copied from:
+# http://www.imgt.org/IMGTrepertoireMHC/LocusGenes/nomenclatures/mouse/MHC/Mu_MHCnom.html
+#
+######################################################
+H2:
+  Ia:
+    - D
+    - D2
+    - D3
+    - D4
+    - K
+    - K2
+    - L
+  Ib:
+    - Q1
+    - Q2
+    - Q3
+    - Q4
+    - Q5
+    - Q6
+    - Q7
+    - Q8
+    - Q9
+    - Q10
+    - T1
+    - T2
+    - T3
+    - T4
+    - T5
+    - T6
+    - T7
+    - T8
+    - T9
+    - T10
+    - T11
+    - T12
+    - T13
+    - T14
+    - T15
+    - T16
+    - T17
+    - T18
+    - T19
+    - T20
+    - T21
+    - T22
+    - T23
+    - T24
+    - M1
+    - M2
+    - M3
+    - M4
+    - M5
+    - M6
+    - M7
+    - M8
+    - M9
+    - M10-1
+    - M10-2
+    - M10-3
+    - M10-4
+    - M10-5
+    - M10-PS1
+    - M10-PS2
+    - M10-PS3
+  IIa:
+    - A:
+      - AA
+      - AB
+    - E:
+      - EA
+      - EB1
+      - EB2
+    - P:
+      - PA
+      - PB
+  IIb:
+    - DM:
+      - DMA
+      - DMB1
+      - DMB2
+    - DO:
+      - OA
+      - OB
+######################################################
+#
+# Horse MHC gene data copied from:
+# https://www.ebi.ac.uk/ipd/mhc/group/ELA/species
+#
+######################################################
+Eqca:
+  - Ia:
+    - N
+    - 1
+    - 2
+    - 3
+    - 4
+    - 6
+    - 7
+    - 16
+  - IIb:
+    - DQ:
+      - DQA1
+      - DQA2
+      - DQA3
+      - DQB1
+      - DQB2
+      - DQB3
+    - DR:
+      - DRA
+      - DRB1
+      - DRB2
+      - DRB3
+######################################################
+#
+# Chicken MHC gene data copied from:
+# https://www.ebi.ac.uk/ipd/mhc/group/CHICKEN/species
+#
+######################################################
+Gaga:
+  Ia:
+    - BF1
+    - BF2
+######################################################
+#
+# Suid MHC gene data copied from:
+# https://www.ebi.ac.uk/ipd/mhc/group/SLA/species
+#
+######################################################
+Susc:
+  Ia:
+    - MIC2
+    - "1"
+    - "2"
+    - "3"
+    - "5"
+    - "6"
+    - "7"
+    - "8"
+    - "11"
+    - "12"
+  IIa:
+    DQ:
+      - DQA
+      - DQB1
+    DR:
+      - DRA
+      - DRB1
+      - DRB2
+      - DRB3
+      - DRB4
+      - DRB5
+  IIb:
+    DO:
+      - DOA
+      - DOB1
+    DM:
+      - DMA
+      - DMB
+######################################################
+#
+# Bovid MHC gene data copied from:
+# https://www.ebi.ac.uk/ipd/mhc/group/BoLA/species
+#
+######################################################
+BoLA:
+  - Ia:
+    - NC1
+    - NC2
+    - NC3
+    - NC4
+    - NC5
+    - "1"
+    - "2"
+    - "3"
+    - "4"
+    - "5"
+    - "6"
+  - DQ:
+    - DQA
+    - DQA1
+    - DQB
+  - DR:
+    - DRA
+    - DRB3
+######################################################
+#
+# Ovid MHC gene data copied from:
+# https://www.ebi.ac.uk/ipd/mhc/group/OLA/species
+#
+######################################################
+Ovar:
+  - Ia:
+    - N
+  - IIa:
+    - DQ:
+      - DQA1 # TODO: what happened to DQB1?
+    - DR:
+      - DRA
+      - DRB1
+######################################################
+#
+# Salmonid MHC gene data copied from:
+# https://www.ebi.ac.uk/ipd/mhc/group/FISH/species
+#
+######################################################
+Onmy:
+  - Ia:
+    - UBA
+  - IIa:
+    - DA:
+      - DAA
+      - DAB
+Sasa:
+  - Ia:
+    - UBA
+  - IIa:
+    - DA:
+      - DAA
+      - DAB
+######################################################
+#
+# Canid MHC gene data copied from:
+# https://www.ebi.ac.uk/ipd/mhc/group/DLA/species
+#
+######################################################
+Calu:
+  - Ia:
+    - "12"
+    - "64"
+    - "88"
+  - IIa:
+    - DQ:
+      - DQA1
+      - DQB1
+    - DR:
+        - DRB1 # TODO: what happened to DRA?
+######################################################
+#
+# Murid MHC gene data copied from:
+# - https://www.ebi.ac.uk/ipd/mhc/group/RT1
+# and partial list from:
+# - https://www.ebi.ac.uk/ipd/mhc/group/RT1/species
+#
+######################################################
+Rano:
+  - Ia:
+    - A
+    - A1
+    - A2
+    - Bb
+    - CE5
+    - CE16
+    - "9.5"
+  - IIa:
+    - D:
+      - Da
+      - Db1
+  - IIb:
+    - DO:
+      - DOa
+      - DOb
+    - DM:
+      - DMA

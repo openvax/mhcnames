@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2018. Mount Sinai School of Medicine
+# Copyright (c) 2018. Mount Sinai School of Medicine
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,181 +14,203 @@
 
 from __future__ import print_function, division, absolute_import
 
-from serializable import Serializable
 
-from .parsing_helpers import (
-    parse_separator,
-    parse_alphanum,
-    parse_numbers,
-    parse_letters
-)
-from .mouse import parse_mouse_allele_name
-from .species import split_species_prefix
+from .human import is_human, parse_human
+from .mouse import is_mouse, parse_mouse
+from .rat import is_rat, parse_rat
+from .swine import is_swine, parse_swine
+from .alpha_beta_pair import AlphaBetaPair
 from .allele_parse_error import AlleleParseError
+from .parsing_helpers import strip_whitespace_and_trim_outer_quotes
+from .mutations import parse_mutation, MutantFourDigitAllele
+from .allele_group import AlleleGroup
+from .four_digit_allele import FourDigitAllele
+from .six_digit_allele import SixDigitAllele
+from .eight_digit_allele import EightDigitAllele
 
-class Species(Serializable):
-    def __init__(self, species_prefix):
-        self.species_prefix = species_prefix
+def parse_without_mutation(name, default_species_prefix="HLA"):
+    """
+    First test to see if MHC name requires any species-specific special logic.
+    If the name doesn't fit any of the special species templates then
+    try parsing it as the following kinds of names in this order:
+        1) eight digit allele
+        2) six digit allele
+        3) four digit allele
+        4) allele group
+        5) locus
+        6) MHC class
+        7) species
+    If none of these succeed, then raise an exception
+    """
+    if is_mouse(name):
+        return parse_mouse(name)
+    elif is_rat(name):
+        return parse_rat(name)
+    elif is_swine(name):
+        return parse_swine(name)
+    elif is_human(name):
+        return parse_human(name)
 
-    def __repr__(self):
-        return str(self)
+    result_classes = [
+        EightDigitAllele,
+        SixDigitAllele,
+        FourDigitAllele,
+        AlleleGroup
+    ]
+    for result_class in result_classes:
+        try:
+            return result_class.parse(
+                name,
+                default_species_prefix=default_species_prefix)
+        except:
+            pass
+    raise AlleleParseError("Unable to parse '%s'" % name)
 
-    def __str__(self):
-        return self.species_prefix
+def parse_known_alpha_beta_pair(name, default_species_prefix="HLA"):
+    """
+    If a name is known to contain "/" then it's
+    expected to be of a format like:
+        HLA-DQA*01:01/DQB*01:02
 
-class Locus(Species):
-    def __init__(self, species_prefix, gene_name):
-        Species.__init__(self, species_prefix)
-        self.gene_name = gene_name
+    The species information from the first allele
+    is used to guide parsing for the second allele.
+    """
+    parts = name.split("/")
+    if len(parts) != 2:
+        raise AlleleParseError(
+            "Expected Class II alpha/beta pairing but got %d allele names in '%s'" % (
+                len(parts),
+                name))
+    alpha_string, beta_string = parts
+    alpha = parse(alpha_string, default_species_prefix=default_species_prefix)
+    beta = parse(
+        beta_string,
+        default_species_prefix=alpha.species_prefix)
+    return AlphaBetaPair(alpha, beta)
 
-    def __str__(self):
-        return "%s-%s" % (self.species_prefix, self.gene_name)
+def parse_with_mutations(
+        name,
+        result_without_mutation,
+        mutation_strings,
+        default_species_prefix):
+    """
+    Parameters
+    ----------
+    original_name : str
+        Used for error messages, e.g. "A*02:07 T80M mutant"
 
-    def to_locus(self):
-        """
-        For Locus objects this acts as a simple copy but descendant classes
-        use this method to project their fields down to a Locus object.
-        """
-        return Locus(self.species_prefix, self.gene_name)
+    result_without_mutation : FourDigitAllele
+        The allele being modified by point mutations in its protein
+        sequence
 
-class AlleleGroup(Locus):
-    def __init__(self, species_prefix, gene_name, group):
-        Locus.__init__(self, species_prefix, gene_name)
-        self.group = group
+    mutation_strings : list of str
+        The mutation descriptors (e.g. "T80M") as well as the optional
+        "MUTANT" string used to denote the whole allele as mutated.
 
-    def __str__(self):
-        return "%s*%s" % (
-            Locus.__str__(self),
-            self.group)
+    default_species_prefix : str
+        If no species can inferred for an allele then use this, e.g. "HLA"
 
-    def to_allele_group(self):
-        """
-        For AlleleGroup objects this acts as a simple copy but descendant classes
-        use this method to project their fields down to a AlleleGroup object.
-        """
-        return AlleleGroup(self.species_prefix, self.gene_name, self.group)
+    Returns MutantFourDigitAllele
+    """
+    parts = name.upper().split()
+    result_without_mutation = parse_without_mutation(
+        parts[0],
+        default_species_prefix=default_species_prefix)
+    if result_without_mutation.__class__ is not FourDigitAllele:
+        raise AlleleParseError(
+            "Cannot apply mutations in '%s' to %s" % (
+                name,
+                result_without_mutation.__class__.__name__))
+    # expect names with spaces to be like "A*02:07 T80M mutant"
+    # trim off final commas in case we encounter a list of
+    # mutations like: "E152A, R155Y, L156Y mutant"
+    mutation_strings = [
+        p[:-1] if p.endswith(",") else p
+        for p in mutation_strings[1:]
+        if p != "MUTANT" and p != ""
+    ]
+    if len(mutation_strings) == 0:
+        raise AlleleParseError(
+            "Expected '%s' to have mutations but none found" % name)
+    mutations = [
+        parse_mutation(mutation_string)
+        for mutation_string in mutation_strings
+    ]
+    return MutantFourDigitAllele(result_without_mutation, mutations)
 
-class FourDigitAllele(AlleleGroup):
-    def __init__(self, species_prefix, gene_name, group, protein_id, modifier=None):
-        AlleleGroup.__init__(self, species_prefix, gene_name, group)
-        self.protein_id = protein_id
-        self.modifier = modifier
 
-    def to_four_digit_allele(self):
-        """
-        On FourDigitAllele objects this acts as a simple copy but descendant
-        classes use this method to project their fields down to a FourDigitAllele
-        object.
-        """
-        return FourDigitAllele(
-            self.species_prefix,
-            self.gene_name,
-            self.group,
-            self.protein_id,
-            modifier=self.modifier)
+def parse_with_interior_whitespace(name, default_species_prefix):
+    if "mutant" in name.lower():
+        return parse_with_mutations(
+            name,
+            default_species_prefix=default_species_prefix)
+    else:
+        raise ValueError("Unexpected whitespace in '%s'" % name)
 
-    def to_six_digit_allele(self):
-        """
-        Invent a 'default' six-digit allele for a four-digit allele
-        by append ":01" at the end of the name.
-        For example, HLA-A*02:01 becomes HLA-A*02:01:01
-        """
-        return SixDigitAllele(
-            self.species_prefix,
-            self.gene_name,
-            self.group,
-            protein_id=self.protein_id,
-            coding_sequence_id="01",
-            modifier=self.modifier)
+_parse_cache = {}
 
-    def to_eight_digit_allele(self):
-        """
-        Invent a 'default' eight-digit allele for a four-digit allele
-        by append ":01:01" at the end of the name.
-        For example, HLA-A*02:01 becomes HLA-A*02:01:01:01
-        """
-        return EightDigitAllele(
-            self.species_prefix,
-            self.gene_name,
-            self.group,
-            protein_id=self.protein_id,
-            coding_sequence_id="01",
-            genomic_sequence_id="01",
-            modifier=self.modifier)
+def parse(name, infer_class2_pairing=False, default_species_prefix="HLA"):
+    """
+    Parse any MHC related string, from gene loci to fully specified 8 digit
+    alleles, alpha/beta pairings of Class II MHCs, with expression modifiers
+    and the description of point mutations in the molecule.
 
-    def __str__(self):
-        return "%s:%s%s" % (
-            AlleleGroup.__str__(self),
-            self.nonsyn,
-            self.modifier if self.modifier else "")
+    Example of the complicated inputs this function can handle:
+        HLA-DRA*01:02/DRB1*03:01 Q74R mutant
+        "H2-Kb E152A, R155Y, L156Y mutant"
+        SLA-1*01:01:01:01
+        HLA-DRA*01:01 F54C mutant/DRB1*01:01
 
-class SixDigitAllele(FourDigitAllele):
-    def __init__(
-            self,
-            species_prefix,
-            gene_name,
-            group,
-            protein_id,
-            coding_sequence_id,
-            modifier=None):
-        FourDigitAllele.__init__(
-            self,
-            species_prefix,
-            gene_name,
-            group,
-            protein_id,
-            modifier)
-        self.coding_sequence_id = coding_sequence_id
+    Parameters
+    ----------
+    name : str
+        Raw name of MHC locus or allele
 
-    def to_six_digit_allele(self):
-        """
-        Acts as a copy function for SixDigitAllele functions
-        but the descendant class EightDigitAllele can use this
-        to project its fields down to only the subset used by SixDigitAllele
-        """
-        return SixDigitAllele(
-            self.species_prefix,
-            self.gene_name,
-            self.group,
-            self.protein_id,
-            self.coding_sequence_id,
-            self.modifier)
+    infer_class2_pairing : bool
+        If only alpha or beta chain of Class II MHC is given, try
+        to infer the missing pair?
 
-    def to_eight_digit_allele(self):
-        """
-        Create a 'default' eight-digit allele for a six-digit allele
-        by append ":01" at the end of the name.
-        For example, HLA-A*02:01:01 becomes HLA-A*02:01:01:01
-        """
-        return EightDigitAllele(
-            self.species_prefix,
-            self.gene_name,
-            self.group,
-            self.protein_id,
-            self.coding_sequence_id,
-            genomic_sequence_id="01",
-            modifier=self.modifier)
+    default_species_prefix : str
+        If no species prefix is given, which should should be assumed?
 
-class EightDigitAllele(SixDigitAllele):
-    def __init__(
-            self,
-            species_prefix,
-            gene_name,
-            group,
-            protein_id,
-            coding_sequence_id,
-            genomic_sequence_id,
-            modifier=None):
-        self.species_prefix = species_prefix
-        self.gene_name = gene_name
-        self.group = group
-        self.protein_id = protein_id
-        self.coding_sequence_id = coding_sequence_id
-        self.genomic_sequence_id = genomic_sequence_id
-        self.modifier = modifier
+    Returns object with one of the following types:
+        - Species
+        - Locus
+        - Gene
+        - AlleleGroup
+        - FourDigitAllele
+        - SixDigitAllele
+        - EightDigitAllele
+        - MutantFourDigitAllele
+        - AlphaBetaPair
+        - NamedAllele
+        - MutantNamedAllele
+    """
+    cache_key = (name, infer_class2_pairing, default_species_prefix)
+    if cache_key in _parse_cache:
+        return _parse_cache[cache_key]
 
+    trimmed_name = strip_whitespace_and_trim_outer_quotes(name)
+    if len(trimmed_name) == 0:
+        raise ValueError(
+            "Cannot parse empty allele name '%s'" % name)
+    elif "/" in trimmed_name:
+        result = parse_known_alpha_beta_pair(
+            trimmed_name,
+            default_species_prefix=default_species_prefix)
+    elif " " in trimmed_name or "\t" in trimmed_name:
+        result = parse_with_interior_whitespace(
+            trimmed_name,
+            default_species_prefix=default_species_prefix)
+    else:
+        result = parse_without_mutation(
+            trimmed_name,
+            default_species_prefix=default_species_prefix)
+    _parse_cache[cache_key] = result
+    return result
+"""
 def parse_allele_name(name, species_prefix=None):
-    """Takes an allele name and splits it into four parts:
+    '''Takes an allele name and splits it into four parts:
         1) species prefix
         2) gene name
         3) allele family
@@ -211,7 +233,7 @@ def parse_allele_name(name, species_prefix=None):
 
     The logic for other species mostly resembles the naming system for humans,
     except for mice, rats, and swine, which have archaic nomenclature.
-    """
+    '''
     original = name
     name = name.strip()
 
@@ -334,3 +356,4 @@ def parse_allele_name(name, species_prefix=None):
         allele_code = allele_code[1:]
 
     return FourDigitAllele(species, gene, family, allele_code)
+"""

@@ -9,7 +9,12 @@
 </a>
 
 # mhcnames
-All the fun and adventure of MHC nomenclature, now in Python
+
+MHC names is a parsing library for multi-species MHC nomenclature which
+aims to correctly parse every name in IEDB, IMGT, and the allele lists
+for both NetMHCpan and NetMHCIIpan predictors. This allows for standardization
+between immune databases and tools, which all seems to use different naming
+conventions.
 
 ## Example
 
@@ -20,3 +25,52 @@ Out[1]: AlleleName(species='HLA', gene='A', allele_family='02', allele_code='01'
 In [2]: mhcnames.compact_allele_name("HLA-A*02:01")
 Out[2]: 'A0201'
 ```
+
+## MHC Nomenclature
+
+MHC alleles are named with a frustratingly loose system. It's not uncommon
+to see dozens of different forms for the same allele.
+
+Note: this function works with both class I and class II allele names (including
+alpha/beta pairs).
+
+For example, these all refer to the same MHC protein sequence:
+    * HLA-A\*02:01
+    * HLA-A02:01
+    * HLA-A:02:01
+    * HLA-A0201
+    * HLA-A00201
+
+Additionally, for human alleles, the species prefix is often omitted:
+    * A\*02:01
+    * A\*00201
+    * A\*0201
+    * A02:01
+    * A:02:01
+    * A:002:01
+    * A0201
+    * A00201
+
+We might also encounter "6 digit" and "8 digit" MHC types (which specify
+variants that don't affect amino acid sequence):
+
+    * A\*02:01:01
+    * A\*02:01:01:01
+
+There are also modifier suffixes which specify whether an allele
+is e.g. secreted instead of membrane-bound:
+
+    * HLA-A\*02:01:01S
+
+There are serotypes, which correspond to groups of four digit alleles.
+    * HLA-A2
+    * A2
+
+To make things worse, several model organisms (like mice and rats) use archaic
+naming systems, where there is no notion of allele groups or four/six/eight
+digit alleles but every allele is simply given a name, such as:
+    * H2-Kk
+    * RT1-9.5f
+
+In the above example "H2"/"RT1" correspond to species, "K"/"9.5" are
+the gene names and "k"/"f" are the allele names.

@@ -14,12 +14,43 @@
 
 from __future__ import print_function, division, absolute_import
 
+from serializable import Serializable
 from .four_digit_allele import FourDigitAllele
 from .data import human_serotypes as raw_serotypes_dict
-from .serotype import Serotype
+from .locus import Locus
+
+class Serotype(Locus):
+    def __init__(self, species_prefix, name, alleles):
+        if len(alleles) == 0:
+            raise ValueError("Cannot create Serotype without alleles")
+
+        gene_names = {allele.gene_name for allele in alleles}
+        if len(gene_name) != 1:
+            raise ValueError(
+                "Serotype cannot span multiple genes: %s" % (
+                    gene_names,))
+        gene_name = list(gene_names)[0]
+        Locus.__init__(self, species_prefix, gene_name)
+        self.name = name
+        self.alleles = alleles
+
+    def normalized_string(self, include_species=True):
+        if include_species:
+            return "%s-%s" % (self.species_prefix, self.name)
+        else:
+            return self.name
+
+    def to_dict(self):
+        d = Locus.to_dict(self)
+        d["serotype"] = self.normalized_string()
+        d["serotype_name"] = self.name
+        d["num_alleles_in_serotype"] = len(self.alleles)
+        return d
 
 def create_human_serotypes_dict():
+
     human_serotypes_dict = {}
+
     for serotype_name, allele_strings in raw_serotypes_dict.items():
         assert serotype_name not in human_serotypes_dict
         alleles = [
@@ -33,7 +64,7 @@ def create_human_serotypes_dict():
 
 human_serotypes_dict = create_human_serotypes_dict()
 
-def get_human_serotype_if_exists(name):
+def get_serotype_if_exists(name):
     """
     Try to match the given serotype name with one of the existing names,
     return the Serotype object if it exists.

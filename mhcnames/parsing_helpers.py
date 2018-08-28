@@ -1,4 +1,4 @@
-# Copyright (c) 2016. Mount Sinai School of Medicine
+# Copyright (c) 2018. Mount Sinai School of Medicine
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,6 +14,18 @@
 
 from __future__ import print_function, division, absolute_import
 
+from .allele_parse_error import AlleleParseError
+
+def strip_whitespace_and_trim_outer_quotes(name):
+    original_name = name
+    name = name.strip()
+    while name.startswith('"'):
+        if name.endswith('"'):
+            name = name[1:-1].strip()
+        else:
+            raise AlleleParseError(
+                "Unbalanced double quotes on allele name: %s" % original_name)
+    return name
 
 def parse_substring(allele, pred, max_len=None):
     """

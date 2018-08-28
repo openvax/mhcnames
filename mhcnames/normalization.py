@@ -1,4 +1,4 @@
-# Copyright (c) 2017. Mount Sinai School of Medicine
+# Copyright (c) 2018. Mount Sinai School of Medicine
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,115 +14,77 @@
 
 from __future__ import print_function, division, absolute_import
 
-from .allele_name import AlleleName
-from .class2 import parse_classi_or_classii_allele_name
+from .parsing import parse
 
-_normalized_allele_cache = {}
-
-_DRA1_0101 = AlleleName(
-    species="HLA",
-    gene="DRA1",
-    allele_family="01",
-    allele_code="01")
-
-def normalize_allele_name(raw_allele, omit_dra1=False, infer_class2_pair=True):
-    """MHC alleles are named with a frustratingly loose system. It's not uncommon
-    to see dozens of different forms for the same allele.
-
-    Note: this function works with both class I and class II allele names (including
-    alpha/beta pairs).
-
-    For example, these all refer to the same MHC sequence:
-        - HLA-A*02:01
-        - HLA-A02:01
-        - HLA-A:02:01
-        - HLA-A0201
-        - HLA-A00201
-
-    Additionally, for human alleles, the species prefix is often omitted:
-        - A*02:01
-        - A*00201
-        - A*0201
-        - A02:01
-        - A:02:01
-        - A:002:01
-        - A0201
-        - A00201
-
-    We might also encounter "6 digit" and "8 digit" MHC types (which specify
-    variants that don't affect amino acid sequence), for our purposes these
-    should be truncated to their "4-digit" forms:
-        - A*02:01:01
-        - A*02:01:01:01
-    There are also suffixes which we're going to ignore:
-        - HLA-A*02:01:01G
-
-    And lastly, for human alleles, there are serotypes which we'll treat
-    as approximately equal to a 4-digit type.
-        - HLA-A2
-        - A2
-
-    These should all be normalized to:
-        HLA-A*02:01
+def normalized_string(
+        raw_string,
+        include_species_prefix=True,
+        infer_class2_pairing=True,
+        default_species_prefix="HLA"):
     """
-    cache_key = (raw_allele, omit_dra1, infer_class2_pair)
-    if cache_key in _normalized_allele_cache:
-        return _normalized_allele_cache[cache_key]
+    Parse MHC alleles into their canonical representation.
 
-    parsed_alleles = parse_classi_or_classii_allele_name(
-        raw_allele, infer_pair=infer_class2_pair)
-    species = parsed_alleles[0].species
-    normalized_list = [species]
-    # Optionally omit the alpha allele, e.g. for IEDB predictors.
-    if omit_dra1 and len(parsed_alleles) == 2:
-        alpha, beta = parsed_alleles
-        # by convention the alpha allelle is omitted since it's assumed
-        # to be DRA1*01:01
-        if alpha == _DRA1_0101:
-            parsed_alleles = [beta]
-    for parsed_allele in parsed_alleles:
-        if len(parsed_allele.allele_family) > 0:
-            normalized_list.append("%s*%s:%s" % (
-                parsed_allele.gene,
-                parsed_allele.allele_family,
-                parsed_allele.allele_code))
-        else:
-            # mice don't have allele families
-            # e.g. H-2-Kd
-            # species = H-2
-            # gene = K
-            # allele = d
-            normalized_list.append("%s%s" % (
-                parsed_allele.gene,
-                parsed_allele.allele_code))
-    normalized = "-".join(normalized_list)
+    Examples:
+        A2 -> HLA-A2
+        A0201 -> HLA-A*02:01
+        H2-K-k -> H2-Kk
+        RT-1*9.5:f -> RT1-9.5f
+        DRB1_0101 -> HLA-DRB1*01:01
 
-    _normalized_allele_cache[cache_key] = normalized
-    return normalized
+    Parameters
+    ----------
+    raw_string : str
+        String corresponding to allele, locus, or other MHC-related name
 
-def compact_allele_name(raw_allele):
+    include_species_prefix : bool
+        Include species in the normalized. If False, then you would
+        get "A*02:01" for "A0201", instead of "HLA-A*02:01"
+
+    infer_class2_pairing : bool
+        If given only the alpha or beta chain of a Class II allele,
+        try to infer the most likely pairing from population frequencies.
+
+    default_species_prefix : str
+        By default, parse alleles like "A*02:01" as human but it's possible
+        to change this to some other species.
+    """
+    parsed_object = parse(
+        raw_string,
+        infer_class2_pairing=infer_class2_pairing,
+        default_species_prefix=default_species_prefix)
+    return parsed_object.normalized_string(
+        include_species_prefix=include_species_prefix)
+
+def compact_string(
+        raw_string,
+        include_species_prefix=False,
+        infer_class2_pairing=False,
+        default_species_prefix="HLA"):
+
     """
     Turn HLA-A*02:01 into A0201 or H-2-D-b into H-2Db or
     HLA-DPA1*01:05-DPB1*100:01 into DPA10105-DPB110001
-    """
-    parsed_alleles = parse_classi_or_classii_allele_name(raw_allele)
-    normalized_list = []
-    if len(parsed_alleles) == 2:
-        alpha, beta = parsed_alleles
-        # by convention the alpha allelle is omitted since it's assumed
-        # to be DRA1*01:01
-        if alpha == _DRA1_0101:
-            parsed_alleles = [beta]
 
-    for parsed_allele in parsed_alleles:
-        if len(parsed_allele.allele_family) > 0:
-            normalized_list.append("%s%s%s" % (
-                parsed_allele.gene,
-                parsed_allele.allele_family,
-                parsed_allele.allele_code))
-        else:
-            # mice don't have allele families
-            normalized_list.append("%s%s" % (
-                parsed_allele.gene,
-                parsed_allele.allele_code))
-    return "-".join(normalized_list)
+    Parameters
+    ----------
+    raw_string : str
+        String corresponding to allele, locus, or other MHC-related name
+
+    include_species_prefix : bool
+        Include species in the normalized. If False, then you would
+        get "A0201" for "A0201", instead of "HLA-A0201"
+
+    infer_class2_pairing : bool
+        If given only the alpha or beta chain of a Class II allele,
+        try to infer the most likely pairing from population frequencies.
+
+    default_species_prefix : str
+        By default, parse alleles like "A*02:01" as human but it's possible
+        to change this to some other species.
+    """
+    parsed_object = parse(
+        raw_string,
+        infer_class2_pairing=infer_class2_pairing,
+        default_species_prefix=default_species_prefix)
+    return parsed_object.compact_string(
+        include_species_prefix=include_species_prefix)
