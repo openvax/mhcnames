@@ -19,11 +19,51 @@ from collections import OrderedDict
 from serializable import Serializable
 
 from .species import get_mhc_class
+from .allele_parse_error import AlleleParseError
 
 class Locus(Serializable):
     def __init__(self, species_prefix, gene_name):
         self.species_prefix = species_prefix
         self.gene_name = gene_name
+
+    parse_cache = {}
+
+    @classmethod
+    def parse_substring(cls, name):
+        """
+        Parse locus such as "HLA-A" and return any extra characters
+        which follow afterward.
+        """
+        num_star_characters = name.count("*")
+        if num_star_characters == 0:
+            # split species name from gene name
+            parts = name.split("-")
+            if len(parts) != 2:
+                raise AlleleParseError("Unable to parse locus '%s'" % (name,))
+            species_prefix, gene_name = parts
+            return None
+        elif num_star_characters == 1:
+            split_index = name.find("*")
+            before_star, after_star = name[:split_index], name[split_index:]
+            locus = Locus.parse(before_star)
+            return locus, after_star
+        else:
+            raise AlleleParseError("Unable to parse locus '%s'" % (name,))
+
+    @classmethod
+    def parse(cls, name):
+        """
+        Parse Locus and make sure that there are no extra characters at the end
+        of the input sequence.
+        """
+        result, extra_characters = cls.parse_substring(name)
+        if len(extra_characters) > 0:
+            raise AlleleParseError(
+                "Unable to parse '%s', found extra characters '%s' after %s" % (
+                    name,
+                    extra_characters,
+                    result))
+        return result
 
     def get_mhc_class(self):
         return get_mhc_class(self.species_prefix, self.gene_name)

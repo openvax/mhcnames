@@ -17,4 +17,5 @@ def load(yaml_filename):
 gene_ontology = load("gene_ontology.yaml")
 serotypes = load("serotypes.yaml")
 allele_aliases = load("allele_aliases.yaml")
+gene_aliases = load("gene_aliases.yaml")
 haplotypes = load("haplotypes.yaml")

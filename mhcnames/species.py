@@ -42,7 +42,7 @@ def create_aliases():
             aliases[lower] = key
     return aliases
 
-gene_name_aliases = create_aliases()
+species_aliases = create_aliases()
 
 def find_matching_species_prefix(name):
     """
@@ -53,7 +53,7 @@ def find_matching_species_prefix(name):
 
     upper_no_dash = name.upper().replace("-", "")
 
-    if upper_no_dash in gene_name_aliases:
+    if upper_no_dash in species_aliases:
         return gene_name_aliases[upper_no_dash]
 
     return None

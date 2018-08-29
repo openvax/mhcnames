@@ -30,7 +30,6 @@ from .four_digit_allele import FourDigitAllele
 from .six_digit_allele import SixDigitAllele
 from .eight_digit_allele import EightDigitAllele
 
-
 def parse_without_mutation(name, default_species_prefix="HLA"):
     """
     First test to see if MHC name requires any species-specific special logic.

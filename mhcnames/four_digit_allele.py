@@ -42,19 +42,26 @@ class FourDigitAllele(AlleleGroup):
             protein_id=protein_id,
             modifier=modifier)
 
+    _parse_cache = {}
+
     @classmethod
     def parse_substring(cls, name):
         """
-        Parses a sequence like "HLA-A*02:01:02" and returns the corresponding
-        FourDigitAllele object for "HLA-A*02:01" and the remaining
+        Parse four-digit allele from normalized representation such
+        as HLA-A*02:01. Does not handle variability arising from
+        retired alleles, gene aliases, capitalization or non-standard
+        separators.
+
+        Example: for the input string "HLA-A*02:01:02", returns the
+        corresponding FourDigitAllele object for "HLA-A*02:01" and the remaining
         characters ":02"
         """
         if name in cls._parse_cache:
             return cls._parse_cache[name]
         name = name.strip()
-        allele_group, extra_characters = AlleleGroup.parse_normalized_substring(name)
+        allele_group, extra_characters = AlleleGroup.parse_substring(name)
         extra_characters = extra_characters.strip()
-        regex = "^:?([A-Za-z0-9]+)"
+        regex = "^[:_-]?([A-Za-z0-9]+)"
         match_obj = re.match(regex, extra_characters)
         if match_obj:
             raise AlleleParseError("Unable parse '%s' beyond allele group %s" % (
@@ -67,25 +74,9 @@ class FourDigitAllele(AlleleGroup):
             allele_group=allele_group,
             protein_id=protein_id,
             modifier=modifier)
-        cls._parse_cache[name] = (four_digit_allele, new_extra_characters)
-        return four_digit_allele, new_extra_characters
-
-    @classmethod
-    def parse(cls, name):
-        """
-        Parse four-digit allele from normalized representation such
-        as HLA-A*02:01. Does not handle variability arising from
-        retired alleles, gene aliases, capitalization or non-standard
-        separators.
-        """
-        four_digit_allele, extra_characters = cls.parse_substring(name)
-        if len(extra_characters) > 0:
-            raise AlleleParseError(
-                "Unable to parse '%s', found extra characters '%s' after %s" % (
-                    name,
-                    extra_characters,
-                    four_digit_allele))
-        return four_digit_allele
+        result = (four_digit_allele, new_extra_characters)
+        cls._parse_cache[name] = result
+        return result
 
     def normalized_string(self, include_species=True, include_modifier=True):
         """
