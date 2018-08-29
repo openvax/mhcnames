@@ -82,5 +82,5 @@ class SixDigitAllele(FourDigitAllele):
         four digit allele, and six digit allele.
         """
         d = FourDigitAllele.to_dict(self)
-        d["allele_name"] = d["six_digit_allele"] = self.normalized_string()
+        d["allele"] = d["six_digit_allele"] = self.normalized_string()
         return d

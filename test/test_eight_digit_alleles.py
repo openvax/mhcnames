@@ -3,9 +3,9 @@ from nose.util import eq_
 
 def test_A_02_01_01_01():
     result = mhcnames.parse_allele_name("A*02:01:01:01")
-    eq_(result.species, "HLA")
-    eq_(result.gene, "A")
-    eq_(result.supertype, "02")
-    eq_(result.nonsyn, "01")
-    eq_(result.syn, "01")
-    eq_(result.intronic, "01")
+    eq_(result.species_prefix, "HLA")
+    eq_(result.gene_name, "A")
+    eq_(result.group_id, "02")
+    eq_(result.protein_id, "01")
+    eq_(result.coding_sequence_id, "01")
+    eq_(result.genomic_sequence_id, "01")

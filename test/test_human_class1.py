@@ -1,7 +1,7 @@
 from nose.tools import eq_
 from mhcnames import (
-    normalize_allele_name,
-    compact_allele_name,
+    normalized_string,
+    compact_string,
 )
 
 hla_02_01_names = [
@@ -27,24 +27,24 @@ hla_02_01_names = [
 def test_hla_long_names():
     expected = "HLA-A*02:01"
     for name in hla_02_01_names:
-        result = normalize_allele_name(name)
+        result = normalized_string(name)
         eq_(result, expected)
 
 def test_hla_short_names():
     expected = "A0201"
     for name in hla_02_01_names:
-        result = compact_allele_name(name)
+        result = compact_string(name)
         eq_(result, expected)
 
 def test_hla_with_3_digit_allele_code():
     # B*15:120
-    eq_(normalize_allele_name("HLA-B*15:120"), "HLA-B*15:120")
-    eq_(compact_allele_name("HLA-B*15:120"), "B15120")
-    eq_(normalize_allele_name("B15120"), "HLA-B*15:120")
-    eq_(compact_allele_name("B15120"), "B15120")
+    eq_(normalized_string("HLA-B*15:120"), "HLA-B*15:120")
+    eq_(compact_string("HLA-B*15:120"), "B15120")
+    eq_(normalized_string("B15120"), "HLA-B*15:120")
+    eq_(compact_string("B15120"), "B15120")
 
     # A*02*123
-    eq_(normalize_allele_name("HLA-A*02:123"), "HLA-A*02:123")
-    eq_(compact_allele_name("HLA-A*02:123"), "A02123")
-    eq_(normalize_allele_name("A02123"), "HLA-A*02:123")
-    eq_(compact_allele_name("A02123"), "A02123")
+    eq_(normalized_string("HLA-A*02:123"), "HLA-A*02:123")
+    eq_(compact_string("HLA-A*02:123"), "A02123")
+    eq_(normalized_string("A02123"), "HLA-A*02:123")
+    eq_(compact_string("A02123"), "A02123")

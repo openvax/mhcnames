@@ -14,32 +14,37 @@
 
 from __future__ import print_function, division, absolute_import
 
-from .allele_group import AlleleGroup
+from .locus import Locus
 
-class NamedAllele(AlleleGroup):
+class MutantFourDigitAllele(Locus):
+    def __init__(self, original_allele, mutations):
+        Locus.__init__(
+            self,
+            species_prefix=original_allele.species_prefix,
+            gene_name=original_allele.gene_name)
+        self.original_allele = original_allele
+        self.mutations = mutations
 
-    def __init__(self, species_prefix, gene_name, allele_name):
-        AlleleGroup.__init__(self, species_prefix, gene_name)
-        self.allele_name = allele_name
+    def is_mutant(self):
+        return True
 
-    def to_dict(self):
-        d = AlleleGroup.to_dict(self)
-        d["allele"] = self.normalized_string()
-
-    def parse_substring(self):
-        pass
-
-    def parse(self):
-        pass
+    def mutation_string(self):
+        return " ".join([mut.normalized_string() for mut in self.mutations])
 
     def normalized_string(self, include_species_prefix=True):
-        return "%s*%s" % (
-            AlleleGroup.normalized_string(
+        return "%s %s mutant" % (
+            self.original_allele.normalized_string(
                 include_species_prefix=include_species_prefix),
-            self.allele_name)
+            self.mutation_string())
 
     def compact_string(self, include_species_prefix=False):
-        return "%s%s" % (
-            AlleleGroup.compact_string(
+        return "%s %s mutant" % (
+            self.original_allele.compact_string(
                 include_species_prefix=include_species_prefix),
-            self.allele_name)
+            self.mutation_string())
+
+    def to_dict(self):
+        d = self.original_allele.to_dict()
+        d["allele_name"] = self.normalized_string()
+        d["mutations"] = self.mutation_string()
+        return d

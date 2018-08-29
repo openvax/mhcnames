@@ -137,6 +137,6 @@ class FourDigitAllele(AlleleGroup):
         and four digit allele.
         """
         d = AlleleGroup.to_dict(self)
-        d["allele_name"] = d["four_digit_allele"] = self.normalized_string()
+        d["allele"] = d["four_digit_allele"] = self.normalized_string()
         d["modifier"] = self.modifier
         return d

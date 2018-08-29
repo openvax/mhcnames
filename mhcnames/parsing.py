@@ -25,9 +25,11 @@ from .parsing_helpers import strip_whitespace_and_trim_outer_quotes
 from .mutations import Mutation
 from .mutant_allele import MutantAllele
 from .allele_group import AlleleGroup
+from .locus import Locus
 from .four_digit_allele import FourDigitAllele
 from .six_digit_allele import SixDigitAllele
 from .eight_digit_allele import EightDigitAllele
+
 
 def parse_without_mutation(name, default_species_prefix="HLA"):
     """
@@ -43,7 +45,7 @@ def parse_without_mutation(name, default_species_prefix="HLA"):
         7) species
     If none of these succeed, then raise an exception
     """
-    if is_mouse(name):
+    if is_mouse(name) or default_species_prefix == "H2":
         return parse_mouse(name)
     elif is_rat(name):
         return parse_rat(name)
@@ -56,7 +58,8 @@ def parse_without_mutation(name, default_species_prefix="HLA"):
         EightDigitAllele,
         SixDigitAllele,
         FourDigitAllele,
-        AlleleGroup
+        AlleleGroup,
+        Locus
     ]
     for result_class in result_classes:
         try:
@@ -163,7 +166,10 @@ def parse_with_interior_whitespace(name, default_species_prefix):
 
 _parse_cache = {}
 
-def parse(name, infer_class2_pairing=False, default_species_prefix="HLA"):
+def parse(
+        name,
+        infer_class2_pairing=False,
+        default_species_prefix="HLA"):
     """
     Parse any MHC related string, from gene loci to fully specified 8 digit
     alleles, alpha/beta pairings of Class II MHCs, with expression modifiers
@@ -220,6 +226,10 @@ def parse(name, infer_class2_pairing=False, default_species_prefix="HLA"):
         result = parse_without_mutation(
             trimmed_name,
             default_species_prefix=default_species_prefix)
+    if infer_class2_pairing and result.__class__ is not AlphaBetaPair:
+        raise NotImplementedError(
+            "Inference of paired alpha/beta pair for %s not yet implemented" % (
+                result,))
     _parse_cache[cache_key] = result
     return result
 """
