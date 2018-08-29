@@ -1,0 +1,72 @@
+#########################################
+#
+# Mouse MHC haplotypes copied from:
+# http://www.biolegend.com/media_assets/support_resource/BioLegend_Mouse_Alloantigens.pdf
+#
+##########################################
+H2:
+  a:
+    - Kk
+    - Dd
+    - Ld
+    - IAk
+    - IEk
+    - Qa2a
+    - Qa1a
+  b:
+    - Kb
+    - Db
+    - IAb
+    - IEk
+    - Qa2b
+    - Qa1a
+  d:
+    - Kd
+    - Dd
+    - Ld
+    - IAd
+    - IEd
+    - Qa2a
+    - Qa1b
+  k:
+    - Kk
+    - Dk
+    - IAk
+    - IEk
+    - Qa2b
+    - Qa1b
+  p:
+    - Kp
+    - Dp
+    - Lp
+    - IAp
+    - IEp
+    - Qa2p
+    - Qa1b
+  q:
+    - Kq
+    - Dq
+    - Lq
+    - IAq
+    - IEq
+    - Qa2q
+  q2:
+    - Kq
+    - Dq
+    - Lq
+    - IAq
+    - IEq
+    - Qa2a
+    - Qa1a
+  r:
+    - Kr
+    - Dr
+    - Lr
+    - IAr
+    - IEr
+    - Qa2b
+  v:
+    - Kv
+    - Dv
+    - Lv
+    - IAv

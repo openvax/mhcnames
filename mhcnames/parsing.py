@@ -22,7 +22,8 @@ from .swine import is_swine, parse_swine
 from .alpha_beta_pair import AlphaBetaPair
 from .allele_parse_error import AlleleParseError
 from .parsing_helpers import strip_whitespace_and_trim_outer_quotes
-from .mutations import parse_mutation, MutantFourDigitAllele
+from .mutations import Mutation
+from .mutant_allele import MutantAllele
 from .allele_group import AlleleGroup
 from .four_digit_allele import FourDigitAllele
 from .six_digit_allele import SixDigitAllele
@@ -133,14 +134,27 @@ def parse_with_mutations(
         raise AlleleParseError(
             "Expected '%s' to have mutations but none found" % name)
     mutations = [
-        parse_mutation(mutation_string)
+        Mutation.parse(mutation_string)
         for mutation_string in mutation_strings
     ]
-    return MutantFourDigitAllele(result_without_mutation, mutations)
+    return MutantAllele(result_without_mutation, mutations)
 
 
 def parse_with_interior_whitespace(name, default_species_prefix):
-    if "mutant" in name.lower():
+    """
+    If there's whitespace within an allele description then it's
+    either a mutant allele or an error.
+
+    TODO: add support for:
+        - "HLA class I"
+        - "H2-b class I"
+        - "ELA-A1 class I"
+        - "human CD1a"
+        - "H2-r class I"
+        - "BF19 class II"
+    """
+    lower = name.lower()
+    if "mutant" in lower:
         return parse_with_mutations(
             name,
             default_species_prefix=default_species_prefix)

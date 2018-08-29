@@ -99,6 +99,5 @@ class EightDigitAllele(SixDigitAllele):
         four digit allele, six digit allele, eight_digit_allele.
         """
         d = SixDigitAllele.to_dict(self)
-        d["eight_digit_allele"] = self.normalized_string()
-        d["genomic_sequence_id"] = self.genomic_sequence_id
+        d["allele_name"] = d["eight_digit_allele"] = self.normalized_string()
         return d
