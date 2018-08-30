@@ -68,7 +68,3 @@ def get_human_serotype_if_exists(name):
     if name in human_serotype_aliases_dict:
         name = human_serotype_aliases_dict[name]
     return human_serotypes_dict.get(name)
-
-def is_human(name):
-    upper = name.upper()
-    return upper.startswith("HLA") or get_human_serotype_if_exists(name)

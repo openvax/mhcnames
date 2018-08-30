@@ -17,7 +17,16 @@ from __future__ import print_function, division, absolute_import
 from .allele_group import AlleleGroup
 
 class NamedAllele(AlleleGroup):
+    """
+    Some species, such as mouse (H2) and rats (RT1) do not yet use
+    the standard nomenclature format (e.g. Species-Gene*Group:Protein).
 
+    Instead they identify each distinct MHC molecule with a letter, or sometimes
+    short sequence. Example: H2-Kk, RT1-9.5*f
+
+    Also, some older swine (SLA) alleles seem to have not been translated into
+    the updated nomenclature (e.g. SLA-1-CHANGDA)
+    """
     def __init__(self, species_prefix, gene_name, allele_name):
         AlleleGroup.__init__(self, species_prefix, gene_name)
         self.allele_name = allele_name

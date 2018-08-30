@@ -18,7 +18,7 @@ import re
 
 from .allele_parse_error import AlleleParseError
 
-from .locus import AlleleGroup
+from .allele_group import AlleleGroup
 from .allele_modifiers import check_for_allele_modifier
 
 class FourDigitAllele(AlleleGroup):

@@ -14,16 +14,12 @@
 
 from __future__ import print_function, division, absolute_import
 
-
-from .human import is_human, parse_human
-from .mouse import is_mouse, parse_mouse
-from .rat import is_rat, parse_rat
-from .swine import is_swine, parse_swine
 from .alpha_beta_pair import AlphaBetaPair
 from .allele_parse_error import AlleleParseError
 from .parsing_helpers import strip_whitespace_and_trim_outer_quotes
 from .mutations import Mutation
 from .mutant_allele import MutantAllele
+from .named_allele import NamedAllele
 from .allele_group import AlleleGroup
 from .locus import Locus
 from .four_digit_allele import FourDigitAllele
@@ -44,28 +40,31 @@ def parse_without_mutation(name, default_species_prefix="HLA"):
         7) species
     If none of these succeed, then raise an exception
     """
-    if is_mouse(name) or default_species_prefix == "H2":
-        return parse_mouse(name)
-    elif is_rat(name):
-        return parse_rat(name)
-    elif is_swine(name):
-        return parse_swine(name)
-    elif is_human(name):
-        return parse_human(name)
+    locus, _ = Locus.parse_substring(
+        name,
+        default_species_prefix=default_species_prefix)
 
-    result_classes = [
-        EightDigitAllele,
-        SixDigitAllele,
-        FourDigitAllele,
-        AlleleGroup,
-        Locus
-    ]
+    if locus.species_prefix in {"H2", "RT1"}:
+        # mice and rats use named alleles instead of the
+        # eight/four/six/eight digit code code system
+        result_classes = [
+            NamedAllele,
+            Locus
+        ]
+    else:
+        result_classes = [
+            EightDigitAllele,
+            SixDigitAllele,
+            FourDigitAllele,
+            AlleleGroup,
+            Locus
+        ]
     for result_class in result_classes:
         try:
             return result_class.parse(
                 name,
                 default_species_prefix=default_species_prefix)
-        except:
+        except AlleleParseError:
             pass
     raise AlleleParseError("Unable to parse '%s'" % name)
 
