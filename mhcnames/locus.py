@@ -18,7 +18,10 @@ from collections import OrderedDict
 
 from serializable import Serializable
 
-from .species import get_mhc_class
+from .species_registry import (
+    find_matching_species_prefix,
+    find_matching_species_info,
+)
 from .allele_parse_error import AlleleParseError
 
 class Locus(Serializable):
@@ -41,6 +44,9 @@ class Locus(Serializable):
             if len(parts) != 2:
                 raise AlleleParseError("Unable to parse locus '%s'" % (name,))
             species_prefix, gene_name = parts
+            corrected_species_prefix = find_matching_species_prefix(species_prefix)
+            if corrected_species_prefix is not None:
+                species_prefix = corrected_species_prefix
             return None
         elif num_star_characters == 1:
             split_index = name.find("*")
@@ -65,8 +71,12 @@ class Locus(Serializable):
                     result))
         return result
 
+    @property
+    def species_info(self):
+        return find_matching_species_info(self.species_prefix)
+
     def get_mhc_class(self):
-        return get_mhc_class(self.species_prefix, self.gene_name)
+        return self.species_info.get_mhc_class(self.gene_name)
 
     def normalized_string(self, include_species=True):
         if include_species:
