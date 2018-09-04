@@ -28,6 +28,10 @@ from __future__ import print_function, division, absolute_import
 
 valid_allele_modifiers = "NLSCAQG"
 
+allele_modifier_regex_string = "[%s]" % valid_allele_modifiers
+allele_modifier_regex_group_string = "(%s)" % allele_modifier_regex_string
+
+
 def check_for_allele_modifier(seq):
     """
     See if single remaining character after parsing an allele is one

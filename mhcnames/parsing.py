@@ -28,6 +28,7 @@ from .eight_digit_allele import EightDigitAllele
 from .human import get_human_serotype_if_exists
 from .species import find_matching_species_prefix, find_matching_species_info
 
+
 def infer_species_prefix(name):
     """
     Trying to parse prefixes of alleles such as:
@@ -45,20 +46,6 @@ def infer_species_prefix(name):
     Returns the normalized species prefix and the original string that matched
     it or None.
     """
-    for n in [2, 3, 4]:
-        candidate_prefix = name[:n]
-        species_prefix = find_matching_species_prefix(candidate_prefix)
-        if species_prefix is not None:
-            return species_prefix, candidate_prefix
-    return None
-
-def parse_species_substring(name, default_species_prefix):
-    """
-    Returns tuple with three elements:
-        - species prefix string
-        - SpeciesInfo object associated with prefix
-        - remaining string after species prefix
-    """
     # Try parsing a few different substrings to get the species,
     # and then use the species gene list to determine what the gene is in this string
     if "-" in name:
@@ -71,49 +58,77 @@ def parse_species_substring(name, default_species_prefix):
         ]
     else:
         candidate_species_substrings = [name]
+    for seq in candidate_species_substrings:
+        for n in [2, 3, 4]:
+            original_prefix = seq[:n]
+            normalized_prefix = find_matching_species_prefix(name[:n])
+            if normalized_prefix is not None:
+                return normalized_prefix, original_prefix
+    return None
 
-    for candidate_species_substring in candidate_species_substrings:
-        species_prefix, remaining_string = infer_species_prefix(candidate_species_substring)
-        if species_prefix is not None:
-            break
+def parse_species_prefix(name, default_species_prefix=None):
+    """
+    Returns tuple with two elements:
+        - species prefix string
+        - remaining string after species prefix
+    """
+
+    inferred_prefix_and_original = infer_species_prefix(name)
+    if inferred_prefix_and_original is None:
+        if default_species_prefix is None:
+            return (None, name)
+        else:
+            return (default_species_prefix, name)
+    else:
+        species_prefix, original_prefix = inferred_prefix_and_original
+        original_prefix_length = len(original_prefix)
+        remaining_string = name[original_prefix_length:]
+        return species_prefix, remaining_string
+
+
+def get_species_prefix_and_info(name, default_species_prefix):
+    """
+    Returns tuple with elements:
+        - SpeciesInfo
+        - species prefix
+        - remaining string after species prefix
+    """
+    (species_prefix, remaining_string) = \
+        parse_species_prefix(name, default_species_prefix=default_species_prefix)
     if species_prefix is None:
-        species_prefix = default_species_prefix
-        remaining_string = name
+        raise AlleleParseError("Unable to infer species for '%s'" % name)
 
     species_info = find_matching_species_info(species_prefix)
-    return (
-        species_prefix,
-        species_info,
-        remaining_string
-    )
+    if species_info is None:
+        raise AlleleParseError("Unknown species '%s' in '%s'" % (species_prefix, name))
+    return species_info, species_prefix, remaining_string
 
-
-def parse_locus_if_possible(name, default_species_prefix="HLA"):
+def parse_gene_if_possible(name, species_info):
     """
-    Parse locus such as "HLA-A" or return None if not possible.
-    """
-    if species_prefix is None:
-            species_prefix = default_species_prefix
-        if species_prefix is None:
-            raise AlleleParseError("Unable to parse '%s'" % name)
-        remaining_string = name[n:]
-        while remaining_string[0] == "-":
-            remaining_string = remaining_string[1:]
+    Parse gene such as "A" or "DQB" and return it along with
+    remaining string.
 
-        species_info = find_matching_species_info(species_prefix)
-        if species_info:
-            locus = None
-            for n in range(len(remaining_string), 0, -1):
-                substring = remaining_string[:n]
-                gene_name = species_info.find_matching_gene_name(substring)
-                locus = Locus(species_prefix, gene_name)
-                remaining_string = remaining_string[n:]
-                break
+    Return None if not possible.
+    """
+    for n in range(len(name), 0, -1):
+        substring = name[:n]
+        gene_name = species_info.find_matching_gene_name(substring)
+        if gene_name:
+            return gene_name, name[n:]
+
+    return None, name
+
+def ontology_guided_parsing():
+    pass
 
 def parse_locus_substring(name, default_species_prefix="HLA"):
     """
     Parse locus such as "HLA-A" and return any extra characters
     which follow afterward.
+    """
+    species_info, species_prefix, remaining_string = get_species_prefix_and_info(
+        name, default_species_prefix=default_species_prefix)
+
     """
     num_star_characters = name.count("*")
     if num_star_characters == 1:
@@ -139,6 +154,8 @@ def parse_locus_substring(name, default_species_prefix="HLA"):
             locus = Locus(species_prefix, remaining_string)
             remaining_string = ""
     return result
+    """
+
 
 def parse_without_mutation(name, default_species_prefix="HLA"):
     """
@@ -154,10 +171,34 @@ def parse_without_mutation(name, default_species_prefix="HLA"):
         7) species
     If none of these succeed, then raise an exception
     """
-    # is it a serotype?
-    serotype = get_human_serotype_if_exists(name)
-    if serotype is not None:
-        return serotype
+    upper = name.upper()
+
+    # two species annoyingly have dashes in their names,
+    # standardize "H-2" as "H2" and "RT-1" as "RT1"
+    if upper.startswith("H-2"):
+        species_prefix = "H2"
+        remaining_string = strip_spaces_and_dashes(name[3:])
+    elif upper.startswith("RT-1"):
+        species_prefix = "RT1"
+        remaining_string = strip_spaces_and_dashes(name[4:])
+    else:
+        species_prefix, remaining_string = \
+            parse_species_prefix(
+                name,
+                default_species_prefix=default_species_prefix)
+
+    # try parsing remaining sequence as a human serotype
+    if species_prefix == "HLA":
+        # is it a serotype?
+        serotype = get_human_serotype_if_exists(name)
+        if serotype is not None:
+            return serotype
+
+    species_info, species_prefix, remaining_string = \
+        get_species_prefix_and_info(
+            name,
+            default_species_prefix=default_species_prefix)
+
 
     locus, _ = Locus.parse_substring(
         name,

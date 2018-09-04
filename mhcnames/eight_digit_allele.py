@@ -68,14 +68,36 @@ class EightDigitAllele(SixDigitAllele):
         by append ":01:01" at the end of the name.
         For example, HLA-A*02:01 becomes HLA-A*02:01:01:01
         """
-        return EightDigitAllele(
+        return cls(
             four_digit_allele.species_prefix,
             four_digit_allele.gene_name,
-            four_digit_allele.group,
+            four_digit_allele.group_id,
             protein_id=four_digit_allele.protein_id,
             coding_sequence_id="01",
             genomic_sequence_id="01",
             modifier=four_digit_allele.modifier)
+
+    @classmethod
+    def from_tuple(cls, t):
+        return cls(
+            species_prefix=t[0],
+            gene_name=t[1],
+            group_id=t[2],
+            protein_id=t[3],
+            coding_sequence_id=t[4],
+            genomic_sequence_id=t[5],
+            modifier=t[6])
+
+    def to_tuple(self):
+        return (
+            self.species_prefix,
+            self.gene_name,
+            self.group_id,
+            self.protein_id,
+            self.coding_sequence_id,
+            self.genomic_sequence_id,
+            self.modifier,
+        )
 
     def from_six_digit_allele(self, six_digit_allele):
         """

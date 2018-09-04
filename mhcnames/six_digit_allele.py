@@ -59,6 +59,26 @@ class SixDigitAllele(FourDigitAllele):
             FourDigitAllele.compact_string(include_species=include_species),
             self.coding_sequence_id)
 
+    @classmethod
+    def from_tuple(cls, t):
+        return cls(
+            species_prefix=t[0],
+            gene_name=t[1],
+            group_id=t[2],
+            protein_id=t[3],
+            coding_sequence_id=t[4],
+            modifier=t[6])
+
+    def to_tuple(self):
+        return (
+            self.species_prefix,
+            self.gene_name,
+            self.group_id,
+            self.protein_id,
+            self.coding_sequence_id,
+            self.modifier,
+        )
+
     def to_six_digit_allele(self):
         """
         Descendant class EightDigitAllele can use this

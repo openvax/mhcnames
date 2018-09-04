@@ -14,6 +14,8 @@
 
 from __future__ import print_function, division, absolute_import
 
+import pandas as pd
+
 from .parsing import parse
 
 def normalized_string(
@@ -88,3 +90,14 @@ def compact_string(
         default_species_prefix=default_species_prefix)
     return parsed_object.compact_string(
         include_species_prefix=include_species_prefix)
+
+def dataframe_from_list(names, default_species_prefix="HLA"):
+    parsed_objects = [
+        parse(name, default_species_prefix=default_species_prefix)
+        for name in names
+    ]
+    records = [
+        obj.to_dict()
+        for obj in parsed_objects
+    ]
+    return pd.DataFrame.from_records(records)

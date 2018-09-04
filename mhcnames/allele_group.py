@@ -48,6 +48,21 @@ class AlleleGroup(Locus):
             Locus.compact_string(include_species=include_species),
             self.group_id)
 
+    @classmethod
+    def from_tuple(cls, t):
+        return cls(
+            species_prefix=t[0],
+            gene_name=t[1],
+            group_id=t[2]
+        )
+
+    def to_tuple(self):
+        return (
+            self.species_prefix,
+            self.gene_name,
+            self.group_id
+        )
+
     def to_allele_group(self):
         """
         For AlleleGroup objects this acts as a simple copy but descendant
