@@ -91,21 +91,3 @@ def find_matching_species_prefix(name):
         return species.prefix
     else:
         return None
-
-def infer_species_prefix(allele_string):
-    """
-    Example the beginning of string to see if it matches any of the
-    known species prefixes.
-
-    Examples:
-        * "hla-a" -> "HLA"
-        * "RT1" -> "RT1"
-        * "RT-1" -> "RT1"
-        * "rano" -> Rano"
-        * "H-2" -> "H2"
-    """
-    for n in [4, 3, 2]:
-        prefix = find_matching_species_prefix(allele_string[:n])
-        if prefix:
-            return prefix
-    return None

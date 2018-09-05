@@ -14,6 +14,8 @@
 
 from __future__ import print_function, division, absolute_import
 
+from .mhc_class_restriction import class1_subtypes, class2_subtypes
+
 class SpeciesInfo(object):
     def __init__(
             self,
@@ -84,10 +86,10 @@ class SpeciesInfo(object):
         Create a dictionary mapping each species to a set of genes
         """
         all_genes = []
-        for class1_category in ["Ia", "Ib", "Ic"]:
+        for class1_category in class1_subtypes:
             class1_genes = self.gene_ontology.get(class1_category, [])
             all_genes.extend(class1_genes)
-        for class2_category in ["IIa", "IIb"]:
+        for class2_category in class2_subtypes:
             class2_genes_dict = self.gene_ontology.get(class2_category, {})
             for class2_genes in class2_genes_dict.values():
                 all_genes.extend(class2_genes)
@@ -127,11 +129,11 @@ class SpeciesInfo(object):
         """
         gene_name = self.find_matching_gene_name(gene_name)
         for mhc_class, mhc_class_members in self.gene_ontology.items():
-            if mhc_class in {"Ia", "Ib", "Ic"}:
+            if mhc_class in class1_subtypes:
                 for member_gene in mhc_class_members:
                     if member_gene == gene_name:
                         return mhc_class
-            elif mhc_class in {"IIa", "IIb"}:
+            elif mhc_class in class2_subtypes:
                 for locus, genes in mhc_class_members.items():
                     if locus == gene_name:
                         return mhc_class

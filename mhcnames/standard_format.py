@@ -23,8 +23,8 @@ from __future__ import print_function, division, absolute_import
 
 import re
 
-from .locus import Locus
-from .allel_group import AlleleGroup
+from .gene import Gene
+from .allele_group import AlleleGroup
 from .four_digit_allele import FourDigitAllele
 from .six_digit_allele import SixDigitAllele
 from .eight_digit_allele import EightDigitAllele
@@ -39,7 +39,7 @@ species_with_gene_regex_string = "%s-%s" % (
     species_prefix_regex_string,
     gene_regex_string)
 
-locus_regex = re.compile(species_with_gene_regex_string)
+gene_regex = re.compile(species_with_gene_regex_string)
 
 allele_group_regex_string = species_with_gene_regex_string + "\*(\d+)"
 
@@ -68,7 +68,7 @@ def parse_standard_allele_name(name):
         (six_digit_regex, SixDigitAllele),
         (four_digit_regex, FourDigitAllele),
         (allele_group_regex, AlleleGroup),
-        (locus_regex, Locus)
+        (gene_regex, Gene)
     ]
     for regex, result_class in order_of_parsing_attempts:
         match = regex.fullmatch(name)

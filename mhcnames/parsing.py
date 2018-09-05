@@ -24,7 +24,7 @@ from .mutations import Mutation
 from .mutant_allele import MutantAllele
 from .named_allele import NamedAllele
 from .allele_group import AlleleGroup
-from .locus import Locus
+from .gene import Gene
 from .four_digit_allele import FourDigitAllele
 from .six_digit_allele import SixDigitAllele
 from .eight_digit_allele import EightDigitAllele
@@ -34,6 +34,8 @@ from .data import (
     allele_aliases_with_uppercase_keys,
     gene_aliases_with_uppercase_keys
 )
+from .standard_format import parse_standard_allele_name
+
 
 def infer_species_prefix(name):
     """
@@ -162,6 +164,17 @@ def parse_locus_substring(name, default_species_prefix="HLA"):
     return result
     """
 
+def normalize_allele_string(species_prefix, allele_sequence_without_species):
+    """
+    Look up allele name in a species-specific dictionary of aliases
+    and, if it's present, substitute allele name with canonical form.
+    """
+    trimmed = strip_whitespace_and_dashes(allele_sequence_without_species)
+    upper_seq = trimmed.upper()
+    if upper_seq in allele_aliases_with_uppercase_keys[species_prefix]:
+        return allele_aliases_with_uppercase_keys[species_prefix][upper_seq]
+    return trimmed
+
 def parse_without_mutation(name, default_species_prefix="HLA"):
     """
     First test to see if MHC name requires any species-specific special logic.
@@ -180,9 +193,12 @@ def parse_without_mutation(name, default_species_prefix="HLA"):
         parse_species_prefix(
             name,
             default_species_prefix=default_species_prefix)
+    remaining_string = normalize_allele_string(
+        species_prefix=species_prefix,
+        allele_sequence_without_species=remaining_string)
 
-    remaining_string = strip_whitespace_and_dashes(remaining_string)
-
+    standard_nomenclature_result = parse_standard_allele_name(
+        "%s-%s" % (species_prefix, remaining_string))
 
     # try parsing remaining sequence as a human serotype
     if species_prefix == "HLA":
@@ -197,32 +213,6 @@ def parse_without_mutation(name, default_species_prefix="HLA"):
             default_species_prefix=default_species_prefix)
 
 
-    locus, _ = Locus.parse_substring(
-        name,
-        default_species_prefix=default_species_prefix)
-
-    if locus.species_prefix in {"H2", "RT1"}:
-        # mice and rats use named alleles instead of the
-        # eight/four/six/eight digit code code system
-        result_classes = [
-            NamedAllele,
-            Locus
-        ]
-    else:
-        result_classes = [
-            EightDigitAllele,
-            SixDigitAllele,
-            FourDigitAllele,
-            AlleleGroup,
-            Locus
-        ]
-    for result_class in result_classes:
-        try:
-            return result_class.parse(
-                name,
-                default_species_prefix=default_species_prefix)
-        except AlleleParseError:
-            pass
     raise AlleleParseError("Unable to parse '%s'" % name)
 
 def parse_known_alpha_beta_pair(name, default_species_prefix="HLA"):
