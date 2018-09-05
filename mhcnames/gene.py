@@ -20,7 +20,7 @@ from serializable import Serializable
 
 from .species_registry import find_matching_species_info
 
-class Locus(Serializable):
+class Gene(Serializable):
     def __init__(self, species_prefix, gene_name):
         self.species_prefix = species_prefix
         self.gene_name = gene_name
@@ -58,30 +58,25 @@ class Locus(Serializable):
             self.gene_name,
         )
 
-    def to_locus(self):
+    def to_gene(self):
         """
         Descendant classes use this method to project their fields down
-        to a Locus object.
+        to a Gene object.
         """
-        if self.__class__ is Locus:
+        if self.__class__ is Gene:
             return self
         else:
-            return Locus(self.species_prefix, self.gene_name)
-
-    def is_mutant(self):
-        return False
+            return Gene(self.species_prefix, self.gene_name)
 
     def to_dict(self):
         """
-        Returns dictionary with all fields of this locus, its normalized,
+        Returns dictionary with all fields of this gene, its normalized,
         representation and the values of the following methods:
             - is_mutant
             - get_mhc_class
         """
         return OrderedDict([
-            ("locus", self.normalized_string()),
-            ("species_prefix", self.species_prefix),
-            ("gene_name", self.gene_name),
-            ("is_mutant", self.is_mutant()),
+            ("gene", self.normalized_string()),
             ("mhc_class", self.get_mhc_class()),
+            ("is_mutant", False),
         ])

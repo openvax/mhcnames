@@ -16,7 +16,10 @@ from __future__ import print_function, division, absolute_import
 
 from .alpha_beta_pair import AlphaBetaPair
 from .allele_parse_error import AlleleParseError
-from .parsing_helpers import strip_whitespace_and_trim_outer_quotes
+from .parsing_helpers import (
+    strip_whitespace_and_trim_outer_quotes,
+    strip_whitespace_and_dashes
+)
 from .mutations import Mutation
 from .mutant_allele import MutantAllele
 from .named_allele import NamedAllele
@@ -27,7 +30,10 @@ from .six_digit_allele import SixDigitAllele
 from .eight_digit_allele import EightDigitAllele
 from .human import get_human_serotype_if_exists
 from .species import find_matching_species_prefix, find_matching_species_info
-
+from .data import (
+    allele_aliases_with_uppercase_keys,
+    gene_aliases_with_uppercase_keys
+)
 
 def infer_species_prefix(name):
     """
@@ -156,7 +162,6 @@ def parse_locus_substring(name, default_species_prefix="HLA"):
     return result
     """
 
-
 def parse_without_mutation(name, default_species_prefix="HLA"):
     """
     First test to see if MHC name requires any species-specific special logic.
@@ -171,21 +176,13 @@ def parse_without_mutation(name, default_species_prefix="HLA"):
         7) species
     If none of these succeed, then raise an exception
     """
-    upper = name.upper()
+    species_prefix, remaining_string = \
+        parse_species_prefix(
+            name,
+            default_species_prefix=default_species_prefix)
 
-    # two species annoyingly have dashes in their names,
-    # standardize "H-2" as "H2" and "RT-1" as "RT1"
-    if upper.startswith("H-2"):
-        species_prefix = "H2"
-        remaining_string = strip_spaces_and_dashes(name[3:])
-    elif upper.startswith("RT-1"):
-        species_prefix = "RT1"
-        remaining_string = strip_spaces_and_dashes(name[4:])
-    else:
-        species_prefix, remaining_string = \
-            parse_species_prefix(
-                name,
-                default_species_prefix=default_species_prefix)
+    remaining_string = strip_whitespace_and_dashes(remaining_string)
+
 
     # try parsing remaining sequence as a human serotype
     if species_prefix == "HLA":

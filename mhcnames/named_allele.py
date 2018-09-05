@@ -31,15 +31,12 @@ class NamedAllele(AlleleGroup):
         AlleleGroup.__init__(self, species_prefix, gene_name)
         self.allele_name = allele_name
 
-    def to_dict(self):
-        d = AlleleGroup.to_dict(self)
-        d["allele"] = self.normalized_string()
+    def to_tuple(self):
+        return (self.species_prefix, self.gene_name, self.allele_name)
 
-    def parse_substring(self):
-        pass
-
-    def parse(self):
-        pass
+    @classmethod
+    def from_tuple(cls, t):
+        return cls(t[0], t[1], t[2])
 
     def normalized_string(self, include_species_prefix=True):
         return "%s*%s" % (
@@ -52,3 +49,7 @@ class NamedAllele(AlleleGroup):
             AlleleGroup.compact_string(
                 include_species_prefix=include_species_prefix),
             self.allele_name)
+
+    def to_dict(self):
+        d = AlleleGroup.to_dict(self)
+        d["allele"] = self.normalized_string()

@@ -14,7 +14,32 @@
 
 from __future__ import print_function, division, absolute_import
 
+import re
+
 from .allele_parse_error import AlleleParseError
+
+def _create_regex_for_strip_whitespace_and_dashes():
+
+    optional_space_or_dash = "[-\s]*"
+    anything_except_space_or_dash = "A-Za-z0-9\._"
+    anything_except_space = anything_except_space_or_dash + "-"
+    regex_string_to_strip_spaces_and_dashes = \
+        "%s([%s][%s]*[%s])%s" % (
+            optional_space_or_dash,
+            anything_except_space_or_dash,
+            anything_except_space,
+            anything_except_space_or_dash,
+            optional_space_or_dash
+        )
+    return re.compile(regex_string_to_strip_spaces_and_dashes)
+
+regex_string_to_strip_spaces_and_dashes = _create_regex_for_strip_whitespace_and_dashes()
+
+def strip_whitespace_and_dashes(s):
+    match_obj = regex_string_to_strip_spaces_and_dashes.fullmatch(s)
+    if not match_obj:
+        raise AlleleParseError("Unexpected failure on string '%s'")
+    return match_obj.groups()[0]
 
 def strip_whitespace_and_trim_outer_quotes(name):
     original_name = name
@@ -26,39 +51,3 @@ def strip_whitespace_and_trim_outer_quotes(name):
             raise AlleleParseError(
                 "Unbalanced double quotes on allele name: %s" % original_name)
     return name
-
-def parse_substring(allele, pred, max_len=None):
-    """
-    Extract substring of letters for which predicate is True
-    """
-    result = ""
-    pos = 0
-    if max_len is None:
-        max_len = len(allele)
-    else:
-        max_len = min(max_len, len(allele))
-    while pos < max_len and pred(allele[pos]):
-        result += allele[pos]
-        pos += 1
-    return result, allele[pos:]
-
-
-SEPARATORS = {":", "*", "-"}
-
-def parse_separator(allele, max_len=None):
-    return parse_substring(allele, lambda c: c in SEPARATORS, max_len=max_len)
-
-def parse_alphanum(allele, max_len=None):
-    return parse_substring(allele, lambda c: c.isalnum(), max_len=max_len)
-
-def parse_letters(allele, max_len=None):
-    return parse_substring(allele, lambda c: c.isalpha(), max_len=max_len)
-
-def parse_numbers(allele, max_len=None):
-    return parse_substring(allele, lambda c: c.isdigit(), max_len=max_len)
-
-def parse_not_numbers(allele, max_len=None):
-    return parse_substring(allele, lambda c: not c.isdigit(), max_len=max_len)
-
-def parse_until(allele, sep):
-    return parse_substring(allele, lambda c: c != sep)

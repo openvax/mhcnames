@@ -25,9 +25,6 @@ class MutantFourDigitAllele(Locus):
         self.original_allele = original_allele
         self.mutations = mutations
 
-    def is_mutant(self):
-        return True
-
     def mutation_string(self):
         return " ".join([mut.normalized_string() for mut in self.mutations])
 
@@ -45,6 +42,7 @@ class MutantFourDigitAllele(Locus):
 
     def to_dict(self):
         d = self.original_allele.to_dict()
-        d["allele_name"] = self.normalized_string()
+        d["allele"] = self.normalized_string()
+        d["is_mutant"] = True
         d["mutations"] = self.mutation_string()
         return d

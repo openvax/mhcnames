@@ -117,7 +117,7 @@ class EightDigitAllele(SixDigitAllele):
     def to_dict(self):
         """
         Returns dictionary with all fields of this allele,
-        as well as its representations as a locus, allele group,
+        as well as its representations as a gene, allele group,
         four digit allele, six digit allele, eight_digit_allele.
         """
         d = SixDigitAllele.to_dict(self)

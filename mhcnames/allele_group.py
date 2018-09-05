@@ -14,9 +14,9 @@
 
 from __future__ import print_function, division, absolute_import
 
-from .locus import Locus
+from .gene import Gene
 
-class AlleleGroup(Locus):
+class AlleleGroup(Gene):
     """
     Representation of a group of closely related alleles,
     specified by a species, a gene, and a group identifier,
@@ -29,12 +29,12 @@ class AlleleGroup(Locus):
     in the similarly named serotype (and vice versa).
     """
     def __init__(self, species_prefix, gene_name, group_id):
-        Locus.__init__(self, species_prefix, gene_name)
+        Gene.__init__(self, species_prefix, gene_name)
         self.group_id = group_id
 
     def normalized_string(self, include_species=True):
         return "%s*%s" % (
-            Locus.normalized_string(self, include_species=include_species),
+            Gene.normalized_string(self, include_species=include_species),
             self.group_id)
 
     def compact_string(self, include_species=True):
@@ -45,7 +45,7 @@ class AlleleGroup(Locus):
             Compact: HLA-A02
         """
         return "%s%s" % (
-            Locus.compact_string(include_species=include_species),
+            Gene.compact_string(include_species=include_species),
             self.group_id)
 
     @classmethod
@@ -76,7 +76,6 @@ class AlleleGroup(Locus):
         Returns dictionary with all fields of this allele group,
         as well as its representations as a locus.
         """
-        d = Locus.to_dict(self)
+        d = Gene.to_dict(self)
         d["allele_group"] = self.normalized_string()
-        d["group_id"] = self.group_id
         return d

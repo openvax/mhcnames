@@ -14,12 +14,7 @@
 
 from __future__ import print_function, division, absolute_import
 
-import re
-
-from .allele_parse_error import AlleleParseError
-
 from .allele_group import AlleleGroup
-from .allele_modifiers import check_for_allele_modifier
 
 class FourDigitAllele(AlleleGroup):
     """
@@ -59,42 +54,6 @@ class FourDigitAllele(AlleleGroup):
             self.protein_id,
             self.modifier,
         )
-
-    _parse_cache = {}
-
-    @classmethod
-    def parse_substring(cls, name):
-        """
-        Parse four-digit allele from normalized representation such
-        as HLA-A*02:01. Does not handle variability arising from
-        retired alleles, gene aliases, capitalization or non-standard
-        separators.
-
-        Example: for the input string "HLA-A*02:01:02", returns the
-        corresponding FourDigitAllele object for "HLA-A*02:01" and the remaining
-        characters ":02"
-        """
-        if name in cls._parse_cache:
-            return cls._parse_cache[name]
-        name = name.strip()
-        allele_group, extra_characters = AlleleGroup.parse_substring(name)
-        extra_characters = extra_characters.strip()
-        regex = "^[:_-]?([A-Za-z0-9]+)"
-        match_obj = re.match(regex, extra_characters)
-        if match_obj:
-            raise AlleleParseError("Unable parse '%s' beyond allele group %s" % (
-                name, allele_group))
-        _, end_index = match_obj.span()
-        protein_id = extra_characters[:end_index]
-        new_extra_characters = extra_characters[end_index:].strip()
-        modifier, new_extra_characters = check_for_allele_modifier(new_extra_characters)
-        four_digit_allele = FourDigitAllele.from_allele_group(
-            allele_group=allele_group,
-            protein_id=protein_id,
-            modifier=modifier)
-        result = (four_digit_allele, new_extra_characters)
-        cls._parse_cache[name] = result
-        return result
 
     def normalized_string(self, include_species=True, include_modifier=True):
         """
@@ -142,7 +101,7 @@ class FourDigitAllele(AlleleGroup):
     def to_dict(self):
         """
         Returns dictionary with all fields of this allele,
-        as well as its representations as a locus, allele group,
+        as well as its representations as a gene, allele group,
         and four digit allele.
         """
         d = AlleleGroup.to_dict(self)

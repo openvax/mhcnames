@@ -8,6 +8,7 @@ H2:
   Qa-1: T23
   Qa-2: Q7
   Ped: Q7
+  Qa-10: Q10
   Qb-1: Q4
   T25: T13
   Bl: T13
@@ -15,7 +16,5 @@ H2:
   CRW2: M5
   Hmt: M3
   Thy19.4: M2
-  Qa-10: Q10
-  D1: D
-  K1: K
-
+  D: D1
+  K: K1

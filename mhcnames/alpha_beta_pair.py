@@ -14,6 +14,7 @@
 
 from __future__ import print_function, division, absolute_import
 
+from collections import OrderedDict
 from serializable import Serializable
 
 class AlphaBetaPair(Serializable):
@@ -21,7 +22,33 @@ class AlphaBetaPair(Serializable):
         self.alpha = alpha
         self.beta = beta
 
-    def normalized_string(self):
+    @property
+    def species_prefix(self):
+        return self.alpha.species_prefix
+
+    def normalized_string(self, include_species=True):
         return "%s/%s" % (
-            self.alpha.normalized_string(include_species=True),
+            self.alpha.normalized_string(include_species=include_species),
             self.beta.normalized_string(include_species=False))
+
+    def compact_string(self, include_species=False):
+        return "%s/%s" % (
+            self.alpha.compact_string(include_species=include_species),
+            self.beta.compact_string(include_species=False))
+
+    def get_mhc_class(self):
+        alpha_class = self.alpha.get_mhc_class()
+        if alpha_class:
+            return alpha_class
+        else:
+            return self.beta.get_mhc_class()
+
+    def to_dict(self):
+        # return a dictionary that has the same elements as Gene.to_dict()
+        # along with "allele"
+        return OrderedDict([
+            ("gene", "%s/%s" % (self.alpha.gene_name, self.beta.gene_name)),
+            ("mhc_class", self.get_mhc_class()),
+            ("is_mutant", False),
+            ("allele", self.normalized_string()),
+        ])
