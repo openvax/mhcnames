@@ -14,11 +14,11 @@
 
 from __future__ import print_function, division, absolute_import
 
-from .locus import Locus
+from .gene import Gene
 
-class MutantFourDigitAllele(Locus):
+class MutantFourDigitAllele(Gene):
     def __init__(self, original_allele, mutations):
-        Locus.__init__(
+        Gene.__init__(
             self,
             species_prefix=original_allele.species_prefix,
             gene_name=original_allele.gene_name)

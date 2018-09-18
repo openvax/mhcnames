@@ -20,8 +20,8 @@ from .parsing_helpers import (
     strip_whitespace_and_trim_outer_quotes,
     strip_whitespace_and_dashes
 )
-from .mutations import Mutation
-from .mutant_allele import MutantAllele
+from .mutation import Mutation
+from .mutant_allele import MutantFourDigitAllele
 from .named_allele import NamedAllele
 from .allele_group import AlleleGroup
 from .gene import Gene
@@ -31,8 +31,8 @@ from .eight_digit_allele import EightDigitAllele
 from .human import get_human_serotype_if_exists
 from .species import find_matching_species_prefix, find_matching_species_info
 from .data import (
-    allele_aliases_with_uppercase_keys,
-    gene_aliases_with_uppercase_keys
+    species_to_gene_aliases,
+    species_to_gene_to_allele_aliases,
 )
 from .standard_format import parse_standard_allele_name
 
@@ -111,6 +111,7 @@ def get_species_prefix_and_info(name, default_species_prefix):
         raise AlleleParseError("Unknown species '%s' in '%s'" % (species_prefix, name))
     return species_info, species_prefix, remaining_string
 
+
 def parse_gene_if_possible(name, species_info):
     """
     Parse gene such as "A" or "DQB" and return it along with
@@ -128,6 +129,7 @@ def parse_gene_if_possible(name, species_info):
 
 def ontology_guided_parsing():
     pass
+
 
 def parse_locus_substring(name, default_species_prefix="HLA"):
     """
@@ -171,9 +173,20 @@ def normalize_allele_string(species_prefix, allele_sequence_without_species):
     """
     trimmed = strip_whitespace_and_dashes(allele_sequence_without_species)
     upper_seq = trimmed.upper()
+    species_to_gene_to_allele_aliases
     if upper_seq in allele_aliases_with_uppercase_keys[species_prefix]:
         return allele_aliases_with_uppercase_keys[species_prefix][upper_seq]
     return trimmed
+
+def normalize_parsed_object(parsed_object):
+    if isinstance(parsed_object, Gene):
+        species_info = find_matching_species_info(parsed_object)
+        if species_info is None:
+            return parsed_object
+        else:
+            # TODO: use SpeciesInfo to normalize gene names
+            return parsed_object
+    return parsed_object
 
 def parse_without_mutation(name, default_species_prefix="HLA"):
     """
@@ -200,6 +213,9 @@ def parse_without_mutation(name, default_species_prefix="HLA"):
     standard_nomenclature_result = parse_standard_allele_name(
         "%s-%s" % (species_prefix, remaining_string))
 
+    if standard_nomenclature_result is not None:
+        return normalize_parsed_object(standard_nomenclature_result)
+
     # try parsing remaining sequence as a human serotype
     if species_prefix == "HLA":
         # is it a serotype?
@@ -212,8 +228,12 @@ def parse_without_mutation(name, default_species_prefix="HLA"):
             name,
             default_species_prefix=default_species_prefix)
 
-
     raise AlleleParseError("Unable to parse '%s'" % name)
+
+
+def parse_serotype(species_prefix, name):
+    pass
+
 
 def parse_known_alpha_beta_pair(name, default_species_prefix="HLA"):
     """
@@ -309,7 +329,9 @@ def parse_with_interior_whitespace(name, default_species_prefix):
     else:
         raise ValueError("Unexpected whitespace in '%s'" % name)
 
+
 _parse_cache = {}
+
 
 def parse(
         name,

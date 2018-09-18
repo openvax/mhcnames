@@ -16,7 +16,9 @@ HLA:
   IIa:
     DR:
       - DRA
-      - DRB
+      - DRB1
+      - DRB3
+      - DRB5
     DP:
       - DPA
       - DPB

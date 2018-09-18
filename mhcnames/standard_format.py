@@ -62,6 +62,7 @@ eight_digit_regex_string = six_digit_regex_string + ":(\d\d+)"
 eight_digit_regex_string_with_modifier = eight_digit_regex_string + optional_modifier
 eight_digit_regex = re.compile(eight_digit_regex_string_with_modifier)
 
+
 def parse_standard_allele_name(name):
     order_of_parsing_attempts = [
         (eight_digit_regex, EightDigitAllele),

@@ -20,6 +20,7 @@ from serializable import Serializable
 
 from .species_registry import find_matching_species_info
 
+
 class Gene(Serializable):
     def __init__(self, species_prefix, gene_name):
         self.species_prefix = species_prefix

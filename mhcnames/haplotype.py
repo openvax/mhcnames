@@ -12,13 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import print_function, division, absolute_import
+
 from serializable import Serializable
 
-from .mhc_class_restriction import (
+from .mhc_class import (
     is_valid_restriction,
     restrict_alleles,
     valid_class_types_and_subtypes
 )
+
 
 class Haplotype(Serializable):
     def __init__(self, species_prefix, haplotype_name, alleles, class_restriction=None):

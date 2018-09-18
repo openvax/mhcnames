@@ -14,9 +14,10 @@
 
 from __future__ import print_function, division, absolute_import
 
-from .locus import Locus
+from .gene import Gene
 
-class Serotype(Locus):
+
+class Serotype(Gene):
     def __init__(self, species_prefix, name, alleles):
         if len(alleles) == 0:
             raise ValueError("Cannot create Serotype without alleles")
@@ -27,7 +28,7 @@ class Serotype(Locus):
                 "Serotype cannot span multiple genes: %s" % (
                     gene_names,))
         gene_name = list(gene_names)[0]
-        Locus.__init__(self, species_prefix, gene_name)
+        Gene.__init__(self, species_prefix, gene_name)
         self.name = name
         self.alleles = alleles
 
@@ -38,7 +39,7 @@ class Serotype(Locus):
             return self.name
 
     def to_dict(self):
-        d = Locus.to_dict(self)
+        d = Gene.to_dict(self)
         d["serotype"] = self.normalized_string()
         d["alleles_in_serotype"] = ";".join([
             allele.normalized_string() for allele in self.alleles

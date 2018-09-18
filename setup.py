@@ -66,4 +66,5 @@ if __name__ == '__main__':
         install_requires=['six>=1.9.0'],
         long_description=readme_restructured,
         packages=['mhcnames'],
+        package_data={'mhcnames': 'data/*.yaml'},
     )

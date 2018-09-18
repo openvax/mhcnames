@@ -33,12 +33,14 @@ valid_class_restrictions = {
 
 classical_subtypes = {"Ia", "IIa"}
 
+
 def mhc_class_is_more_specific(original_class=None, new_class=None):
     return (
         (original_class is None and new_class is not None) or
         (original_class == "I" and new_class in class1_subtypes) or
         (original_class == "II" and new_class in class1_subtypes)
     )
+
 
 def is_valid_restriction(original_class=None, new_class=None):
     if original_class is None:
@@ -52,6 +54,7 @@ def is_valid_restriction(original_class=None, new_class=None):
         return True
 
     return mhc_class_is_more_specific(original_class, new_class)
+
 
 def restrict_alleles(alleles, mhc_class):
     if mhc_class == "I":
