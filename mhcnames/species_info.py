@@ -14,7 +14,8 @@
 
 from __future__ import print_function, division, absolute_import
 
-from .mhc_class_restriction import class1_subtypes, class2_subtypes
+from .mhc_class import class1_subtypes, class2_subtypes
+
 
 class SpeciesInfo(object):
     def __init__(

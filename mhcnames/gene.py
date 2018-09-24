@@ -16,12 +16,12 @@ from __future__ import print_function, division, absolute_import
 
 from collections import OrderedDict
 
-from serializable import Serializable
+from .parsed_result import ParsedResult
 
 from .species_registry import find_matching_species_info
 
 
-class Gene(Serializable):
+class Gene(ParsedResult):
     def __init__(self, species_prefix, gene_name):
         self.species_prefix = species_prefix
         self.gene_name = gene_name
@@ -47,17 +47,11 @@ class Gene(Serializable):
         return self.normalized_string(include_species=include_species)
 
     @classmethod
-    def from_tuple(cls, t):
-        return cls(
-            species_prefix=t[0],
-            gene_name=t[1]
-        )
-
-    def to_tuple(self):
-        return (
-            self.species_prefix,
-            self.gene_name,
-        )
+    def field_names(cls):
+        """
+        Returns name of fields used in constructor
+        """
+        return ("species_prefix", "gene_name")
 
     def to_gene(self):
         """
@@ -69,10 +63,10 @@ class Gene(Serializable):
         else:
             return Gene(self.species_prefix, self.gene_name)
 
-    def to_dict(self):
+    def to_record(self):
         """
-        Returns dictionary with all fields of this gene, its normalized,
-        representation and the values of the following methods:
+        Returns a user-viewable ordered dictionary with a representation  of
+        this gene, and the values of the following methods:
             - is_mutant
             - get_mhc_class
         """

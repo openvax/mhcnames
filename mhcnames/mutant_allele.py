@@ -16,6 +16,7 @@ from __future__ import print_function, division, absolute_import
 
 from .gene import Gene
 
+
 class MutantFourDigitAllele(Gene):
     def __init__(self, original_allele, mutations):
         Gene.__init__(

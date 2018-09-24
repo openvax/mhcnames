@@ -16,6 +16,7 @@ from __future__ import print_function, division, absolute_import
 
 from .gene import Gene
 
+
 class AlleleGroup(Gene):
     """
     Representation of a group of closely related alleles,
@@ -31,6 +32,14 @@ class AlleleGroup(Gene):
     def __init__(self, species_prefix, gene_name, group_id):
         Gene.__init__(self, species_prefix, gene_name)
         self.group_id = group_id
+
+    @classmethod
+    def field_names(cls):
+        return (
+            "species_prefix",
+            "gene_name",
+            "group_id"
+        )
 
     def normalized_string(self, include_species=True):
         return "%s*%s" % (
@@ -48,21 +57,6 @@ class AlleleGroup(Gene):
             Gene.compact_string(include_species=include_species),
             self.group_id)
 
-    @classmethod
-    def from_tuple(cls, t):
-        return cls(
-            species_prefix=t[0],
-            gene_name=t[1],
-            group_id=t[2]
-        )
-
-    def to_tuple(self):
-        return (
-            self.species_prefix,
-            self.gene_name,
-            self.group_id
-        )
-
     def to_allele_group(self):
         """
         For AlleleGroup objects this acts as a simple copy but descendant
@@ -71,11 +65,11 @@ class AlleleGroup(Gene):
         """
         return AlleleGroup(self.species_prefix, self.gene_name, self.group_id)
 
-    def to_dict(self):
+    def to_record(self):
         """
         Returns dictionary with all fields of this allele group,
         as well as its representations as a locus.
         """
-        d = Gene.to_dict(self)
+        d = Gene.to_record(self)
         d["allele_group"] = self.normalized_string()
         return d

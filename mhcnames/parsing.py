@@ -21,20 +21,17 @@ from .parsing_helpers import (
     strip_whitespace_and_dashes
 )
 from .mutation import Mutation
-from .mutant_allele import MutantFourDigitAllele
-from .named_allele import NamedAllele
-from .allele_group import AlleleGroup
-from .gene import Gene
 from .four_digit_allele import FourDigitAllele
-from .six_digit_allele import SixDigitAllele
-from .eight_digit_allele import EightDigitAllele
-from .human import get_human_serotype_if_exists
+from .gene import Gene
 from .species import find_matching_species_prefix, find_matching_species_info
 from .data import (
     species_to_gene_aliases,
-    species_to_gene_to_allele_aliases,
+    allele_aliases_with_uppercase_and_no_dash,
+    get_serotype_tuple,
 )
+from .mutant_allele import MutantAllele
 from .standard_format import parse_standard_allele_name
+from .serotype import Serotype
 
 
 def infer_species_prefix(name):
@@ -73,6 +70,7 @@ def infer_species_prefix(name):
             if normalized_prefix is not None:
                 return normalized_prefix, original_prefix
     return None
+
 
 def parse_species_prefix(name, default_species_prefix=None):
     """
@@ -166,27 +164,58 @@ def parse_locus_substring(name, default_species_prefix="HLA"):
     return result
     """
 
+
 def normalize_allele_string(species_prefix, allele_sequence_without_species):
     """
     Look up allele name in a species-specific dictionary of aliases
     and, if it's present, substitute allele name with canonical form.
     """
     trimmed = strip_whitespace_and_dashes(allele_sequence_without_species)
+    if "*" in trimmed:
+        split_by_star = trimmed.split("*")
+        if len(split_by_star) > 2:
+            raise AlleleParseError(
+                "Unexpected number of '*' characters in sequence '%s' " % (
+                    allele_sequence_without_species,))
     upper_seq = trimmed.upper()
-    species_to_gene_to_allele_aliases
-    if upper_seq in allele_aliases_with_uppercase_keys[species_prefix]:
-        return allele_aliases_with_uppercase_keys[species_prefix][upper_seq]
-    return trimmed
+    species_allele_alias_dict = \
+        allele_aliases_with_uppercase_and_no_dash.get(species_prefix, {})
+    new_allele_name = species_allele_alias_dict.get(upper_seq)
+    if new_allele_name:
+        return new_allele_name
+    else:
+        return trimmed
+
+_serotype_cache = {}
+
+
+def get_serotype_if_exists(species_prefix, serotype_name):
+    key = (species_prefix, serotype_name)
+    if key in _serotype_cache:
+        return _serotype_cache[key]
+    t = get_serotype_tuple(species_prefix, serotype_name)
+    if t is None:
+        result = None
+    else:
+        species_prefix, serotype_name, allele_list = t
+        parsed_allele_objects = []
+        for allele in allele_list:
+            parsed_allele_objects.append(
+                parse(allele, default_species_prefix=species_prefix))
+        result = Serotype(species_prefix, serotype_name, parsed_allele_objects)
+    _serotype_cache[key] = result
+    return result
+
 
 def normalize_parsed_object(parsed_object):
     if isinstance(parsed_object, Gene):
-        species_info = find_matching_species_info(parsed_object)
-        if species_info is None:
-            return parsed_object
-        else:
-            # TODO: use SpeciesInfo to normalize gene names
-            return parsed_object
+        gene_name = parsed_object.gene_name
+        gene_aliases = species_to_gene_aliases.get(parsed_object.species_prefix, {})
+        corrected_gene_name = gene_aliases.get(gene_name)
+        if corrected_gene_name and gene_name != corrected_gene_name:
+            return parsed_object.update_field(gene_name=corrected_gene_name)
     return parsed_object
+
 
 def parse_without_mutation(name, default_species_prefix="HLA"):
     """
@@ -216,23 +245,11 @@ def parse_without_mutation(name, default_species_prefix="HLA"):
     if standard_nomenclature_result is not None:
         return normalize_parsed_object(standard_nomenclature_result)
 
-    # try parsing remaining sequence as a human serotype
-    if species_prefix == "HLA":
-        # is it a serotype?
-        serotype = get_human_serotype_if_exists(name)
-        if serotype is not None:
-            return serotype
-
-    species_info, species_prefix, remaining_string = \
-        get_species_prefix_and_info(
-            name,
-            default_species_prefix=default_species_prefix)
+    serotype_result = get_serotype_if_exists(species_prefix, remaining_string)
+    if serotype_result is not None:
+        return serotype_result
 
     raise AlleleParseError("Unable to parse '%s'" % name)
-
-
-def parse_serotype(species_prefix, name):
-    pass
 
 
 def parse_known_alpha_beta_pair(name, default_species_prefix="HLA"):

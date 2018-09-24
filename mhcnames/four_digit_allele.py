@@ -16,6 +16,7 @@ from __future__ import print_function, division, absolute_import
 
 from .allele_group import AlleleGroup
 
+
 class FourDigitAllele(AlleleGroup):
     """
     Allele name which specifies a unique protein amino acid sequence
@@ -29,6 +30,16 @@ class FourDigitAllele(AlleleGroup):
         self.modifier = modifier
 
     @classmethod
+    def field_names(cls):
+        return (
+            "species_prefix",
+            "gene_name",
+            "group_id",
+            "protein_id",
+            "modifier"
+        )
+
+    @classmethod
     def from_allele_group(cls, allele_group, protein_id, modifier=None):
         return cls(
             species_prefix=allele_group.species_prefix,
@@ -36,24 +47,6 @@ class FourDigitAllele(AlleleGroup):
             group_id=allele_group.group_id,
             protein_id=protein_id,
             modifier=modifier)
-
-    @classmethod
-    def from_tuple(cls, t):
-        return cls(
-            species_prefix=t[0],
-            gene_name=t[1],
-            group_id=t[2],
-            protein_id=t[3],
-            modifier=t[6])
-
-    def to_tuple(self):
-        return (
-            self.species_prefix,
-            self.gene_name,
-            self.group_id,
-            self.protein_id,
-            self.modifier,
-        )
 
     def normalized_string(self, include_species=True, include_modifier=True):
         """
@@ -98,13 +91,13 @@ class FourDigitAllele(AlleleGroup):
             self.nonsyn,
             self.modifier if self.modifier else "")
 
-    def to_dict(self):
+    def to_record(self):
         """
         Returns dictionary with all fields of this allele,
         as well as its representations as a gene, allele group,
         and four digit allele.
         """
-        d = AlleleGroup.to_dict(self)
+        d = AlleleGroup.to_record(self)
         d["allele"] = d["four_digit_allele"] = self.normalized_string()
         d["modifier"] = self.modifier
         return d

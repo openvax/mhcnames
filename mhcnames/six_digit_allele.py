@@ -16,6 +16,7 @@ from __future__ import print_function, division, absolute_import
 
 from .four_digit_allele import FourDigitAllele
 
+
 class SixDigitAllele(FourDigitAllele):
     def __init__(
             self,
@@ -33,6 +34,17 @@ class SixDigitAllele(FourDigitAllele):
             protein_id,
             modifier)
         self.coding_sequence_id = coding_sequence_id
+
+    @classmethod
+    def field_names(cls):
+        return (
+            "species_prefix",
+            "gene_name",
+            "group_id",
+            "protein_id",
+            "coding_sequence_id",
+            "modifier"
+        )
 
     def normalized_string(self, include_species=True, include_modifier=True):
         """
@@ -59,26 +71,6 @@ class SixDigitAllele(FourDigitAllele):
             FourDigitAllele.compact_string(include_species=include_species),
             self.coding_sequence_id)
 
-    @classmethod
-    def from_tuple(cls, t):
-        return cls(
-            species_prefix=t[0],
-            gene_name=t[1],
-            group_id=t[2],
-            protein_id=t[3],
-            coding_sequence_id=t[4],
-            modifier=t[6])
-
-    def to_tuple(self):
-        return (
-            self.species_prefix,
-            self.gene_name,
-            self.group_id,
-            self.protein_id,
-            self.coding_sequence_id,
-            self.modifier,
-        )
-
     def to_six_digit_allele(self):
         """
         Descendant class EightDigitAllele can use this
@@ -95,12 +87,12 @@ class SixDigitAllele(FourDigitAllele):
                 self.coding_sequence_id,
                 self.modifier)
 
-    def to_dict(self):
+    def to_record(self):
         """
         Returns dictionary with all fields of this allele,
         as well as its representations as a gene, allele group,
         four digit allele, and six digit allele.
         """
-        d = FourDigitAllele.to_dict(self)
+        d = FourDigitAllele.to_record(self)
         d["allele"] = d["six_digit_allele"] = self.normalized_string()
         return d

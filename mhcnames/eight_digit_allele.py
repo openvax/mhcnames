@@ -16,6 +16,7 @@ from __future__ import print_function, division, absolute_import
 
 from .six_digit_allele import SixDigitAllele
 
+
 class EightDigitAllele(SixDigitAllele):
     def __init__(
             self,
@@ -35,6 +36,18 @@ class EightDigitAllele(SixDigitAllele):
             coding_sequence_id,
             modifier)
         self.genomic_sequence_id = genomic_sequence_id
+
+    @classmethod
+    def field_names(cls):
+        return (
+            "species_prefix",
+            "gene_name",
+            "group_id",
+            "protein_id",
+            "coding_sequence_id",
+            "genomic_sequence_id",
+            "modifier"
+        )
 
     def normalized_string(self, include_species=True, include_modifier=True):
         """
@@ -77,28 +90,6 @@ class EightDigitAllele(SixDigitAllele):
             genomic_sequence_id="01",
             modifier=four_digit_allele.modifier)
 
-    @classmethod
-    def from_tuple(cls, t):
-        return cls(
-            species_prefix=t[0],
-            gene_name=t[1],
-            group_id=t[2],
-            protein_id=t[3],
-            coding_sequence_id=t[4],
-            genomic_sequence_id=t[5],
-            modifier=t[6])
-
-    def to_tuple(self):
-        return (
-            self.species_prefix,
-            self.gene_name,
-            self.group_id,
-            self.protein_id,
-            self.coding_sequence_id,
-            self.genomic_sequence_id,
-            self.modifier,
-        )
-
     def from_six_digit_allele(self, six_digit_allele):
         """
         Create a 'default' eight-digit allele for a six-digit allele
@@ -114,12 +105,12 @@ class EightDigitAllele(SixDigitAllele):
             genomic_sequence_id="01",
             modifier=self.modifier)
 
-    def to_dict(self):
+    def to_record(self):
         """
         Returns dictionary with all fields of this allele,
         as well as its representations as a gene, allele group,
         four digit allele, six digit allele, eight_digit_allele.
         """
-        d = SixDigitAllele.to_dict(self)
+        d = SixDigitAllele.to_record(self)
         d["allele"] = d["eight_digit_allele"] = self.normalized_string()
         return d

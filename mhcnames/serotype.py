@@ -32,14 +32,18 @@ class Serotype(Gene):
         self.name = name
         self.alleles = alleles
 
+    @classmethod
+    def field_names(cls):
+        return ("species_prefix", "name", "alleles")
+
     def normalized_string(self, include_species=True):
         if include_species:
             return "%s-%s" % (self.species_prefix, self.name)
         else:
             return self.name
 
-    def to_dict(self):
-        d = Gene.to_dict(self)
+    def to_record(self):
+        d = Gene.to_record(self)
         d["serotype"] = self.normalized_string()
         d["alleles_in_serotype"] = ";".join([
             allele.normalized_string() for allele in self.alleles
