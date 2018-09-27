@@ -23,11 +23,14 @@ from .parsing_helpers import (
 from .mutation import Mutation
 from .four_digit_allele import FourDigitAllele
 from .gene import Gene
-from .species import find_matching_species_prefix, find_matching_species_info
+from .species_registry import (
+    find_matching_species_prefix,
+    find_matching_species_info
+)
 from .data import (
     species_to_gene_aliases,
     allele_aliases_with_uppercase_and_no_dash,
-    get_serotype_tuple,
+    get_serotype,
 )
 from .mutant_allele import MutantAllele
 from .standard_format import parse_standard_allele_name
@@ -125,9 +128,6 @@ def parse_gene_if_possible(name, species_info):
 
     return None, name
 
-def ontology_guided_parsing():
-    pass
-
 
 def parse_locus_substring(name, default_species_prefix="HLA"):
     """
@@ -193,7 +193,7 @@ def get_serotype_if_exists(species_prefix, serotype_name):
     key = (species_prefix, serotype_name)
     if key in _serotype_cache:
         return _serotype_cache[key]
-    t = get_serotype_tuple(species_prefix, serotype_name)
+    t = get_serotype(species_prefix, serotype_name)
     if t is None:
         result = None
     else:
@@ -213,7 +213,7 @@ def normalize_parsed_object(parsed_object):
         gene_aliases = species_to_gene_aliases.get(parsed_object.species_prefix, {})
         corrected_gene_name = gene_aliases.get(gene_name)
         if corrected_gene_name and gene_name != corrected_gene_name:
-            return parsed_object.update_field(gene_name=corrected_gene_name)
+            parsed_object = parsed_object.update_field(gene_name=corrected_gene_name)
     return parsed_object
 
 
@@ -231,21 +231,22 @@ def parse_without_mutation(name, default_species_prefix="HLA"):
         7) species
     If none of these succeed, then raise an exception
     """
-    species_prefix, remaining_string = \
+    species_prefix, str_after_species = \
         parse_species_prefix(
             name,
             default_species_prefix=default_species_prefix)
-    remaining_string = normalize_allele_string(
+
+    str_after_species = normalize_allele_string(
         species_prefix=species_prefix,
-        allele_sequence_without_species=remaining_string)
+        allele_sequence_without_species=str_after_species)
 
     standard_nomenclature_result = parse_standard_allele_name(
-        "%s-%s" % (species_prefix, remaining_string))
+        "%s-%s" % (species_prefix, str_after_species))
 
     if standard_nomenclature_result is not None:
         return normalize_parsed_object(standard_nomenclature_result)
 
-    serotype_result = get_serotype_if_exists(species_prefix, remaining_string)
+    serotype_result = get_serotype_if_exists(species_prefix, str_after_species)
     if serotype_result is not None:
         return serotype_result
 
@@ -273,6 +274,7 @@ def parse_known_alpha_beta_pair(name, default_species_prefix="HLA"):
         beta_string,
         default_species_prefix=alpha.species_prefix)
     return AlphaBetaPair(alpha, beta)
+
 
 def parse_with_mutations(
         name,

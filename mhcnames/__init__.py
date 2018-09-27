@@ -15,7 +15,7 @@
 from .normalization import normalized_string, compact_string
 from .allele_parse_error import AlleleParseError
 from .parsing import parse
-from .locus import Locus
+from .gene import Gene
 from .allele_group import AlleleGroup
 from .four_digit_allele import FourDigitAllele
 from .six_digit_allele import SixDigitAllele
@@ -32,7 +32,7 @@ __all__ = [
     "compact_string",
     "AlleleParseError",
     "parse",
-    "Locus",
+    "Gene",
     "AlleleGroup",
     "FourDigitAllele",
     "SixDigitAllele",

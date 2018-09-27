@@ -85,12 +85,6 @@ class FourDigitAllele(AlleleGroup):
                 self.protein_id,
                 modifier=self.modifier)
 
-    def __str__(self):
-        return "%s:%s%s" % (
-            AlleleGroup.__str__(self),
-            self.nonsyn,
-            self.modifier if self.modifier else "")
-
     def to_record(self):
         """
         Returns dictionary with all fields of this allele,

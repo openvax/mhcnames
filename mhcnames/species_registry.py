@@ -46,6 +46,7 @@ for species_prefix, species_gene_ontology in raw_gene_ontology_dict.items():
         serotypes=raw_serotypes_dict.get(species_prefix, {}),
         haplotypes=raw_haplotypes_dict.get(species_prefix, {}))
 
+
 def create_species_aliases():
     """
     Create dictionary of species aliases from both the species->MHC class->gene
@@ -69,6 +70,7 @@ def create_species_aliases():
 # dictionary mapping alias names to Species objects
 species_aliases_dict = create_species_aliases()
 
+
 def find_matching_species_info(name):
     """
     Returns either SpeciesInfo object or None if species can't be found
@@ -76,6 +78,7 @@ def find_matching_species_info(name):
     if name in species_dict:
         return species_dict[name]
     return species_aliases_dict.get(name.upper().replace("-", ""))
+
 
 def find_matching_species_prefix(name):
     """

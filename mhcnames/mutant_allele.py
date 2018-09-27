@@ -14,17 +14,42 @@
 
 from __future__ import print_function, division, absolute_import
 
-from .gene import Gene
+from .four_digit_allele import FourDigitAllele
+from .mutation import Mutation
 
 
-class MutantFourDigitAllele(Gene):
+class MutantAllele(FourDigitAllele):
     def __init__(self, original_allele, mutations):
-        Gene.__init__(
+        FourDigitAllele.__init__(
             self,
             species_prefix=original_allele.species_prefix,
-            gene_name=original_allele.gene_name)
-        self.original_allele = original_allele
+            gene_name=original_allele.gene_name,
+            group_id=original_allele.group_id,
+            protein_id=original_allele.protein_id,
+            modifier=original_allele.modifier)
         self.mutations = mutations
+
+    @classmethod
+    def field_names(cls):
+        return (
+            "species_prefix",
+            "gene_name",
+            "group_id",
+            "protein_id",
+            "modifier",
+            "mutations",
+        )
+
+    def to_dict(self):
+        d = FourDigitAllele.to_dict(self)
+        d["mutations"] = [m.to_dict() for m in self.mutations]
+        return d
+
+    @classmethod
+    def from_dict(cls, d):
+        four_digit_allele = FourDigitAllele.from_dict(d)
+        mutations = [Mutation.from_dict(m) for m in d["mutations"]]
+        return cls(four_digit_allele, mutations)
 
     def mutation_string(self):
         return " ".join([mut.normalized_string() for mut in self.mutations])
@@ -41,7 +66,7 @@ class MutantFourDigitAllele(Gene):
                 include_species_prefix=include_species_prefix),
             self.mutation_string())
 
-    def to_dict(self):
+    def to_record(self):
         d = self.original_allele.to_dict()
         d["allele"] = self.normalized_string()
         d["is_mutant"] = True

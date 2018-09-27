@@ -33,7 +33,7 @@ from .allele_modifiers import allele_modifier_regex_group_string
 
 species_prefix_regex_string = "([A-Z][A-Za-z0-9]+)"
 
-gene_regex_string = "([A-Za-z0-9][A-Za-z\.\-]+)"
+gene_regex_string = "([A-Za-z0-9]+\.?-?[0-9]*)"
 
 species_with_gene_regex_string = "%s-%s" % (
     species_prefix_regex_string,
@@ -64,15 +64,26 @@ eight_digit_regex = re.compile(eight_digit_regex_string_with_modifier)
 
 
 def parse_standard_allele_name(name):
-    order_of_parsing_attempts = [
-        (eight_digit_regex, EightDigitAllele),
-        (six_digit_regex, SixDigitAllele),
-        (four_digit_regex, FourDigitAllele),
-        (allele_group_regex, AlleleGroup),
-        (gene_regex, Gene)
-    ]
-    for regex, result_class in order_of_parsing_attempts:
-        match = regex.fullmatch(name)
-        if match:
-            return result_class.from_tuple(match.groups())
+    if "-" not in name:
+        # if sequence isn't even like "HLA-A"
+        return None
+    num_star = name.count("*")
+    num_colon = name.count(":")
+
+    if num_star == 0 and num_colon == 0:
+        regex, result_class = (gene_regex, Gene)
+    elif num_star == 1 and num_colon == 0:
+        regex, result_class = (allele_group_regex, AlleleGroup)
+    elif num_star == 1 and num_colon == 1:
+        regex, result_class = (four_digit_regex, FourDigitAllele)
+    elif num_star == 1 and num_colon == 2:
+        regex, result_class = (six_digit_regex, SixDigitAllele)
+    elif num_star == 1 and num_colon == 3:
+        regex, result_class = (eight_digit_regex, EightDigitAllele)
+    else:
+        return None
+    match = regex.fullmatch(name)
+    print(regex, result_class.__name__, name, match)
+    if match:
+        return result_class.from_tuple(match.groups())
     return None

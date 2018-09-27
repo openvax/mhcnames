@@ -18,10 +18,10 @@ import re
 
 from .allele_parse_error import AlleleParseError
 
-def _create_regex_for_strip_whitespace_and_dashes():
 
+def _create_regex_for_strip_whitespace_and_dashes():
     optional_space_or_dash = "[-\s]*"
-    anything_except_space_or_dash = "A-Za-z0-9\._"
+    anything_except_space_or_dash = "A-Za-z0-9\._\*:"
     anything_except_space = anything_except_space_or_dash + "-"
     regex_string_to_strip_spaces_and_dashes = \
         "%s([%s][%s]*[%s])%s" % (
@@ -35,11 +35,13 @@ def _create_regex_for_strip_whitespace_and_dashes():
 
 regex_string_to_strip_spaces_and_dashes = _create_regex_for_strip_whitespace_and_dashes()
 
+
 def strip_whitespace_and_dashes(s):
     match_obj = regex_string_to_strip_spaces_and_dashes.fullmatch(s)
     if not match_obj:
-        raise AlleleParseError("Unexpected failure on string '%s'")
+        raise AlleleParseError("Unexpected failure on string '%s'" % s)
     return match_obj.groups()[0]
+
 
 def strip_whitespace_and_trim_outer_quotes(name):
     original_name = name
