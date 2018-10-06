@@ -41,7 +41,7 @@ species_with_gene_regex_string = "%s-%s" % (
 
 gene_regex = re.compile(species_with_gene_regex_string)
 
-allele_group_regex_string = species_with_gene_regex_string + "\*(\d+)"
+allele_group_regex_string = species_with_gene_regex_string + "\*(\d\d\d?)"
 
 allele_group_regex = re.compile(allele_group_regex_string)
 

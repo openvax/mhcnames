@@ -217,6 +217,21 @@ def normalize_parsed_object(parsed_object):
     return parsed_object
 
 
+def split_on_all_seps(seq, seps="_:"):
+    """
+    Split given string on all separators specified
+
+    For example, 02_01:01 will be split into:
+        ["02", "01", "01"]
+    """
+    string_parts = [seq]
+    for sep in seps:
+        new_parts = []
+        for subseq in string_parts:
+            new_parts.extend(subseq.split(sep))
+        parts = new_parts
+    return parts
+
 def parse_without_mutation(name, default_species_prefix="HLA"):
     """
     First test to see if MHC name requires any species-specific special logic.
@@ -231,10 +246,9 @@ def parse_without_mutation(name, default_species_prefix="HLA"):
         7) species
     If none of these succeed, then raise an exception
     """
-    species_prefix, str_after_species = \
-        parse_species_prefix(
-            name,
-            default_species_prefix=default_species_prefix)
+    species_info, species_prefix, str_after_species = get_species_prefix_and_info(
+        name,
+        default_species_prefix=default_species_prefix)
 
     str_after_species = normalize_allele_string(
         species_prefix=species_prefix,
@@ -249,6 +263,13 @@ def parse_without_mutation(name, default_species_prefix="HLA"):
     serotype_result = get_serotype_if_exists(species_prefix, str_after_species)
     if serotype_result is not None:
         return serotype_result
+
+    # try to heuristically split apart the gene name and any allele information
+    # when the requires separators are missing
+    if str_after_species.count("*") == 1:
+        gene, str_after_gene = str_after_species.split("*")
+        gene = species_info.normalize_gene_name_if_exists(gene)
+        parts = split_on_all_seps(str_after_gene)
 
     raise AlleleParseError("Unable to parse '%s'" % name)
 

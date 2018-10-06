@@ -105,6 +105,13 @@ class SpeciesInfo(object):
             return gene_name
         return self.expanded_gene_alias_dict.get(gene_name.upper())
 
+    def normalize_gene_name_if_exists(self, gene_name):
+        normalized_name = self.find_matching_gene_name(gene_name)
+        if normalized_name:
+            return normalized_name
+        else:
+            return gene_name
+
     def _create_expanded_gene_aliases(self):
         expanded_aliases = {}
         for original_alias, gene_name in self.gene_aliases.items():
