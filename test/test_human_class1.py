@@ -24,17 +24,20 @@ hla_02_01_names = [
     "a0201"
 ]
 
+
 def test_hla_long_names():
     expected = "HLA-A*02:01"
     for name in hla_02_01_names:
         result = normalized_string(name)
         eq_(result, expected)
 
+
 def test_hla_short_names():
     expected = "A0201"
     for name in hla_02_01_names:
         result = compact_string(name)
         eq_(result, expected)
+
 
 def test_hla_with_3_digit_allele_code():
     # B*15:120

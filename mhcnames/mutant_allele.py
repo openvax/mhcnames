@@ -54,16 +54,16 @@ class MutantAllele(FourDigitAllele):
     def mutation_string(self):
         return " ".join([mut.normalized_string() for mut in self.mutations])
 
-    def normalized_string(self, include_species_prefix=True):
+    def normalized_string(self, include_species=True):
         return "%s %s mutant" % (
             self.original_allele.normalized_string(
-                include_species_prefix=include_species_prefix),
+                include_species=include_species),
             self.mutation_string())
 
-    def compact_string(self, include_species_prefix=False):
+    def compact_string(self, include_species=False):
         return "%s %s mutant" % (
             self.original_allele.compact_string(
-                include_species_prefix=include_species_prefix),
+                include_species=include_species),
             self.mutation_string())
 
     def to_record(self):

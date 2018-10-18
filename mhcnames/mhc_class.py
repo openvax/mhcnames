@@ -26,10 +26,10 @@ class2_subtypes = {
     "IId"
 }
 
-valid_class_restrictions = {
-    "I",
-    "II",
-}.union(class1_subtypes).union(class2_subtypes)
+class1_restrictions = {"I"}.union(class1_subtypes)
+class2_restrictions = {"II"}.union(class2_subtypes)
+
+valid_class_restrictions = class1_restrictions.union(class2_restrictions)
 
 classical_subtypes = {"Ia", "IIa"}
 
@@ -40,6 +40,14 @@ def mhc_class_is_more_specific(original_class=None, new_class=None):
         (original_class == "I" and new_class in class1_subtypes) or
         (original_class == "II" and new_class in class1_subtypes)
     )
+
+
+def is_class1(mhc_class):
+    return mhc_class in class1_restrictions
+
+
+def is_class2(mhc_class):
+    return mhc_class in class2_restrictions
 
 
 def is_valid_restriction(original_class=None, new_class=None):

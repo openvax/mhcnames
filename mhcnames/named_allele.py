@@ -16,6 +16,7 @@ from __future__ import print_function, division, absolute_import
 
 from .allele_group import AlleleGroup
 
+
 class NamedAllele(AlleleGroup):
     """
     Some species, such as mouse (H2) and rats (RT1) do not yet use
@@ -38,16 +39,16 @@ class NamedAllele(AlleleGroup):
     def from_tuple(cls, t):
         return cls(t[0], t[1], t[2])
 
-    def normalized_string(self, include_species_prefix=True):
+    def normalized_string(self, include_species=True):
         return "%s*%s" % (
             AlleleGroup.normalized_string(
-                include_species_prefix=include_species_prefix),
+                include_species=include_species),
             self.allele_name)
 
-    def compact_string(self, include_species_prefix=False):
+    def compact_string(self, include_species=False):
         return "%s%s" % (
             AlleleGroup.compact_string(
-                include_species_prefix=include_species_prefix),
+                include_species=include_species),
             self.allele_name)
 
     def to_dict(self):

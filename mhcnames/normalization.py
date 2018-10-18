@@ -18,6 +18,7 @@ import pandas as pd
 
 from .parsing import parse
 
+
 def normalized_string(
         raw_string,
         include_species_prefix=True,
@@ -54,8 +55,11 @@ def normalized_string(
         raw_string,
         infer_class2_pairing=infer_class2_pairing,
         default_species_prefix=default_species_prefix)
-    return parsed_object.normalized_string(
-        include_species_prefix=include_species_prefix)
+    result = parsed_object.normalized_string(
+        include_species=include_species_prefix)
+    print(">>>", raw_string, parsed_object, result)
+    return result
+
 
 def compact_string(
         raw_string,
@@ -89,7 +93,8 @@ def compact_string(
         infer_class2_pairing=infer_class2_pairing,
         default_species_prefix=default_species_prefix)
     return parsed_object.compact_string(
-        include_species_prefix=include_species_prefix)
+        include_species=include_species_prefix)
+
 
 def dataframe_from_list(names, default_species_prefix="HLA"):
     parsed_objects = [

@@ -20,6 +20,7 @@ from serializable import Serializable
 
 from .allele_parse_error import AlleleParseError
 
+
 class Mutation(Serializable):
     def __init__(self, pos, aa_original, aa_mutant):
         self.pos = pos

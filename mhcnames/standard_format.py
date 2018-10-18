@@ -23,7 +23,6 @@ from __future__ import print_function, division, absolute_import
 
 import re
 
-from .gene import Gene
 from .allele_group import AlleleGroup
 from .four_digit_allele import FourDigitAllele
 from .six_digit_allele import SixDigitAllele
@@ -64,15 +63,27 @@ eight_digit_regex = re.compile(eight_digit_regex_string_with_modifier)
 
 
 def parse_standard_allele_name(name):
+    """
+    Parse allele group, four digit allele, six digit allele or eight
+    digit allele which are in the "standard" format using star and colon
+    separators.
+
+    Examples:
+        - allele group: "HLA-A*02"
+        - four digit allele: "HLA-A*02:01"
+        - six digit allele: "HLA-A*02:01:01"
+        - eight digit allele: "HLA-A*02:01:01:01"
+
+    Note that this function intentionally does not parse gene names by
+    themselves.
+    """
     if "-" not in name:
         # if sequence isn't even like "HLA-A"
         return None
     num_star = name.count("*")
     num_colon = name.count(":")
 
-    if num_star == 0 and num_colon == 0:
-        regex, result_class = (gene_regex, Gene)
-    elif num_star == 1 and num_colon == 0:
+    if num_star == 1 and num_colon == 0:
         regex, result_class = (allele_group_regex, AlleleGroup)
     elif num_star == 1 and num_colon == 1:
         regex, result_class = (four_digit_regex, FourDigitAllele)
@@ -83,7 +94,6 @@ def parse_standard_allele_name(name):
     else:
         return None
     match = regex.fullmatch(name)
-    print(regex, result_class.__name__, name, match)
     if match:
         return result_class.from_tuple(match.groups())
     return None

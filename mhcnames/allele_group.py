@@ -54,7 +54,7 @@ class AlleleGroup(Gene):
             Compact: HLA-A02
         """
         return "%s%s" % (
-            Gene.compact_string(include_species=include_species),
+            Gene.compact_string(self, include_species=include_species),
             self.group_id)
 
     def to_allele_group(self):

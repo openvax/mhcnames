@@ -43,6 +43,7 @@ def infer_alpha_chain(beta):
             return alpha
     return None
 
+
 def parse_classi_or_classii_allele_name(name, infer_pair=True):
     """
     Handle different forms of both single and alpha-beta allele names.

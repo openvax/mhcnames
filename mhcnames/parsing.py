@@ -232,6 +232,7 @@ def split_on_all_seps(seq, seps="_:"):
         parts = new_parts
     return parts
 
+
 def parse_without_mutation(name, default_species_prefix="HLA"):
     """
     First test to see if MHC name requires any species-specific special logic.
@@ -270,6 +271,7 @@ def parse_without_mutation(name, default_species_prefix="HLA"):
         gene, str_after_gene = str_after_species.split("*")
         gene = species_info.normalize_gene_name_if_exists(gene)
         parts = split_on_all_seps(str_after_gene)
+        print(parts)
 
     raise AlleleParseError("Unable to parse '%s'" % name)
 
@@ -433,10 +435,12 @@ def parse(
         result = parse_without_mutation(
             trimmed_name,
             default_species_prefix=default_species_prefix)
+
     if infer_class2_pairing and result.__class__ is not AlphaBetaPair:
-        raise NotImplementedError(
-            "Inference of paired alpha/beta pair for %s not yet implemented" % (
-                result,))
+        if isinstance(result, Gene) and result.is_class2:
+            raise NotImplementedError(
+                "Inference of paired alpha/beta pair for %s not yet implemented" % (
+                    result,))
     _parse_cache[cache_key] = result
     return result
 """

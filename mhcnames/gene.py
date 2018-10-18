@@ -19,6 +19,7 @@ from collections import OrderedDict
 from .parsed_result import ParsedResult
 
 from .species_registry import find_matching_species_info
+from .mhc_class import is_class1, is_class2
 
 
 class Gene(ParsedResult):
@@ -29,6 +30,14 @@ class Gene(ParsedResult):
     @property
     def species_info(self):
         return find_matching_species_info(self.species_prefix)
+
+    @property
+    def is_class1(self):
+        return is_class1(self.get_mhc_class())
+
+    @property
+    def is_class2(self):
+        return is_class2(self.get_mhc_class())
 
     def get_mhc_class(self):
         return self.species_info.get_mhc_class(self.gene_name)
@@ -44,7 +53,7 @@ class Gene(ParsedResult):
         Compact representation of a Locus, currently same as the
         normalized representation.
         """
-        return self.normalized_string(include_species=include_species)
+        return Gene.normalized_string(self, include_species=include_species)
 
     @classmethod
     def field_names(cls):

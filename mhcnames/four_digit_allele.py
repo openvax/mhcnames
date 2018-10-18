@@ -52,11 +52,12 @@ class FourDigitAllele(AlleleGroup):
         """
         Return allele strings like "HLA-A*02:01"
         """
-        result = "%s:%s" % (
-            AlleleGroup.normalized_string(self, include_species=include_species),
-            self.protein_id)
+        allele_group_str = AlleleGroup.normalized_string(
+            self, include_species=include_species)
+        result = "%s:%s" % (allele_group_str, self.protein_id)
         if include_modifier and self.modifier:
             result += self.modifier
+        print(result)
         return result
 
     def compact_string(self, include_species=True):
@@ -67,7 +68,7 @@ class FourDigitAllele(AlleleGroup):
             Compact: HLA-A0201
         """
         return "%s%s" % (
-            AlleleGroup.compact_string(include_species=include_species),
+            AlleleGroup.compact_string(self, include_species=include_species),
             self.protein_id)
 
     def to_four_digit_allele(self):
