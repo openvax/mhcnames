@@ -1,6 +1,7 @@
 import mhcnames
 from nose.util import eq_
 
+
 def test_A_02_01_01_01():
     result = mhcnames.parse_allele_name("A*02:01:01:01")
     eq_(result.species_prefix, "HLA")
