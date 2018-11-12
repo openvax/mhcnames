@@ -28,14 +28,6 @@ except:
     logging.warn("Failed to load %s" % readme_path)
     readme_markdown = ""
 
-try:
-    import pypandoc
-    readme_restructured = pypandoc.convert(readme_markdown, to='rst', format='md')
-except:
-    readme_restructured = readme_markdown
-    logging.warn("Conversion of long_description from MD to RST failed")
-    pass
-
 with open('mhcnames/__init__.py', 'r') as f:
     version = re.search(
         r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]',
@@ -64,7 +56,8 @@ if __name__ == '__main__':
             'Topic :: Scientific/Engineering :: Bio-Informatics',
         ],
         install_requires=['six>=1.9.0'],
-        long_description=readme_restructured,
+        long_description=readme_markdown,
+        long_description_content_type='text/markdown',
         packages=['mhcnames'],
         package_data={'mhcnames': 'data/*.yaml'},
     )

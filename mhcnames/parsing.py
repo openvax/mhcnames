@@ -236,6 +236,66 @@ def split_on_all_seps(seq, seps="_:"):
         parts = new_parts
     return parts
 
+def parse_allele_after_species_and_gene_name(
+    original_name,
+    str_after_gene):
+    if str_after_gene[-1].upper() in valid_allele_modifiers:
+        modifier = str_after_gene[-1]
+        str_after_gene = str_after_gene[:-1]
+    else:
+        modifier = None
+
+    parts = split_on_all_seps(str_after_gene)
+
+    limited_digit_parts = []
+    for part_number, part in enumerate(parts):
+        if part.isdigit():
+            for i in range(len(part) // 2):
+                odd_length = (len(part) % 2 == 1)
+                if i == 0 and odd_length:
+                    # if the sequence is of odd length, take the first 3
+                    # characters
+                    # e.g. HLA-A00101 gets parsed as HLA-A*001:01
+                    boundary_index = 3
+                elif odd_length:
+                    raise AlleleParseError("Unable to parse '%s'" % original_name)
+                else:
+                    boundary_index = 2
+                limited_digit_parts.append(part[:boundary_index])
+                part = part[boundary_index:]
+        else:
+            raise AlleleParseError("Unexpected part of allele name '%s' in '%s'" % (
+                part, original_name))
+    if len(limited_digit_parts) == 1:
+        return AlleleGroup(
+            species_prefix,
+            gene,
+            limited_digit_parts[0],
+            modifier=modifier)
+    elif len(limited_digit_parts) == 2:
+        return FourDigitAllele(
+            species_prefix,
+            gene,
+            limited_digit_parts[0],
+            limited_digit_parts[1],
+            modifier=modifier)
+    elif len(limited_digit_parts) == 3:
+        return SixDigitAllele(
+            species_prefix,
+            gene,
+            limited_digit_parts[0],
+            limited_digit_parts[1],
+            limited_digit_parts[2],
+            modifier=modifier)
+    elif len(limited_digit_parts) == 4:
+        return EightDigitAllele(
+            species_prefix,
+            gene,
+            limited_digit_parts[0],
+            limited_digit_parts[1],
+            limited_digit_parts[2],
+            limited_digit_parts[3],
+            modifier=modifier)
 
 def parse_without_mutation(name, default_species_prefix="HLA"):
     """
@@ -274,63 +334,9 @@ def parse_without_mutation(name, default_species_prefix="HLA"):
     # when the requires separators are missing
     if str_after_species.count("*") == 1:
         gene, str_after_gene = str_after_species.split("*")
+
         gene = species_info.normalize_gene_name_if_exists(gene)
-        if str_after_gene[-1].upper() in valid_allele_modifiers:
-            modifier = str_after_gene[-1]
-            str_after_gene = str_after_gene[:-1]
-        else:
-            modifier = None
 
-        parts = split_on_all_seps(str_after_gene)
-
-        limited_digit_parts = []
-        for part_number, part in enumerate(parts):
-            if part.isdigit():
-                for i in range(len(part) // 2):
-                    odd_length = (len(part) % 2 == 1)
-                    if i == 0 and odd_length:
-                        # if the sequence is of odd length, take the first 3
-                        # characters
-                        # e.g. HLA-A00101 gets parsed as HLA-A*001:01
-                        boundary_index = 3
-                    elif odd_length:
-                        raise AlleleParseError("Unable to parse '%s'" % name)
-                    else:
-                        boundary_index = 2
-                    limited_digit_parts.append(part[:boundary_index])
-                    part = part[boundary_index:]
-            else:
-                raise AlleleParseError("Unexpected part of allele name '%s' in '%s'" % (part, name))
-        if len(limited_digit_parts) == 1:
-            return AlleleGroup(
-                species_prefix,
-                gene,
-                limited_digit_parts[0],
-                modifier=modifier)
-        elif len(limited_digit_parts) == 2:
-            return FourDigitAllele(
-                species_prefix,
-                gene,
-                limited_digit_parts[0],
-                limited_digit_parts[1],
-                modifier=modifier)
-        elif len(limited_digit_parts) == 3:
-            return SixDigitAllele(
-                species_prefix,
-                gene,
-                limited_digit_parts[0],
-                limited_digit_parts[1],
-                limited_digit_parts[2],
-                modifier=modifier)
-        elif len(limited_digit_parts) == 4:
-            return EightDigitAllele(
-                species_prefix,
-                gene,
-                limited_digit_parts[0],
-                limited_digit_parts[1],
-                limited_digit_parts[2],
-                limited_digit_parts[3],
-                modifier=modifier)
     raise AlleleParseError("Unable to parse '%s'" % name)
 
 
