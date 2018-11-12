@@ -14,6 +14,8 @@
 
 from __future__ import print_function, division, absolute_import
 
+import re
+
 from .alpha_beta_pair import AlphaBetaPair
 from .allele_parse_error import AlleleParseError
 from .parsing_helpers import (
@@ -31,7 +33,6 @@ from .species_registry import (
     find_matching_species_info
 )
 from .data import (
-    species_to_gene_aliases,
     allele_aliases_with_uppercase_and_no_dash,
     get_serotype,
 )
@@ -133,42 +134,6 @@ def parse_gene_if_possible(name, species_info):
     return None, name
 
 
-def parse_locus_substring(name, default_species_prefix="HLA"):
-    """
-    Parse locus such as "HLA-A" and return any extra characters
-    which follow afterward.
-    """
-    species_info, species_prefix, remaining_string = get_species_prefix_and_info(
-        name, default_species_prefix=default_species_prefix)
-
-    """
-    num_star_characters = name.count("*")
-    if num_star_characters == 1:
-        split_index = name.find("*")
-        before_star, remaining_string = name[:split_index], name[split_index:]
-        locus = parse_locus(
-            name=before_star,
-            default_species_prefix=default_species_prefix)
-        return locus, remaining_string[1:]
-    elif num_star_characters > 1:
-        raise AlleleParseError("Unable to parse '%s'" % (name,))
-
-
-     for n_parts in range(1, min(2, len(parts_split_by_dash) + 1)):
-        joined_substring = "-".join(parts_split_by_dash[:n_parts])
-    if num_dash_characters == 0:
-        locus = parse_locus_if_possible(
-            name,
-            default_species_prefix=default_species_prefix)
-
-
-        else:
-            locus = Locus(species_prefix, remaining_string)
-            remaining_string = ""
-    return result
-    """
-
-
 def normalize_allele_string(species_prefix, allele_sequence_without_species):
     """
     Look up allele name in a species-specific dictionary of aliases
@@ -211,13 +176,15 @@ def get_serotype_if_exists(species_prefix, serotype_name):
     return result
 
 
-def normalize_parsed_object(parsed_object):
-    if isinstance(parsed_object, Gene):
-        gene_name = parsed_object.gene_name
-        gene_aliases = species_to_gene_aliases.get(parsed_object.species_prefix, {})
-        corrected_gene_name = gene_aliases.get(gene_name)
-        if corrected_gene_name and gene_name != corrected_gene_name:
-            parsed_object = parsed_object.update_field(gene_name=corrected_gene_name)
+def normalize_parsed_object(
+        species_info,
+        parsed_object):
+    if species_info is not None:
+        if isinstance(parsed_object, Gene):
+            old_gene_name = parsed_object.gene_name
+            new_gene_name = species_info.normalize_gene_name_if_exists(old_gene_name)
+            if old_gene_name != new_gene_name:
+                parsed_object = parsed_object.update_field(gene_name=new_gene_name)
     return parsed_object
 
 
@@ -236,9 +203,13 @@ def split_on_all_seps(seq, seps="_:"):
         parts = new_parts
     return parts
 
+
 def parse_allele_after_species_and_gene_name(
-    original_name,
-    str_after_gene):
+        original_name,
+        species_prefix,
+        gene_name,
+        str_after_gene):
+
     if str_after_gene[-1].upper() in valid_allele_modifiers:
         modifier = str_after_gene[-1]
         str_after_gene = str_after_gene[:-1]
@@ -269,20 +240,20 @@ def parse_allele_after_species_and_gene_name(
     if len(limited_digit_parts) == 1:
         return AlleleGroup(
             species_prefix,
-            gene,
+            gene_name,
             limited_digit_parts[0],
             modifier=modifier)
     elif len(limited_digit_parts) == 2:
         return FourDigitAllele(
             species_prefix,
-            gene,
+            gene_name,
             limited_digit_parts[0],
             limited_digit_parts[1],
             modifier=modifier)
     elif len(limited_digit_parts) == 3:
         return SixDigitAllele(
             species_prefix,
-            gene,
+            gene_name,
             limited_digit_parts[0],
             limited_digit_parts[1],
             limited_digit_parts[2],
@@ -290,12 +261,16 @@ def parse_allele_after_species_and_gene_name(
     elif len(limited_digit_parts) == 4:
         return EightDigitAllele(
             species_prefix,
-            gene,
+            gene_name,
             limited_digit_parts[0],
             limited_digit_parts[1],
             limited_digit_parts[2],
             limited_digit_parts[3],
             modifier=modifier)
+
+
+compact_gene_and_allele_regex = re.compile("([A-Za-z]+)([0-9\:]+)[A-Z]?")
+
 
 def parse_without_mutation(name, default_species_prefix="HLA"):
     """
@@ -323,7 +298,9 @@ def parse_without_mutation(name, default_species_prefix="HLA"):
         "%s-%s" % (species_prefix, str_after_species))
 
     if standard_nomenclature_result is not None:
-        return normalize_parsed_object(standard_nomenclature_result)
+        return normalize_parsed_object(
+            species_info,
+            standard_nomenclature_result)
 
     serotype_result = get_serotype_if_exists(species_prefix, str_after_species)
 
@@ -332,12 +309,38 @@ def parse_without_mutation(name, default_species_prefix="HLA"):
 
     # try to heuristically split apart the gene name and any allele information
     # when the requires separators are missing
-    if str_after_species.count("*") == 1:
-        gene, str_after_gene = str_after_species.split("*")
-
-        gene = species_info.normalize_gene_name_if_exists(gene)
-
-    raise AlleleParseError("Unable to parse '%s'" % name)
+    # Examples which will parse correctly here:
+    #   - A*0201
+    #   - A*02:01
+    #   - A_0101
+    #   - A_01:01
+    # However this will not work:
+    #   - A_01_01
+    # Also, if no gene separator is used (e.g. A0101) then the parsing
+    # continues further down.
+    gene_seps = "*_"
+    gene = None
+    for sep in gene_seps:
+        if str_after_species.count(sep) == 1:
+            gene, str_after_gene = str_after_species.split(sep)
+            break
+    if gene is None:
+        # If the string had neither "*" nor "_" then try to collect the gene
+        # name as the non-numerical part at the start of the string.
+        match = compact_gene_and_allele_regex.fullmatch(str_after_species)
+        if match:
+            gene, str_after_gene = match.groups()
+    if gene is None:
+        # failed to figure out a gene name, give up
+        raise AlleleParseError("Unable to parse '%s'" % name)
+    else:
+        return normalize_parsed_object(
+            species_info,
+            parse_allele_after_species_and_gene_name(
+                original_name=name,
+                species_prefix=species_prefix,
+                gene_name=gene,
+                str_after_gene=str_after_gene))
 
 
 def parse_known_alpha_beta_pair(name, default_species_prefix="HLA"):
