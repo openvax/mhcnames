@@ -20,6 +20,7 @@ from .mutation import Mutation
 
 class MutantAllele(FourDigitAllele):
     def __init__(self, original_allele, mutations):
+        self.original_allele = original_allele
         FourDigitAllele.__init__(
             self,
             species_prefix=original_allele.species_prefix,

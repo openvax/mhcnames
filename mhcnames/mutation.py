@@ -30,14 +30,14 @@ class Mutation(Serializable):
     def normalized_string(self):
         return "%s%d%s" % (self.aa_original, self.pos, self.aa_mutant)
 
-    mutation_regex = re.compile("([A-Z])(\d)([A-Z])")
+    mutation_regex = re.compile("([A-Z])(\d+)([A-Z])")
 
     @classmethod
     def parse(cls, seq):
         seq = seq.upper()
-        result = cls.mutation_regex.full_match(seq)
+        result = cls.mutation_regex.fullmatch(seq)
         if result is None:
-            raise AlleleParseError("Allele mutation malformed: '%s'")
+            raise AlleleParseError("Allele mutation malformed: '%s'" % seq)
         aa_original = result.group(1)
         pos = int(result.group(2))
         aa_mutant = result.group(3)

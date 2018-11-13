@@ -49,7 +49,7 @@ def parse_species_prefix(name, default_species_prefix=None):
     """
 
     inferred_prefix_and_original = infer_species_prefix_substring(name)
-    print(name, inferred_prefix_and_original)
+
     if inferred_prefix_and_original is None:
         if default_species_prefix is None:
             return (None, name)
@@ -144,7 +144,7 @@ def normalize_parsed_object(
         if isinstance(parsed_object, Gene):
             old_gene_name = parsed_object.gene_name
             new_gene_name = species_info.normalize_gene_name_if_exists(old_gene_name)
-            print(old_gene_name, new_gene_name)
+
             if old_gene_name != new_gene_name:
                 parsed_object = parsed_object.copy(gene_name=new_gene_name)
     return parsed_object
@@ -182,20 +182,20 @@ def parse_allele_after_species_and_gene_name(
 
     parts = split_on_all_seps(str_after_gene)
 
-    limited_digit_parts = []
+    parsed_fields = []
     for part in parts:
         if part.isdigit():
             if (allow_three_digits_in_first_field and
-                    len(limited_digit_parts) == 0 and
+                    len(parsed_fields) == 0 and
                     len(part) > 4):
-                limited_digit_parts.append(part[:3])
+                parsed_fields.append(part[:3])
                 part = part[3:]
             if (allow_three_digits_in_second_field and
-                    len(limited_digit_parts) == 1 and
+                    len(parsed_fields) == 1 and
                     len(part) > 4):
-                limited_digit_parts.append(part[3:])
+                parsed_fields.append(part[3:])
             while part:
-                n_parsed = len(limited_digit_parts)
+                n_parsed = len(parsed_fields)
                 remaining_length = len(part)
                 if remaining_length == 1:
                     raise AlleleParseError("Unable to parse '%s'" % original_name)
@@ -207,40 +207,46 @@ def parse_allele_after_species_and_gene_name(
                     boundary_index = 3
                 else:
                     boundary_index = 2
-                limited_digit_parts.append(part[:boundary_index])
+                parsed_fields.append(part[:boundary_index])
                 part = part[boundary_index:]
         else:
             raise AlleleParseError("Unexpected part of allele name '%s' in '%s'" % (
                 part, original_name))
-    if len(limited_digit_parts) == 1:
+
+    if len(parsed_fields) in {0, 1} and modifier is not None:
+            raise AlleleParseError("Unexpected modifier '%s' at end of '%s'" % (
+                modifier, original_name))
+
+    if len(parsed_fields) == 0:
+        return Gene(species_prefix, gene_name)
+    elif len(parsed_fields) == 1:
         return AlleleGroup(
             species_prefix,
             gene_name,
-            limited_digit_parts[0],
-            modifier=modifier)
-    elif len(limited_digit_parts) == 2:
+            parsed_fields[0])
+    elif len(parsed_fields) == 2:
         return FourDigitAllele(
             species_prefix,
             gene_name,
-            limited_digit_parts[0],
-            limited_digit_parts[1],
+            parsed_fields[0],
+            parsed_fields[1],
             modifier=modifier)
-    elif len(limited_digit_parts) == 3:
+    elif len(parsed_fields) == 3:
         return SixDigitAllele(
             species_prefix,
             gene_name,
-            limited_digit_parts[0],
-            limited_digit_parts[1],
-            limited_digit_parts[2],
+            parsed_fields[0],
+            parsed_fields[1],
+            parsed_fields[2],
             modifier=modifier)
-    elif len(limited_digit_parts) == 4:
+    elif len(parsed_fields) == 4:
         return EightDigitAllele(
             species_prefix,
             gene_name,
-            limited_digit_parts[0],
-            limited_digit_parts[1],
-            limited_digit_parts[2],
-            limited_digit_parts[3],
+            parsed_fields[0],
+            parsed_fields[1],
+            parsed_fields[2],
+            parsed_fields[3],
             modifier=modifier)
 
 
@@ -325,8 +331,6 @@ def parse_without_mutation(
         allow_three_digits_in_first_field=allow_three_digits_in_first_field,
         allow_three_digits_in_second_field=allow_three_digits_in_second_field)
 
-    print(name, species_info, species_prefix, str_after_species, parsed_object)
-
     return normalize_parsed_object(
         species_info,
         parsed_object)
@@ -357,29 +361,18 @@ def parse_known_alpha_beta_pair(name, default_species_prefix="HLA"):
 
 def parse_with_mutations(
         name,
-        result_without_mutation,
-        mutation_strings,
         default_species_prefix):
     """
     Parameters
     ----------
-    original_name : str
-        Used for error messages, e.g. "A*02:07 T80M mutant"
-
-    result_without_mutation : FourDigitAllele
-        The allele being modified by point mutations in its protein
-        sequence
-
-    mutation_strings : list of str
-        The mutation descriptors (e.g. "T80M") as well as the optional
-        "MUTANT" string used to denote the whole allele as mutated.
+    name : str
 
     default_species_prefix : str
         If no species can inferred for an allele then use this, e.g. "HLA"
 
     Returns MutantFourDigitAllele
     """
-    parts = name.upper().split()
+    parts = name.split()
     result_without_mutation = parse_without_mutation(
         parts[0],
         default_species_prefix=default_species_prefix)
@@ -393,8 +386,8 @@ def parse_with_mutations(
     # mutations like: "E152A, R155Y, L156Y mutant"
     mutation_strings = [
         p[:-1] if p.endswith(",") else p
-        for p in mutation_strings[1:]
-        if p != "MUTANT" and p != ""
+        for p in parts[1:]
+        if p.upper() != "MUTANT" and p != ""
     ]
     if len(mutation_strings) == 0:
         raise AlleleParseError(
@@ -425,7 +418,7 @@ def parse_with_interior_whitespace(name, default_species_prefix):
             name,
             default_species_prefix=default_species_prefix)
     else:
-        raise ValueError("Unexpected whitespace in '%s'" % name)
+        raise AlleleParseError("Unexpected whitespace in '%s'" % name)
 
 
 _parse_cache = {}
@@ -494,7 +487,7 @@ def parse(
 
     if infer_class2_pairing and result.__class__ is not AlphaBetaPair:
         if isinstance(result, Gene) and result.is_class2:
-            raise NotImplementedError(
+            raise AlleleParseError(
                 "Inference of paired alpha/beta pair for %s not yet implemented" % (
                     result,))
     _parse_cache[cache_key] = result

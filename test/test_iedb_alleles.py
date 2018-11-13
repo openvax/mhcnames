@@ -1,5 +1,6 @@
 import pandas as pd
-from mhcnames import normalize_allele_name, AlleleParseError
+from mhcnames import normalized_string, AlleleParseError
+
 
 def parse_all_IEDB_allele_names():
     df = pd.read_csv("iedb_allele_counts.csv")
@@ -11,7 +12,7 @@ def parse_all_IEDB_allele_names():
         n_total += 1
         n_total_iedb_count += count
         try:
-            normalize_allele_name(allele)
+            normalized_string(allele)
         except AlleleParseError as e:
             print(e)
             n_wrong += 1
