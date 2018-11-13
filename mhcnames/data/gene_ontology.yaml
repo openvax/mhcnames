@@ -300,3 +300,447 @@ Rano:
       - DOb
     DM:
       - DMA
+######################################################
+#
+# Non-human primates
+#
+######################################################
+
+# Alouatta pigra
+# Guatemalan black howler
+Alpi:
+  IIa:
+    DR:
+      - DRB
+
+# Aotus azarai
+# Azara's Night Monkey
+Aoaz:
+  IIa:
+    DR:
+      - DRB
+      - DRB3
+# Aotus lemurinus
+# Gray-bellied Night Monkey
+Aole:
+  TODO: F
+
+# Aotus nancymaae
+# Nancy Ma's Night Monkey
+Aona:
+  IIa:
+    DP:
+      - DPB1
+    DQ:
+      - DQA1
+      - DQB1
+      - DQB2
+    DR:
+      - DRA
+      - DRB
+      - DRB1
+      - DRB3
+
+# Aotus nigriceps
+# Black-headed Night Monkey
+Aoni:
+  Ia:
+    DR:
+      - DRB
+      - DRB1
+      - DRB3
+
+# Aotus trivirgatus
+# Three-striped Night Monkey
+Aotr:
+  TODO: E G PS2 DQB2 DRB DRB1 DRB3
+
+# Aotus vociferans
+# Spix's Night Monkey
+Aovo:
+  IIa:
+    DR:
+      - DRA
+      - DRB
+      - DRB1
+      - DRB3
+
+# Ateles belzebuth
+# White-fronted Spider Monkey
+Atbe:
+  Ia:
+    - B
+  TODO: E G DRB
+
+# Ateles fusciceps
+# Black-headed Spider Monkey
+Atfu:
+  Ia:
+    - B
+  TODO: E G
+
+# Callithrix jacchus
+# Common Marmoset
+Caja:
+  TODO:
+    - B
+    - B1
+    - B2
+    - B3
+    - B4 B5 B6 B7 B8 B9 E F F1Ps F2Ps F3Ps F5Ps G G10Ps G11Ps G13Ps G14Ps G2Ps G4Ps G5Ps G6Ps G8Ps G9Ps PS2
+  IIa:
+    DQ:
+      - DQA1
+      - DQB1
+      - DQB2
+    DR:
+      - DRB
+      - DRB1
+
+# Callicebus moloch
+# Red-bellied Titi
+Camo:
+  IIa:
+    DR:
+      - DRB
+      - DRB1
+      - DRB11
+      - DRB3
+
+# Callithrix pygmaea
+# Pygmy Marmoset
+Capy:
+  IIa:
+    DR:
+      - DRB
+      - DRB1
+
+# Cebus apella
+# Tufted Capuchin
+Ceap:
+  IIa:
+    DR:
+      - DRB
+
+# Cercocebus atys
+# Sooty Mangabey
+Ceat:
+  TODO: A1 Aw1 Aw2 B E F I
+
+# Cercopithecus mitis
+# Blue Monkey
+Cemi:
+  Ia:
+    - A
+    - B
+  IIa:
+    DQ:
+      - DQA1
+
+# Cercopithecus neglectus
+# De Brazza's monkey
+Cene:
+  IIa:
+    DQ:
+      - DQA1
+
+# Chlorocebus aethiops
+# Grivet
+Chae:
+  Ia:
+    - A
+    - B
+  TODO: G DQA1 DQB1 DRB DRB1 DRB5 DRB6
+
+# Chlorocebus pygerythrus
+# vervet monkey
+Chpy:
+  TODO: A B
+
+# Chlorocebus sabaeus
+# Green Monkey
+Chsa:
+  Ia:
+    - B
+  TODO: A AG E  DPA1 DPB1 DQA1 DQB1 DRA DRB DRB1 DRB5
+
+# Colobus guereza
+# Mantled Guereza
+Cogu:
+  IIa:
+    DQ:
+      - DQA1
+# Gorilla beringei
+# eastern gorilla
+Gobe:
+  Ia:
+    - A
+    - B
+    - C
+  TODO: E G H OKO DMB DPA1 DPB1 DQA1 DQA2 DQB1 DQB2 DRB DRB1 DRB3 DRB5 DRB6
+
+# Gorilla gorilla
+# Gorilla
+Gogo:
+  Ia:
+    - A
+    - B
+    - C
+  TODO: E F G H OKO DMB DPA1 DPB1 DQA1 DQA2 DQB1 DQB2 DRA DRB DRB1 DRB3 DRB5 DRB6
+
+# Hylobates lar
+# Lar Gibbon
+Hyla:
+  Ia:
+    - A
+    - B
+  IIa:
+    DQ:
+      - DQA1
+      - DQA2
+      - DQB1
+      - DQB2
+
+# Hylobates moloch
+# Silvery Javan Gibbon
+Hymo:
+  IIa:
+    DR:
+      - DRB
+      - DRB1
+
+# Leontopithecus rosalia
+# Golden Lion Tamarin
+Lero:
+  TODO: G
+
+# Lophocebus aterrimus
+# Black Crested Mangabey    DQA1
+Loat:
+  IIa:
+    DQ:
+      - DQA1
+
+# Macaca arctoides
+# Stump-tailed Macaque
+Maar:
+  Ia:
+    - A1
+    - B
+  TODO: I  DPA1 DQA1 DQB1 DRB1 DRB5
+
+# Macaca assamensis
+# Assam Macaque
+Maas:
+  Ia:
+    - A1
+    - B
+  TODO: I
+
+# Macaca fascicularis
+# Crab-eating Macaque
+Mafa:
+  TODO: A1 A2 A3 A4 A5 A6 A8 AG B B11L B16 B17 B20 B21 E F G I  DMA DMB DOA DOB DPA1 DPB1 DQA1 DQB1 DRA DRB DRB1 DRB3 DRB4 DRB5 DRB6
+
+# Macaca fuscata
+# Japanese Macaque
+Mafu:
+  IIa:
+    DR:
+      - DRB
+      - DRB1
+      - DRB3
+
+# Mandrillus leucophaeus
+# Drill
+Male:
+  IIa:
+    DR:
+      - DRB1
+
+# Macaca leonina
+# Northern Pig-tailed Macaque
+Malo:
+  Ia:
+    - A1
+    - A2
+    - A3
+  TODO: B I  DMA DMB DOA DOB DPA1 DPB1 DQA1 DQB1 DRA DRB DRB1 DRB3
+
+# Macaca mulatta
+# Rhesus Monkey
+Mamu:
+  TODO-ClassI:
+    - A1
+    - A2
+    - A3
+    - A4
+    - A5
+    - A6
+    - A7
+    - AG
+    - B
+    - B11L
+    - B16
+    - B17
+    - B20
+    - E
+    - F
+    - G
+    - I
+  TODO-ClassII:
+    - DMA DMB DPA1 DPB1 DPB2 DQA1 DQB1 DRA DRB DRB1 DRB3 DRB4 DRB5 DRB6
+
+# Macaca nemestrina
+# Southern Pig-tailed Macaque
+Mane:
+  TODO: A1 A2 A3 A4 A5 A6 A7 AG B B12 B16 B17 B20 E F I DPA1 DPB1 DQA1 DQB1 DRA DRB DRB1 DRB3 DRB5 DRB6
+
+# Macaca silenus
+# Lion-tailed Macaque
+Masi:
+  IIa:
+    DR:
+      - DRB
+      - DRB1
+      - DRB4
+
+# Mandrillus sphinx
+# Mandrill
+Masp:
+  TODO: DRB DRB1 DRB3 DRB5 DRB6
+
+# Macaca thibetana
+# Milne Edward's Macaque
+Math:
+  Ia:
+    - A1
+    - A2
+    - B
+  TODO: I DPB1 DQB1
+
+# Papio anubis
+# Olive Baboon
+Paan:
+  Ia:
+    - B
+  TODO: A AG F  DPA1 DPB1 DQA1 DQB1 DRA DRB DRB1 DRB3 DRB5 DRB6
+
+# Papio cynocephalus
+# Yellow Baboon
+Pacy:
+  Ia:
+    - A
+    - B
+  TODO: E DQA1
+
+# Papio hamadryas
+# Hamadryas Baboon
+Paha:
+  Ia:
+    - A
+    - B
+  IIa:
+    DP:
+      - DPA1
+    DQ:
+      - DQA1
+      - DQB1
+    DR:
+      - DRB1
+
+# Pan paniscus
+# Bonobo
+Papa:
+  Ia:
+    - A
+    - B
+    - C
+  TODO:
+    - G
+    - H
+    - DMB
+    - DPB1
+    - DRB6
+  IIa:
+    DR:
+      - DRB1
+# Papio papio
+# Guinea Baboon
+Papp:
+  IIa:
+    DQ:
+      DQA1
+
+# Pan troglodytes
+# Common Chimpanzee
+Patr:
+  TODO: A AL B C E F G H  DMB DOB DPA1 DPB1 DQA1 DQA2 DQB1 DQB2 DRA DRB DRB1 DRB3 DRB4 DRB5 DRB6 DRB7
+
+# Papio ursinus
+# Chacma Baboon
+Paur:
+  TODO: DRB DRB1 DRB5 DRB6
+
+# Pithecia pithecia
+# White-faced Saki
+Pipi:
+  TODO:  B E G DRB DRB3
+# Pongo abelii
+# Sumatran Orangutan
+Poab:
+  TODO: A B C DRA
+
+# Pongo pygmaeus
+# Bornean Orangutan
+Popy:
+  TODO: A Ap B C E H  DMB DPA1 DPB1 DQA1 DQA2 DQB1 DQB2 DRA DRB5 DRB6
+
+# Rhinopithecus roxellana
+# golden snub-nosed monkey
+Rhro:
+  TODO: DPB1 DQA1 DQB1 DRB1 DRB2
+
+# Saguinus fuscicollis
+# Brown-mantled Tamarin
+Safu:
+  TODO: G PS1 PS2
+
+# Saguinus geoffroyi
+# Geoffroy's Tamarin
+Sage:
+  TODO: PS1 PS2
+
+# Saguinus labiatus
+# White-lipped Tamarin
+Sala:
+  TODO: G DRB DRB1
+
+# Saguinus mystax
+# Moustached Tamarin
+Samy:
+  TODO: PS1 PS2
+
+# Saguinus oedipus
+# Cottontop Tamarin
+Saoe:
+  TODO: C E F G N1 N3 N4 PS1  DPB1 DQA1 DQB1 DQB2 DRB DRB1 DRB11 DRB3 DRB5
+
+# Saimiri sciureus
+# Common squirrel monkey
+Sasc:
+  TODO: G DPA1 DRB
+
+# Semnopithecus entellus
+# Northern Plains Gray Langur
+Seen:
+  IIa:
+    DP:
+      - DPB1
+
+# Theropithecus gelada
+# Gelada
+Thge:
+  IIa:
+    DQ:
+      DQA1

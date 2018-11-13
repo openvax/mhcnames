@@ -98,8 +98,17 @@ def _create_species_to_genes_dict():
     species_to_genes = {}
     for species, species_ontology_dict in gene_ontology.items():
         species_genes = set([])
+        if species_ontology_dict is None:
+            raise ValueError("Missing gene ontology for '%s'" % species)
+        if not isinstance(species_ontology_dict, dict):
+            raise ValueError("Expected ontology dictionary for species '%s' but got: %s" % (
+                species, species_ontology_dict))
         for mhc_class, genes_or_dict in species_ontology_dict.items():
             if mhc_class.startswith("II"):
+                if not isinstance(genes_or_dict, dict):
+                    raise ValueError(
+                        "Expected MHC class '%s' of '%s' to contain dictionary" % (
+                            mhc_class, species))
                 # Class II MHC class entries are dictionaries
                 # mapping e.g. "DQ->{DQA, DQB1}"
                 for genes in genes_or_dict.values():

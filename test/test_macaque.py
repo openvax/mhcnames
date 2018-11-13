@@ -1,6 +1,7 @@
 from nose.tools import eq_
 from mhcnames import normalized_string, compact_string
 
+
 def test_macaque_alleles():
     allele_name = "Mamu-B*082:02"
     eq_(normalized_string(allele_name), "Mamu-B*82:02")

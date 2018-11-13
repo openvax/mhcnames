@@ -2,7 +2,7 @@ import pandas as pd
 from mhcnames import normalized_string, AlleleParseError
 
 
-def parse_all_IEDB_allele_names():
+def test_parse_all_IEDB_allele_names():
     df = pd.read_csv("iedb_allele_counts.csv")
     n_wrong = 0
     n_total = 0
@@ -29,4 +29,4 @@ def parse_all_IEDB_allele_names():
     assert n_correct == n_total
 
 if __name__ == "__main__":
-    parse_all_IEDB_allele_names()
+    test_parse_all_IEDB_allele_names()

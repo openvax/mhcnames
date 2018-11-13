@@ -137,6 +137,7 @@ def get_serotype_if_exists(species_prefix, serotype_name):
     return result
 
 
+"""
 def normalize_parsed_object(
         species_info,
         parsed_object):
@@ -148,6 +149,7 @@ def normalize_parsed_object(
             if old_gene_name != new_gene_name:
                 parsed_object = parsed_object.copy(gene_name=new_gene_name)
     return parsed_object
+"""
 
 
 def split_on_all_seps(seq, seps="_:"):
@@ -253,6 +255,25 @@ def parse_allele_after_species_and_gene_name(
 compact_gene_and_allele_regex = re.compile("([A-Za-z]+)([0-9\:]+)[A-Z]?")
 
 
+def parse_gene_name_from_prefix(original_name, str_after_species, gene_seps="*_"):
+    gene_name = None
+    for sep in gene_seps:
+        if str_after_species.count(sep) == 1:
+            gene_name, str_after_gene = str_after_species.split(sep)
+            break
+    if gene_name is None:
+        # If the string had neither "*" nor "_" then try to collect the gene
+        # name as the non-numerical part at the start of the string.
+        match = compact_gene_and_allele_regex.fullmatch(str_after_species)
+        if match:
+            gene_name, str_after_gene = match.groups()
+    if gene_name is None:
+        # failed to figure out a gene name, give up
+        raise AlleleParseError("Unable to parse '%s'" % original_name)
+
+    return gene_name, str_after_gene
+
+
 def parse_without_mutation(
         name,
         default_species_prefix="HLA",
@@ -294,38 +315,28 @@ def parse_without_mutation(
     #   - A_01_01
     # Also, if no gene separator is used (e.g. A0101) then the parsing
     # continues further down.
+    gene_name, str_after_gene = parse_gene_name_from_prefix(
+        name,
+        str_after_species,
+        gene_seps=gene_seps)
 
-    gene_name = None
-    for sep in gene_seps:
-        if str_after_species.count(sep) == 1:
-            gene_name, str_after_gene = str_after_species.split(sep)
-            break
-    if gene_name is None:
-        # If the string had neither "*" nor "_" then try to collect the gene
-        # name as the non-numerical part at the start of the string.
-        match = compact_gene_and_allele_regex.fullmatch(str_after_species)
-        if match:
-            gene_name, str_after_gene = match.groups()
-    if gene_name is None:
-        # failed to figure out a gene name, give up
-        raise AlleleParseError("Unable to parse '%s'" % name)
-    gene = Gene(species_prefix, gene_name)
+    # use the canonical gene name e.g. "A" and not "a"
+    gene_name = species_info.normalize_gene_name_if_exists(gene_name)
+
     # only allele names which allow three digits in second field seem to be
     # human class I names such as "HLA-B*15:120",
     # it's otherwise typical to allow three digits in the first field
-    allow_three_digits_in_second_field = species_prefix == "HLA" and gene.is_class1
+    allow_three_digits_in_second_field = (
+        species_prefix == "HLA" and gene_name in {"A", "B", "C"}
+    )
     allow_three_digits_in_first_field = not allow_three_digits_in_second_field
-    parsed_object = parse_allele_after_species_and_gene_name(
+    return parse_allele_after_species_and_gene_name(
         original_name=name,
         species_prefix=species_prefix,
         gene_name=gene_name,
         str_after_gene=str_after_gene,
         allow_three_digits_in_first_field=allow_three_digits_in_first_field,
         allow_three_digits_in_second_field=allow_three_digits_in_second_field)
-
-    return normalize_parsed_object(
-        species_info,
-        parsed_object)
 
 
 def parse_known_alpha_beta_pair(name, default_species_prefix="HLA"):
