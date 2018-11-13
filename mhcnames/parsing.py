@@ -277,15 +277,7 @@ def parse_without_mutation(
     str_after_species = normalize_allele_string(
         species_prefix=species_prefix,
         allele_sequence_without_species=str_after_species)
-    """
-    standard_nomenclature_result = parse_standard_allele_name(
-        "%s-%s" % (species_prefix, str_after_species))
 
-    if standard_nomenclature_result is not None:
-        return normalize_parsed_object(
-            species_info,
-            standard_nomenclature_result)
-    """
     serotype_result = get_serotype_if_exists(species_prefix, str_after_species)
 
     if serotype_result is not None:
