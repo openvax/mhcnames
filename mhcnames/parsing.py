@@ -29,7 +29,7 @@ from .eight_digit_allele import EightDigitAllele
 from .allele_group import AlleleGroup
 from .gene import Gene
 from .species_registry import (
-    find_matching_species_prefix,
+    infer_species_prefix_substring,
     find_matching_species_info
 )
 from .data import (
@@ -37,47 +37,8 @@ from .data import (
     get_serotype,
 )
 from .mutant_allele import MutantAllele
-from .standard_format import parse_standard_allele_name
 from .serotype import Serotype
 from .allele_modifiers import valid_allele_modifiers
-
-
-def infer_species_prefix(name):
-    """
-    Trying to parse prefixes of alleles such as:
-        HLA-A
-    but also ones with dashes in the species prefix:
-        H-2-K
-    and also those lacking any dashes such as:
-        H2K
-
-     ...we also need to consider that alleles, haplotypes, etc may come
-     immediately after the gene:
-        H2Kk
-        HLA-A0201
-
-    Returns the normalized species prefix and the original string that matched
-    it or None.
-    """
-    # Try parsing a few different substrings to get the species,
-    # and then use the species gene list to determine what the gene is in this string
-    if "-" in name:
-        # if name is "H-2-K" then try parsing "H" and "H-2" as a species
-        # prefix
-        parts_split_by_dash = name.split("-")
-        candidate_species_substrings = [
-            parts_split_by_dash[0],
-            parts_split_by_dash[0] + "-" + parts_split_by_dash[1]
-        ]
-    else:
-        candidate_species_substrings = [name]
-    for seq in candidate_species_substrings:
-        for n in [2, 3, 4]:
-            original_prefix = seq[:n]
-            normalized_prefix = find_matching_species_prefix(name[:n])
-            if normalized_prefix is not None:
-                return normalized_prefix, original_prefix
-    return None
 
 
 def parse_species_prefix(name, default_species_prefix=None):
@@ -87,7 +48,8 @@ def parse_species_prefix(name, default_species_prefix=None):
         - remaining string after species prefix
     """
 
-    inferred_prefix_and_original = infer_species_prefix(name)
+    inferred_prefix_and_original = infer_species_prefix_substring(name)
+    print(name, inferred_prefix_and_original)
     if inferred_prefix_and_original is None:
         if default_species_prefix is None:
             return (None, name)
@@ -130,7 +92,6 @@ def parse_gene_if_possible(name, species_info):
         gene_name = species_info.find_matching_gene_name(substring)
         if gene_name:
             return gene_name, name[n:]
-
     return None, name
 
 
@@ -183,8 +144,9 @@ def normalize_parsed_object(
         if isinstance(parsed_object, Gene):
             old_gene_name = parsed_object.gene_name
             new_gene_name = species_info.normalize_gene_name_if_exists(old_gene_name)
+            print(old_gene_name, new_gene_name)
             if old_gene_name != new_gene_name:
-                parsed_object = parsed_object.update_field(gene_name=new_gene_name)
+                parsed_object = parsed_object.copy(gene_name=new_gene_name)
     return parsed_object
 
 
@@ -208,7 +170,9 @@ def parse_allele_after_species_and_gene_name(
         original_name,
         species_prefix,
         gene_name,
-        str_after_gene):
+        str_after_gene,
+        allow_three_digits_in_first_field=False,
+        allow_three_digits_in_second_field=False):
 
     if str_after_gene[-1].upper() in valid_allele_modifiers:
         modifier = str_after_gene[-1]
@@ -219,17 +183,28 @@ def parse_allele_after_species_and_gene_name(
     parts = split_on_all_seps(str_after_gene)
 
     limited_digit_parts = []
-    for part_number, part in enumerate(parts):
+    for part in parts:
         if part.isdigit():
-            for i in range(len(part) // 2):
-                odd_length = (len(part) % 2 == 1)
-                if i == 0 and odd_length:
-                    # if the sequence is of odd length, take the first 3
-                    # characters
-                    # e.g. HLA-A00101 gets parsed as HLA-A*001:01
-                    boundary_index = 3
-                elif odd_length:
+            if (allow_three_digits_in_first_field and
+                    len(limited_digit_parts) == 0 and
+                    len(part) > 4):
+                limited_digit_parts.append(part[:3])
+                part = part[3:]
+            if (allow_three_digits_in_second_field and
+                    len(limited_digit_parts) == 1 and
+                    len(part) > 4):
+                limited_digit_parts.append(part[3:])
+            while part:
+                n_parsed = len(limited_digit_parts)
+                remaining_length = len(part)
+                if remaining_length == 1:
                     raise AlleleParseError("Unable to parse '%s'" % original_name)
+                if (allow_three_digits_in_first_field and n_parsed == 0 and
+                        (remaining_length == 3 or remaining_length > 4)):
+                    boundary_index = 3
+                elif (allow_three_digits_in_second_field and n_parsed == 1 and
+                        (remaining_length == 3 or remaining_length > 4)):
+                    boundary_index = 3
                 else:
                     boundary_index = 2
                 limited_digit_parts.append(part[:boundary_index])
@@ -272,7 +247,10 @@ def parse_allele_after_species_and_gene_name(
 compact_gene_and_allele_regex = re.compile("([A-Za-z]+)([0-9\:]+)[A-Z]?")
 
 
-def parse_without_mutation(name, default_species_prefix="HLA"):
+def parse_without_mutation(
+        name,
+        default_species_prefix="HLA",
+        gene_seps="*_"):
     """
     First test to see if MHC name requires any species-specific special logic.
     If the name doesn't fit any of the special species templates then
@@ -293,7 +271,7 @@ def parse_without_mutation(name, default_species_prefix="HLA"):
     str_after_species = normalize_allele_string(
         species_prefix=species_prefix,
         allele_sequence_without_species=str_after_species)
-
+    """
     standard_nomenclature_result = parse_standard_allele_name(
         "%s-%s" % (species_prefix, str_after_species))
 
@@ -301,7 +279,7 @@ def parse_without_mutation(name, default_species_prefix="HLA"):
         return normalize_parsed_object(
             species_info,
             standard_nomenclature_result)
-
+    """
     serotype_result = get_serotype_if_exists(species_prefix, str_after_species)
 
     if serotype_result is not None:
@@ -318,29 +296,40 @@ def parse_without_mutation(name, default_species_prefix="HLA"):
     #   - A_01_01
     # Also, if no gene separator is used (e.g. A0101) then the parsing
     # continues further down.
-    gene_seps = "*_"
-    gene = None
+
+    gene_name = None
     for sep in gene_seps:
         if str_after_species.count(sep) == 1:
-            gene, str_after_gene = str_after_species.split(sep)
+            gene_name, str_after_gene = str_after_species.split(sep)
             break
-    if gene is None:
+    if gene_name is None:
         # If the string had neither "*" nor "_" then try to collect the gene
         # name as the non-numerical part at the start of the string.
         match = compact_gene_and_allele_regex.fullmatch(str_after_species)
         if match:
-            gene, str_after_gene = match.groups()
-    if gene is None:
+            gene_name, str_after_gene = match.groups()
+    if gene_name is None:
         # failed to figure out a gene name, give up
         raise AlleleParseError("Unable to parse '%s'" % name)
-    else:
-        return normalize_parsed_object(
-            species_info,
-            parse_allele_after_species_and_gene_name(
-                original_name=name,
-                species_prefix=species_prefix,
-                gene_name=gene,
-                str_after_gene=str_after_gene))
+    gene = Gene(species_prefix, gene_name)
+    # only allele names which allow three digits in second field seem to be
+    # human class I names such as "HLA-B*15:120",
+    # it's otherwise typical to allow three digits in the first field
+    allow_three_digits_in_second_field = species_prefix == "HLA" and gene.is_class1
+    allow_three_digits_in_first_field = not allow_three_digits_in_second_field
+    parsed_object = parse_allele_after_species_and_gene_name(
+        original_name=name,
+        species_prefix=species_prefix,
+        gene_name=gene_name,
+        str_after_gene=str_after_gene,
+        allow_three_digits_in_first_field=allow_three_digits_in_first_field,
+        allow_three_digits_in_second_field=allow_three_digits_in_second_field)
+
+    print(name, species_info, species_prefix, str_after_species, parsed_object)
+
+    return normalize_parsed_object(
+        species_info,
+        parsed_object)
 
 
 def parse_known_alpha_beta_pair(name, default_species_prefix="HLA"):
@@ -510,152 +499,3 @@ def parse(
                     result,))
     _parse_cache[cache_key] = result
     return result
-"""
-def parse_allele_name(name, species_prefix=None):
-    '''Takes an allele name and splits it into four parts:
-        1) species prefix
-        2) gene name
-        3) allele family
-        4) allele code
-
-    If species_prefix is provided, that is used instead of getting the species prefix from the name.
-    (And in that case, a species prefix in the name will result in an error being raised.)
-
-    For example, in all of the following inputs:
-        "HLA-A*02:01"
-        "A0201"
-        "A00201"
-    The result is a AlleleName object. Example:
-        AlleleName(
-            species="HLA",  # species prefix
-            gene="A",    # gene name
-            allele_family="02",   # allele family
-            allele_code="01",   # allele code
-        )
-
-    The logic for other species mostly resembles the naming system for humans,
-    except for mice, rats, and swine, which have archaic nomenclature.
-    '''
-    original = name
-    name = name.strip()
-
-    if len(name) == 0:
-        raise ValueError("Can't normalize empty MHC allele name")
-
-    species_from_name, name = split_species_prefix(name)
-
-    if species_prefix:
-        if species_from_name:
-            raise ValueError(
-                ("If a species is passed in, we better not have another "
-                 "species in the name itself."))
-        species = species_prefix
-    else:
-        species = species_from_name
-
-    if species in ("H-2", "H2"):
-        return parse_mouse_allele_name("H-2-" + name)
-
-    if len(name) == 0:
-        raise AlleleParseError("Incomplete MHC allele name: %s" % (original,))
-    elif not species:
-        # assume that a missing species name means we're dealing with a
-        # human HLA allele
-        if "-" in name:
-            raise AlleleParseError("Can't parse allele name: %s" % original)
-        species = "HLA"
-
-    if name[0].upper() == "D":
-        if len(name) == 7:
-            # sometimes we get very compact names like DRB0101
-            gene, name = parse_letters(name, 3)
-        else:
-            # MHC class II genes like "DQA1" need to be parsed with both
-            # letters and numbers
-            gene, name = parse_alphanum(name, 4)
-        # TODO: make a list of known species/gene pairs, along with
-        # gene synonyms. That should significantly imporve on this kind of
-        # ad-hoc synonym handling.
-
-        if gene.isalpha():
-            # expand e.g. DRA -> DRA1, DQB -> DQB1
-            gene = gene + "1"
-    elif len(name) == 5:
-        # example: SLA-30101
-        gene, name = name[0], name[1:]
-    elif name[0].isalpha():
-        # if there are more separators to come, then assume the gene names
-        # can have the form "DQA1"
-        gene, name = parse_letters(name)
-    elif name[0].isdigit():
-        gene, name = parse_numbers(name)
-    elif len(name) in (6, 7) and ("*" in name or "-" in name or ":" in name):
-        # example: SLA-3*0101 or SLA-3*01:01
-        gene, name = parse_alphanum(name)
-        _, name = parse_separator(name)
-    else:
-        raise AlleleParseError(
-            "Can't parse gene name from allele: %s" % original)
-
-    if len(gene) == 0:
-        raise AlleleParseError("No MHC gene name given in %s" % original)
-    if len(name) == 0:
-        raise AlleleParseError("Malformed MHC type %s" % original)
-
-    gene = gene.upper()
-    # skip initial separator
-    sep, name = parse_separator(name)
-
-    if species == "SLA":
-        if ":" in name:
-            parts = name.split(":")
-            if len(parts) != 2:
-                raise AlleleParseError(
-                    "Unexpected number of ':' characters in '%s'" % original)
-            family, name = parts
-        elif len(name) < 2:
-                raise AlleleParseError("Unable to parse '%s'" % original)
-        elif name.isalpha() or len(name) == 2:
-            # parse sequences serotypes like SLA-1-HB
-            # as shorthand for SLA-1-HB01
-            family = name
-            name = "01"
-        else:
-            # the family names for pigs can be weirdly complicated
-            # such as 'w13sm' but the alleles still always
-            # end with two digits e.g. SLA-2*w13sm20
-            family = name[:-2]
-            name = name[-2:]
-    elif len(name) == 4 or (species == "HLA" and gene in ("A", "B", "C")):
-        # If all that's left is e.g. "0201" then only parse the
-        # first two digits as the family code. Also, human Class I alleles
-        # seem to be exceptional in that they have only 2 digit allele
-        # families but 3 digit allele codes
-        # (other species like sheep have 3 digits followed by 2 digits)
-        family, name = parse_numbers(name, max_len=2)
-    else:
-        family, name = parse_numbers(name, max_len=3)
-
-    sep, name = parse_separator(name)
-
-    allele_code, rest_of_text = parse_numbers(name)
-
-    rest_of_text = rest_of_text.strip()
-
-    if len(rest_of_text) > 0:
-        raise AlleleParseError("The suffix '%s' of '%s' was not parsed" % (
-            rest_of_text,
-            original))
-
-    if len(family) == 1:
-        family = "0" + family
-    elif len(family) == 3 and family[0] == "0":
-        family = family[1:]
-    if len(allele_code) == 0:
-        allele_code = "01"
-    elif len(allele_code) == 3 and allele_code[0] == "0":
-        # normalize HLA-A*02:001 into HLA-A*02:01
-        allele_code = allele_code[1:]
-
-    return FourDigitAllele(species, gene, family, allele_code)
-"""

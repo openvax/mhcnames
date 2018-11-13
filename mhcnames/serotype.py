@@ -42,6 +42,9 @@ class Serotype(Gene):
         else:
             return self.name
 
+    def compact_string(self, include_species=False):
+        return self.normalized_string(include_species=include_species)
+
     def to_record(self):
         d = Gene.to_record(self)
         d["serotype"] = self.normalized_string()

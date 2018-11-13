@@ -54,7 +54,7 @@ def create_species_aliases():
     multiple species and require an exemplar to be chosen for its gene
     metadata.
     """
-    aliases = {}
+    aliases = species_dict.copy()
     for group_name, species_name in exemplar_species.items():
         aliases[group_name] = species_dict[species_name]
 
@@ -90,7 +90,46 @@ def find_matching_species_prefix(name):
     if upper_no_dash in exemplar_species:
         return upper_no_dash
     species = find_matching_species_info(name)
-    if species:
+
+    if species is not None:
         return species.prefix
     else:
         return None
+
+
+def infer_species_prefix_substring(name):
+    """
+    Trying to parse prefixes of alleles such as:
+        HLA-A
+    but also ones with dashes in the species prefix:
+        H-2-K
+    and also those lacking any dashes such as:
+        H2K
+
+     ...we also need to consider that alleles, haplotypes, etc may come
+     immediately after the gene:
+        H2Kk
+        HLA-A0201
+
+    Returns the normalized species prefix and the original string that matched
+    it or None.
+    """
+    # Try parsing a few different substrings to get the species,
+    # and then use the species gene list to determine what the gene is in this string
+    candidate_species_substrings = [name]
+
+    if "-" in name:
+        # if name is "H-2-K" then try parsing "H" and "H-2" as a species
+        # prefix
+        parts_split_by_dash = name.split("-")
+        candidate_species_substrings.extend([
+            parts_split_by_dash[0],
+            parts_split_by_dash[0] + "-" + parts_split_by_dash[1]
+        ])
+    for seq in candidate_species_substrings:
+        for n in [2, 3, 4]:
+            original_prefix = seq[:n]
+            normalized_prefix = find_matching_species_prefix(name[:n])
+            if normalized_prefix is not None:
+                return normalized_prefix, original_prefix
+    return None

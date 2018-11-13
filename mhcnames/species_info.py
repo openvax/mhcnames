@@ -64,6 +64,9 @@ class SpeciesInfo(object):
         self._gene_set = None
         self._expanded_gene_alias_dict = None
 
+    def __str__(self):
+        return "SpeciesInfo(prefix='%s')" % (self.prefix,)
+
     @property
     def genes(self):
         if self._genes is None:
@@ -114,6 +117,12 @@ class SpeciesInfo(object):
 
     def _create_expanded_gene_aliases(self):
         expanded_aliases = {}
+        for gene in self.genes:
+            expanded_aliases[gene] = gene
+            upper = gene.upper()
+            if upper != gene:
+                expanded_aliases[upper] = gene
+
         for original_alias, gene_name in self.gene_aliases.items():
             expanded_alias_set = {
                 original_alias,
@@ -124,10 +133,6 @@ class SpeciesInfo(object):
             for alias in expanded_alias_set:
                 expanded_aliases[alias] = gene_name
 
-            for gene in self.genes:
-                upper = gene.upper()
-                if upper != gene:
-                    expanded_aliases[upper] = gene
         return expanded_aliases
 
     def get_mhc_class(self, gene_name):
