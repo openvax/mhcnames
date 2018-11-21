@@ -10,9 +10,16 @@ HLA:
     - F
     - G
   Ic:
+    - MICA
+    - MICB
+    - BTN3A1
+  Id:
     - CD1a
     - CD1b
     - CD1c
+    - CD1d
+    - CD1e
+    - MR1
   IIa:
     DR:
       - DRA
@@ -99,6 +106,8 @@ H2:
     - M10-PS1
     - M10-PS2
     - M10-PS3
+  Id:
+    - CD1d
   IIa:
     A:
       - AA
@@ -157,24 +166,29 @@ Gaga:
   Ia:
     - BF1
     - BF2
+  Id:
+    - CD1-1
 ######################################################
 #
-# Suid MHC gene data copied from:
+# Suid/swine MHC gene data copied from:
 # https://www.ebi.ac.uk/ipd/mhc/group/SLA/species
 #
 ######################################################
 Susc:
   Ia:
-    - MIC2
     - "1"
     - "2"
     - "3"
     - "5"
+    - "11"
+    - "12"
+  Ib:
     - "6"
     - "7"
     - "8"
-    - "11"
-    - "12"
+  Ic:
+    - MIC1
+    - MIC2
   IIa:
     DQ:
       - DQA
@@ -212,6 +226,9 @@ BoLA:
     - "4"
     - "5"
     - "6"
+  Id:
+    - CD1b3
+    - CD1d
   IIa:
     DQ:
       - DQA
@@ -323,7 +340,8 @@ Aoaz:
 # Aotus lemurinus
 # Gray-bellied Night Monkey
 Aole:
-  TODO: F
+  Ib:
+    - F
 
 # Aotus nancymaae
 # Nancy Ma's Night Monkey
@@ -353,7 +371,16 @@ Aoni:
 # Aotus trivirgatus
 # Three-striped Night Monkey
 Aotr:
-  TODO: E G PS2 DQB2 DRB DRB1 DRB3
+  Ib:
+    - E
+    - G
+  IIa:
+    - DQB2
+    - DRB
+    - DRB1
+    - DRB3
+  TODO:
+    - PS2
 
 # Aotus vociferans
 # Spix's Night Monkey
@@ -370,14 +397,20 @@ Aovo:
 Atbe:
   Ia:
     - B
-  TODO: E G DRB
+  Ib:
+    - E
+    - G
+  IIa:
+    - DRB
 
 # Ateles fusciceps
 # Black-headed Spider Monkey
 Atfu:
   Ia:
     - B
-  TODO: E G
+  Ib:
+    - E
+    - G
 
 # Callithrix jacchus
 # Common Marmoset
@@ -387,7 +420,30 @@ Caja:
     - B1
     - B2
     - B3
-    - B4 B5 B6 B7 B8 B9 E F F1Ps F2Ps F3Ps F5Ps G G10Ps G11Ps G13Ps G14Ps G2Ps G4Ps G5Ps G6Ps G8Ps G9Ps PS2
+    - B4
+    - B5
+    - B6
+    - B7
+    - B8
+    - B9
+    - E
+    - F
+    - F1Ps
+    - F2Ps
+    - F3Ps
+    - F5Ps
+    - G
+    - G10Ps
+    - G11Ps
+    - G13Ps
+    - G14Ps
+    - G2Ps
+    - G4Ps
+    - G5Ps
+    - G6Ps
+    - G8Ps
+    - G9Ps
+    - PS2
   IIa:
     DQ:
       - DQA1
@@ -450,19 +506,40 @@ Chae:
   Ia:
     - A
     - B
-  TODO: G DQA1 DQB1 DRB DRB1 DRB5 DRB6
+  Ib:
+    - G
+  IIa:
+    - DQA1
+    - DQB1
+    - DRB
+    - DRB1
+    - DRB5
+    - DRB6
 
 # Chlorocebus pygerythrus
 # vervet monkey
 Chpy:
-  TODO: A B
+  Ia:
+    - A
+    - B
 
 # Chlorocebus sabaeus
 # Green Monkey
 Chsa:
   Ia:
     - B
-  TODO: A AG E  DPA1 DPB1 DQA1 DQB1 DRA DRB DRB1 DRB5
+  Ib:
+    - E
+  IIa:
+    - DPA1
+    - DPB1
+    - DQA1
+    - DQB1
+    - DRA
+    - DRB
+    - DRB1
+    - DRB5
+  TODO: A AG
 
 # Colobus guereza
 # Mantled Guereza
@@ -477,7 +554,25 @@ Gobe:
     - A
     - B
     - C
-  TODO: E G H OKO DMB DPA1 DPB1 DQA1 DQA2 DQB1 DQB2 DRB DRB1 DRB3 DRB5 DRB6
+  Ib:
+    - E
+    - G
+    - H
+  IIa:
+    - DPA1
+    - DPB1
+    - DQA1
+    - DQA2
+    - DQB1
+    - DQB2
+    - DRB
+    - DRB1
+    - DRB3
+    - DRB5
+    - DRB6
+  IIb:
+    - DMB
+  TODO: OKO
 
 # Gorilla gorilla
 # Gorilla
@@ -486,7 +581,28 @@ Gogo:
     - A
     - B
     - C
-  TODO: E F G H OKO DMB DPA1 DPB1 DQA1 DQA2 DQB1 DQB2 DRA DRB DRB1 DRB3 DRB5 DRB6
+  Ib:
+    - E
+    - F
+    - G
+    - H
+  IIa:
+    - DPA1
+    - DPB1
+    - DQA1
+    - DQA2
+    - DQB1
+    - DQB2
+    - DRA
+    - DRB
+    - DRB1
+    - DRB3
+    - DRB5
+    - DDRB6
+  Ib:
+    - DMB
+  TODO:
+    - OKO
 
 # Hylobates lar
 # Lar Gibbon
@@ -527,7 +643,13 @@ Maar:
   Ia:
     - A1
     - B
-  TODO: I  DPA1 DQA1 DQB1 DRB1 DRB5
+  IIa:
+    - DPA1
+    - DQA1
+    - DQB1
+    - DRB1
+    - DRB5
+  TODO: I
 
 # Macaca assamensis
 # Assam Macaque
@@ -540,7 +662,36 @@ Maas:
 # Macaca fascicularis
 # Crab-eating Macaque
 Mafa:
-  TODO: A1 A2 A3 A4 A5 A6 A8 AG B B11L B16 B17 B20 B21 E F G I  DMA DMB DOA DOB DPA1 DPB1 DQA1 DQB1 DRA DRB DRB1 DRB3 DRB4 DRB5 DRB6
+  Ia:
+    - A1
+    - A2
+    - A3
+    - A4
+    - A5
+    - A6
+    - A8
+  Ib:
+    - E
+    - F
+    - G
+  IIa:
+    - DPA1
+    - DPB1
+    - DQA1
+    - DQB1
+    - DRA
+    - DRB
+    - DRB1
+    - DRB3
+    - DRB4
+    - DRB5
+    - DRB6
+  IIb:
+    - DMA
+    - DMB
+    - DOA
+    - DOB
+  TODO:  AG B B11L B16 B17 B20 B21 I
 
 # Macaca fuscata
 # Japanese Macaque
@@ -565,7 +716,21 @@ Malo:
     - A1
     - A2
     - A3
-  TODO: B I  DMA DMB DOA DOB DPA1 DPB1 DQA1 DQB1 DRA DRB DRB1 DRB3
+  IIa:
+    - DPA1
+    - DPB1
+    - DQA1
+    - DQB1
+    - DRA
+    - DRB
+    - DRB1
+    - DRB3
+  IIb:
+    - DMA
+    - DMB
+    - DOA
+    - DOB
+  TODO: B I
 
 # Macaca mulatta
 # Rhesus Monkey
@@ -588,13 +753,56 @@ Mamu:
     - F
     - G
     - I
-  TODO-ClassII:
-    - DMA DMB DPA1 DPB1 DPB2 DQA1 DQB1 DRA DRB DRB1 DRB3 DRB4 DRB5 DRB6
+  IIa:
+    - DPA1
+    - DPB1
+    - DPB2
+    - DQA1
+    - DQB1
+    - DRA
+    - DRB
+    - DRB1
+    - DRB3
+    - DRB4
+    - DRB5
+    - DRB6
+  IIb:
+    - DMA
+    - DMB
 
 # Macaca nemestrina
 # Southern Pig-tailed Macaque
 Mane:
-  TODO: A1 A2 A3 A4 A5 A6 A7 AG B B12 B16 B17 B20 E F I DPA1 DPB1 DQA1 DQB1 DRA DRB DRB1 DRB3 DRB5 DRB6
+  Ia:
+    - A1
+    - A2
+    - A3
+    - A4
+    - A5
+    - A6
+    - A7
+    - B
+    - B12
+    - B16
+    - B17
+    - B20
+  Ib:
+    - E
+    - F
+  IIa:
+    - DPA1
+    - DPB1
+    - DQA1
+    - DQB1
+    - DRA
+    - DRB
+    - DRB1
+    - DRB3
+    - DRB5
+    - DRB6
+  TODO:
+    - AG
+    - I
 
 # Macaca silenus
 # Lion-tailed Macaque
@@ -608,7 +816,12 @@ Masi:
 # Mandrillus sphinx
 # Mandrill
 Masp:
-  TODO: DRB DRB1 DRB3 DRB5 DRB6
+  IIa:
+    - DRB
+    - DRB1
+    - DRB3
+    - DRB5
+    - DRB6
 
 # Macaca thibetana
 # Milne Edward's Macaque
@@ -724,12 +937,36 @@ Samy:
 # Saguinus oedipus
 # Cottontop Tamarin
 Saoe:
-  TODO: C E F G N1 N3 N4 PS1  DPB1 DQA1 DQB1 DQB2 DRB DRB1 DRB11 DRB3 DRB5
+  Ia:
+    - C
+  Ib:
+    - E
+    - F
+    - G
+  IIa:
+    - DPB1
+    - DQA1
+    - DQB1
+    - DQB2
+    - DRB
+    - DRB1
+    - DRB11
+    - DRB3
+    - DRB5
+  TODO:
+    - N1
+    - N3
+    - N4
+    - PS1
 
 # Saimiri sciureus
 # Common squirrel monkey
 Sasc:
-  TODO: G DPA1 DRB
+  Ib:
+    - G
+  IIa:
+    - DPA1
+    - DRB
 
 # Semnopithecus entellus
 # Northern Plains Gray Langur

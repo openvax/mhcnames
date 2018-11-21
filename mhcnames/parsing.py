@@ -47,7 +47,6 @@ def parse_species_prefix(name, default_species_prefix=None):
         - species prefix string
         - remaining string after species prefix
     """
-
     inferred_prefix_and_original = infer_species_prefix_substring(name)
 
     if inferred_prefix_and_original is None:
