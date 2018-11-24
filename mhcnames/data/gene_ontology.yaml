@@ -375,11 +375,13 @@ Aotr:
     - E
     - G
   IIa:
-    - DQB2
-    - DRB
-    - DRB1
-    - DRB3
-  TODO:
+    DQ:
+      - DQB2
+    DR:
+      - DRB
+      - DRB1
+      - DRB3
+  I:
     - PS2
 
 # Aotus vociferans
@@ -401,7 +403,8 @@ Atbe:
     - E
     - G
   IIa:
-    - DRB
+    DR:
+      - DRB
 
 # Ateles fusciceps
 # Black-headed Spider Monkey
@@ -415,7 +418,7 @@ Atfu:
 # Callithrix jacchus
 # Common Marmoset
 Caja:
-  TODO:
+  Ia:
     - B
     - B1
     - B2
@@ -426,6 +429,7 @@ Caja:
     - B7
     - B8
     - B9
+  Ib:
     - E
     - F
     - F1Ps
@@ -481,7 +485,16 @@ Ceap:
 # Cercocebus atys
 # Sooty Mangabey
 Ceat:
-  TODO: A1 Aw1 Aw2 B E F I
+  Ia:
+    - A1
+    - Aw1
+    - Aw2
+    - B
+  Ib:
+    - E
+    - F
+  I:
+    - I
 
 # Cercopithecus mitis
 # Blue Monkey
@@ -509,12 +522,14 @@ Chae:
   Ib:
     - G
   IIa:
-    - DQA1
-    - DQB1
-    - DRB
-    - DRB1
-    - DRB5
-    - DRB6
+    DQ:
+      - DQA1
+      - DQB1
+    DR:
+      - DRB
+      - DRB1
+      - DRB5
+      - DRB6
 
 # Chlorocebus pygerythrus
 # vervet monkey
@@ -531,15 +546,20 @@ Chsa:
   Ib:
     - E
   IIa:
-    - DPA1
-    - DPB1
-    - DQA1
-    - DQB1
-    - DRA
-    - DRB
-    - DRB1
-    - DRB5
-  TODO: A AG
+    DP:
+      - DPA1
+      - DPB1
+    DQ:
+      - DQA1
+      - DQB1
+    DR:
+      - DRA
+      - DRB
+      - DRB1
+      - DRB5
+  I:
+    - A
+    - AG
 
 # Colobus guereza
 # Mantled Guereza
@@ -559,20 +579,25 @@ Gobe:
     - G
     - H
   IIa:
-    - DPA1
-    - DPB1
-    - DQA1
-    - DQA2
-    - DQB1
-    - DQB2
-    - DRB
-    - DRB1
-    - DRB3
-    - DRB5
-    - DRB6
+    DP:
+      - DPA1
+      - DPB1
+    DQ:
+      - DQA1
+      - DQA2
+      - DQB1
+      - DQB2
+    DR:
+      - DRB
+      - DRB1
+      - DRB3
+      - DRB5
+      - DRB6
   IIb:
-    - DMB
-  TODO: OKO
+    DM:
+      - DMB
+  I: # unclassified
+    - OKO
 
 # Gorilla gorilla
 # Gorilla
@@ -587,21 +612,24 @@ Gogo:
     - G
     - H
   IIa:
-    - DPA1
-    - DPB1
-    - DQA1
-    - DQA2
-    - DQB1
-    - DQB2
-    - DRA
-    - DRB
-    - DRB1
-    - DRB3
-    - DRB5
-    - DDRB6
+    DP:
+      - DPA1
+      - DPB1
+    DQ:
+      - DQA1
+      - DQA2
+      - DQB1
+      - DQB2
+    DR:
+      - DRA
+      - DRB
+      - DRB1
+      - DRB3
+      - DRB5
+      - DDRB6
   Ib:
     - DMB
-  TODO:
+  I: # unclassified
     - OKO
 
 # Hylobates lar
@@ -628,7 +656,8 @@ Hymo:
 # Leontopithecus rosalia
 # Golden Lion Tamarin
 Lero:
-  TODO: G
+  Ib:
+    - G
 
 # Lophocebus aterrimus
 # Black Crested Mangabey    DQA1
@@ -644,12 +673,16 @@ Maar:
     - A1
     - B
   IIa:
-    - DPA1
-    - DQA1
-    - DQB1
-    - DRB1
-    - DRB5
-  TODO: I
+    DP:
+      - DPA1
+    DQ:
+      - DQA1
+      - DQB1
+    DR:
+      - DRB1
+      - DRB5
+  I: # unclassified
+    - I
 
 # Macaca assamensis
 # Assam Macaque
@@ -657,11 +690,15 @@ Maas:
   Ia:
     - A1
     - B
-  TODO: I
+  I:
+    - I
 
 # Macaca fascicularis
 # Crab-eating Macaque
 Mafa:
+  I:
+    - AG
+    - I
   Ia:
     - A1
     - A2
@@ -670,28 +707,38 @@ Mafa:
     - A5
     - A6
     - A8
+    - B
+    - B11L
+    - B16
+    - B17
+    - B20
+    - B21
   Ib:
     - E
     - F
     - G
   IIa:
-    - DPA1
-    - DPB1
-    - DQA1
-    - DQB1
-    - DRA
-    - DRB
-    - DRB1
-    - DRB3
-    - DRB4
-    - DRB5
-    - DRB6
+    DP:
+      - DPA1
+      - DPB1
+    DQ:
+      - DQA1
+      - DQB1
+    DR:
+      - DRA
+      - DRB
+      - DRB1
+      - DRB3
+      - DRB4
+      - DRB5
+      - DRB6
   IIb:
-    - DMA
-    - DMB
-    - DOA
-    - DOB
-  TODO:  AG B B11L B16 B17 B20 B21 I
+    DM:
+      - DMA
+      - DMB
+    DO:
+      - DOA
+      - DOB
 
 # Macaca fuscata
 # Japanese Macaque
@@ -717,25 +764,30 @@ Malo:
     - A2
     - A3
   IIa:
-    - DPA1
-    - DPB1
-    - DQA1
-    - DQB1
-    - DRA
-    - DRB
-    - DRB1
-    - DRB3
+    DP:
+      - DPA1
+      - DPB1
+    DQ:
+      - DQA1
+      - DQB1
+    DR:
+      - DRA
+      - DRB
+      - DRB1
+      - DRB3
   IIb:
-    - DMA
-    - DMB
-    - DOA
-    - DOB
+    DM:
+      - DMA
+      - DMB
+    DO:
+      - DOA
+      - DOB
   TODO: B I
 
 # Macaca mulatta
 # Rhesus Monkey
 Mamu:
-  TODO-ClassI:
+  Ia:
     - A1
     - A2
     - A3
@@ -743,32 +795,38 @@ Mamu:
     - A5
     - A6
     - A7
-    - AG
     - B
     - B11L
     - B16
     - B17
     - B20
+  Ib:
     - E
     - F
     - G
+  I:
     - I
+    - AG
   IIa:
-    - DPA1
-    - DPB1
-    - DPB2
-    - DQA1
-    - DQB1
-    - DRA
-    - DRB
-    - DRB1
-    - DRB3
-    - DRB4
-    - DRB5
-    - DRB6
+    DP:
+      - DPA1
+      - DPB1
+      - DPB2
+    DQ:
+      - DQA1
+      - DQB1
+    DR:
+      - DRA
+      - DRB
+      - DRB1
+      - DRB3
+      - DRB4
+      - DRB5
+      - DRB6
   IIb:
-    - DMA
-    - DMB
+    DM:
+      - DMA
+      - DMB
 
 # Macaca nemestrina
 # Southern Pig-tailed Macaque
@@ -790,16 +848,19 @@ Mane:
     - E
     - F
   IIa:
-    - DPA1
-    - DPB1
-    - DQA1
-    - DQB1
-    - DRA
-    - DRB
-    - DRB1
-    - DRB3
-    - DRB5
-    - DRB6
+    DP:
+      - DPA1
+      - DPB1
+    DQ:
+      - DQA1
+      - DQB1
+    DR:
+      - DRA
+      - DRB
+      - DRB1
+      - DRB3
+      - DRB5
+      - DRB6
   TODO:
     - AG
     - I
@@ -817,11 +878,12 @@ Masi:
 # Mandrill
 Masp:
   IIa:
-    - DRB
-    - DRB1
-    - DRB3
-    - DRB5
-    - DRB6
+    DR:
+      - DRB
+      - DRB1
+      - DRB3
+      - DRB5
+      - DRB6
 
 # Macaca thibetana
 # Milne Edward's Macaque
@@ -830,14 +892,38 @@ Math:
     - A1
     - A2
     - B
-  TODO: I DPB1 DQB1
+  IIa:
+    DP:
+      - DPB1
+    DQ:
+      - DQB1
+  I:
+    - I
 
 # Papio anubis
 # Olive Baboon
 Paan:
   Ia:
+    - A
     - B
-  TODO: A AG F  DPA1 DPB1 DQA1 DQB1 DRA DRB DRB1 DRB3 DRB5 DRB6
+  Ib:
+    -F
+  I:
+    - AG
+  IIa:
+    DP:
+      - DPA1
+      - DPB1
+    DQ:
+      - DQA1
+      - DQB1
+    DR:
+      - DRA
+      - DRB
+      - DRB1
+      - DRB3
+      - DRB5
+      - DRB6
 
 # Papio cynocephalus
 # Yellow Baboon
@@ -845,7 +931,11 @@ Pacy:
   Ia:
     - A
     - B
-  TODO: E DQA1
+  Ib:
+    - E
+  IIa:
+    DQ:
+      - DQA1
 
 # Papio hamadryas
 # Hamadryas Baboon
@@ -869,15 +959,19 @@ Papa:
     - A
     - B
     - C
-  TODO:
+  Ib:
     - G
     - H
-    - DMB
-    - DPB1
-    - DRB6
   IIa:
     DR:
       - DRB1
+      - DRB6
+    DP:
+      - DPB1
+  IIb:
+    DM:
+      - DMB
+
 # Papio papio
 # Guinea Baboon
 Papp:
@@ -888,51 +982,148 @@ Papp:
 # Pan troglodytes
 # Common Chimpanzee
 Patr:
-  TODO: A AL B C E F G H  DMB DOB DPA1 DPB1 DQA1 DQA2 DQB1 DQB2 DRA DRB DRB1 DRB3 DRB4 DRB5 DRB6 DRB7
+  Ia:
+    - A
+    - AL
+    - B
+    - C
+  Ib:
+    - E
+    - F
+    - G
+    - H
+  IIa:
+    DP:
+      - DPA1
+      - DPB1
+    DQ:
+      - DQA1
+      - DQA2
+      - DQB1
+      - DQB2
+    DR:
+      - DRA
+      - DRB
+      - DRB1
+      - DRB3
+      - DRB4
+      - DRB5
+      - DRB6
+      - DRB7
+  IIb:
+    DM:
+      - DMB
+    DO:
+      - DOB
 
 # Papio ursinus
 # Chacma Baboon
 Paur:
-  TODO: DRB DRB1 DRB5 DRB6
+  IIa:
+    DR:
+      - DRB
+      - DRB1
+      - DRB5
+      - DRB6
 
 # Pithecia pithecia
 # White-faced Saki
 Pipi:
-  TODO:  B E G DRB DRB3
+  Ia:
+    - B
+  Ib:
+    - E
+    - G
+  IIa:
+    DR:
+      - DRB
+      - DRB3
+
 # Pongo abelii
 # Sumatran Orangutan
 Poab:
-  TODO: A B C DRA
+  Ia:
+    - A
+    - B
+    - C
+  IIa:
+    DR:
+      - DRA
 
 # Pongo pygmaeus
 # Bornean Orangutan
 Popy:
-  TODO: A Ap B C E H  DMB DPA1 DPB1 DQA1 DQA2 DQB1 DQB2 DRA DRB5 DRB6
+  Ia:
+    - A
+    - B
+    - C
+  I:
+    - Ap
+  Ib:
+    - E
+    - H
+  IIa:
+    DP:
+      - DPA1
+      - DPB1
+    DQ:
+      - DQA1
+      - DQA2
+      - DQB1
+      - DQB2
+    DR:
+      - DRA
+      - DRB5
+      - DRB6
+  IIb:
+    DM:
+      - DMB
 
 # Rhinopithecus roxellana
 # golden snub-nosed monkey
 Rhro:
-  TODO: DPB1 DQA1 DQB1 DRB1 DRB2
+  IIa:
+    DP:
+      - DPB1
+    DQ:
+      - DQA1
+      - DQB1
+    DR:
+      - DRB1
+      - DRB2
 
 # Saguinus fuscicollis
 # Brown-mantled Tamarin
 Safu:
-  TODO: G PS1 PS2
+  Ib:
+    - G
+  I:
+    - PS1
+    - PS2
 
 # Saguinus geoffroyi
 # Geoffroy's Tamarin
 Sage:
-  TODO: PS1 PS2
+  I:
+    - PS1
+    - PS2
 
 # Saguinus labiatus
 # White-lipped Tamarin
 Sala:
-  TODO: G DRB DRB1
+  Ib:
+    - G
+  IIa:
+    DR:
+      - DRB
+      - DRB1
 
 # Saguinus mystax
 # Moustached Tamarin
 Samy:
-  TODO: PS1 PS2
+  I:
+    - PS1
+    - PS2
 
 # Saguinus oedipus
 # Cottontop Tamarin
@@ -944,16 +1135,19 @@ Saoe:
     - F
     - G
   IIa:
-    - DPB1
-    - DQA1
-    - DQB1
-    - DQB2
-    - DRB
-    - DRB1
-    - DRB11
-    - DRB3
-    - DRB5
-  TODO:
+    DP:
+      - DPB1
+    DQ:
+      - DQA1
+      - DQB1
+      - DQB2
+    DR:
+      - DRB
+      - DRB1
+      - DRB11
+      - DRB3
+      - DRB5
+  I:
     - N1
     - N3
     - N4
@@ -965,8 +1159,10 @@ Sasc:
   Ib:
     - G
   IIa:
-    - DPA1
-    - DRB
+    DP:
+      - DPA1
+    DR:
+      - DRB
 
 # Semnopithecus entellus
 # Northern Plains Gray Langur
