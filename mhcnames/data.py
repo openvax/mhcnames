@@ -38,6 +38,10 @@ haplotypes = load("haplotypes.yaml")
 # Dictionary mapping species to serotype name to list of alleles
 serotypes = load("serotypes.yaml")
 
+species_names = load("species_names.yaml")
+
+common_names = load("common_species_names.yaml")
+
 
 def expand_with_uppercase_and_no_dash(*names):
     """
