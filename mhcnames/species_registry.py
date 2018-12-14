@@ -14,13 +14,9 @@
 
 from __future__ import print_function, division, absolute_import
 
-
 from .data import gene_ontology as raw_gene_ontology_dict
-from .data import gene_aliases as raw_gene_aliases_dict
-from .data import serotypes as raw_serotypes_dict
-from .data import haplotypes as raw_haplotypes_dict
-from .data import allele_aliases as raw_allele_aliases_dict
-from .species_info import SpeciesInfo
+
+from .species import Species
 
 # Many old-fasioned naming systems like "equine" ELA now correspond
 # to multiple species. For each species-ambiguous prefix, map it to the
@@ -38,13 +34,7 @@ special_prefixes = set(exemplar_species.keys())
 # map prefixes to Species objects
 species_dict = {}
 for species_prefix, species_gene_ontology in raw_gene_ontology_dict.items():
-    species_dict[species_prefix] = SpeciesInfo(
-        prefix=species_prefix,
-        gene_ontology=raw_gene_ontology_dict.get(species_prefix, {}),
-        gene_aliases=raw_gene_aliases_dict.get(species_prefix, {}),
-        allele_aliases=raw_allele_aliases_dict.get(species_prefix, {}),
-        serotypes=raw_serotypes_dict.get(species_prefix, {}),
-        haplotypes=raw_haplotypes_dict.get(species_prefix, {}))
+    species_dict[species_prefix] = Species(species_prefix)
 
 
 def create_species_aliases():
@@ -71,7 +61,7 @@ def create_species_aliases():
 species_aliases_dict = create_species_aliases()
 
 
-def find_matching_species_info(name):
+def find_matching_species(name):
     """
     Returns either SpeciesInfo object or None if species can't be found
     """
@@ -89,10 +79,10 @@ def find_matching_species_prefix(name):
     upper_no_dash = name.upper().replace("-", "")
     if upper_no_dash in exemplar_species:
         return upper_no_dash
-    species = find_matching_species_info(name)
+    species = find_matching_species(name)
 
     if species is not None:
-        return species.prefix
+        return species.species_prefix
     else:
         return None
 

@@ -12,6 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+from __future__ import print_function, division, absolute_import
+
+from .allele_parse_error import AlleleParseError
+
 class1_subtypes = {
     "Ia",
     "Ib",
@@ -22,8 +27,6 @@ class1_subtypes = {
 class2_subtypes = {
     "IIa",
     "IIb",
-    "IIc"
-    "IId"
 }
 
 class1_restrictions = {"I"}.union(class1_subtypes)
@@ -77,3 +80,14 @@ def restrict_alleles(alleles, mhc_class):
         for allele in alleles
         if allele.get_mhc_class() in valid_subtypes
     ]
+
+
+def normalize_mhc_class_string(mhc_class):
+    original_string = mhc_class
+    mhc_class = mhc_class.lower()
+    mhc_class = mhc_class.replace("i", "II")
+    mhc_class = mhc_class.replace("1", "I")
+    mhc_class = mhc_class.replace("2", "II")
+    if mhc_class not in valid_class_restrictions:
+        raise AlleleParseError("Invalid MHC class: '%s'" % original_string)
+    return mhc_class

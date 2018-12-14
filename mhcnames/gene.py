@@ -14,37 +14,36 @@
 
 from __future__ import print_function, division, absolute_import
 
-from collections import OrderedDict
-
-from .parsed_result import ParsedResult
-
-from .species_registry import find_matching_species_info
 from .mhc_class import is_class1, is_class2
+from .species import Species
 
 
-class Gene(ParsedResult):
+class Gene(Species):
     def __init__(self, species_prefix, gene_name):
-        self.species_prefix = species_prefix
+        Species.__init__(self, species_prefix)
         self.gene_name = gene_name
 
     @property
-    def species_info(self):
-        return find_matching_species_info(self.species_prefix)
+    def mhc_class(self):
+        return self.get_mhc_class_of_gene(self.gene_name)
 
     @property
     def is_class1(self):
-        return is_class1(self.get_mhc_class())
+        return is_class1(self.mhc_class)
 
     @property
     def is_class2(self):
-        return is_class2(self.get_mhc_class())
-
-    def get_mhc_class(self):
-        return self.species_info.get_mhc_class(self.gene_name)
+        return is_class2(self.mhc_class)
 
     def normalized_string(self, include_species=True):
         if include_species:
-            return "%s-%s" % (self.species_prefix, self.gene_name)
+            # non-classical genes located outside the MHC locus
+            # get identified with the common species name if possible
+            if self.mhc_class == "Id":
+                species_str = self.common_species_name
+            else:
+                species_str = self.species_prefix
+            return "%s-%s" % (species_str, self.gene_name)
         else:
             return self.gene_name
 
@@ -79,8 +78,7 @@ class Gene(ParsedResult):
             - is_mutant
             - get_mhc_class
         """
-        return OrderedDict([
-            ("gene", self.normalized_string()),
-            ("mhc_class", self.get_mhc_class()),
-            ("is_mutant", False),
-        ])
+        d = Species.to_record()
+        d["gene"] = self.normalized_string()
+        d["mhc_class"] = self.mhc_class
+        return d

@@ -28,10 +28,8 @@ from .six_digit_allele import SixDigitAllele
 from .eight_digit_allele import EightDigitAllele
 from .allele_group import AlleleGroup
 from .gene import Gene
-from .species_registry import (
-    infer_species_prefix_substring,
-    find_matching_species_info
-)
+from .gene_class import GeneClass
+from .species_registry import infer_species_prefix_substring, find_matching_species
 from .data import (
     allele_aliases_with_uppercase_and_no_dash,
     get_serotype,
@@ -64,7 +62,7 @@ def parse_species_prefix(name, default_species_prefix=None):
 def get_species_prefix_and_info(name, default_species_prefix):
     """
     Returns tuple with elements:
-        - SpeciesInfo
+        - Species
         - species prefix
         - remaining string after species prefix
     """
@@ -73,10 +71,10 @@ def get_species_prefix_and_info(name, default_species_prefix):
     if species_prefix is None:
         raise AlleleParseError("Unable to infer species for '%s'" % name)
 
-    species_info = find_matching_species_info(species_prefix)
-    if species_info is None:
+    species = find_matching_species(species_prefix)
+    if species is None:
         raise AlleleParseError("Unknown species '%s' in '%s'" % (species_prefix, name))
-    return species_info, species_prefix, remaining_string
+    return species, species_prefix, remaining_string
 
 
 def parse_gene_if_possible(name, species_info):
@@ -290,13 +288,16 @@ def parse_without_mutation(
         7) species
     If none of these succeed, then raise an exception
     """
-    species_info, species_prefix, str_after_species = get_species_prefix_and_info(
+    species, species_prefix, str_after_species = get_species_prefix_and_info(
         name,
         default_species_prefix=default_species_prefix)
 
     str_after_species = normalize_allele_string(
         species_prefix=species_prefix,
         allele_sequence_without_species=str_after_species)
+
+    if len(str_after_species) == 0:
+        return species
 
     serotype_result = get_serotype_if_exists(species_prefix, str_after_species)
 
@@ -320,7 +321,7 @@ def parse_without_mutation(
         gene_seps=gene_seps)
 
     # use the canonical gene name e.g. "A" and not "a"
-    gene_name = species_info.normalize_gene_name_if_exists(gene_name)
+    gene_name = species.normalize_gene_name_if_exists(gene_name)
 
     # only allele names which allow three digits in second field seem to be
     # human class I names such as "HLA-B*15:120",
@@ -405,22 +406,26 @@ def parse_with_interior_whitespace(name, default_species_prefix):
     """
     If there's whitespace within an allele description then it's
     either a mutant allele or an error.
-
-    TODO: add support for:
-        - "HLA class I"
-        - "H2-b class I"
-        - "ELA-A1 class I"
-        - "human CD1a"
-        - "H2-r class I"
-        - "BF19 class II"
     """
     lower = name.lower()
     if "mutant" in lower:
         return parse_with_mutations(
             name,
             default_species_prefix=default_species_prefix)
-    else:
-        raise AlleleParseError("Unexpected whitespace in '%s'" % name)
+    parts = lower.split()
+    if len(parts) == 2:
+        # TODO: parse MHC-Id genes and alleles such as "human CD1a"
+        pass
+    elif len(parts) == 3:
+        if parts[1] == "class" and parts[2] in {"1", "2", "i", "ii"}:
+            # parse haplotypes and MHC classes such as:
+            # - "HLA class I"
+            # - "H2-b class I"
+            # - "ELA-A1 class I"
+            # - "H2-r class I"
+            # - "BF19 class II"
+            return GeneClass(parts[0], parts[2])
+    raise AlleleParseError("Unexpected whitespace in '%s'" % name)
 
 
 _parse_cache = {}
@@ -455,7 +460,7 @@ def parse(
 
     Returns object with one of the following types:
         - Species
-        - Locus
+        - GeneClass
         - Gene
         - AlleleGroup
         - FourDigitAllele

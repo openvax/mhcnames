@@ -95,4 +95,5 @@ class FourDigitAllele(AlleleGroup):
         d = AlleleGroup.to_record(self)
         d["allele"] = d["four_digit_allele"] = self.normalized_string()
         d["modifier"] = self.modifier
+        d["is_mutant"] = False
         return d
