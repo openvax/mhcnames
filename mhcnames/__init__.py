@@ -24,6 +24,7 @@ from .named_allele import NamedAllele
 from .mutation import Mutation
 from .mutant_allele import MutantAllele
 from .alpha_beta_pair import AlphaBetaPair
+from .gene_class import GeneClass
 
 __version__ = "1.0.0"
 
@@ -33,6 +34,7 @@ __all__ = [
     "AlleleParseError",
     "parse",
     "Gene",
+    "GeneClass",
     "AlleleGroup",
     "FourDigitAllele",
     "SixDigitAllele",

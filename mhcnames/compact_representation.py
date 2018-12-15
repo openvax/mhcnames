@@ -38,27 +38,3 @@ regarding which fields (the allele group vs. protein ID) can be 3 digits.
 """
 
 from __future__ import print_function, division, absolute_import
-
-import re
-
-from .gene import Gene
-from .allele_group import AlleleGroup
-from .four_digit_allele import FourDigitAllele
-from .six_digit_allele import SixDigitAllele
-from .eight_digit_allele import EightDigitAllele
-from .allele_modifiers import allele_modifier_regex_group_string
-
-
-def parse_compact_allele_name(name):
-    order_of_parsing_attempts = [
-        (eight_digit_regex, EightDigitAllele),
-        (six_digit_regex, SixDigitAllele),
-        (four_digit_regex, FourDigitAllele),
-        (allele_group_regex, AlleleGroup),
-        (gene_regex, Gene)
-    ]
-    for regex, result_class in order_of_parsing_attempts:
-        match = regex.fullmatch(name)
-        if match:
-            return result_class.from_tuple(match.groups())
-    return None

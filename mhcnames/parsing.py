@@ -29,7 +29,7 @@ from .eight_digit_allele import EightDigitAllele
 from .allele_group import AlleleGroup
 from .gene import Gene
 from .gene_class import GeneClass
-from .species_registry import infer_species_prefix_substring, find_matching_species
+from .species import infer_species_prefix_substring, find_matching_species
 from .data import (
     allele_aliases_with_uppercase_and_no_dash,
     get_serotype,
@@ -37,6 +37,7 @@ from .data import (
 from .mutant_allele import MutantAllele
 from .serotype import Serotype
 from .allele_modifiers import valid_allele_modifiers
+from .mhc_class import normalize_mhc_class_string
 
 
 def parse_species_prefix(name, default_species_prefix=None):
@@ -59,7 +60,7 @@ def parse_species_prefix(name, default_species_prefix=None):
         return species_prefix, remaining_string
 
 
-def get_species_prefix_and_info(name, default_species_prefix):
+def get_species_prefix_and_info(name, default_species_prefix=None):
     """
     Returns tuple with elements:
         - Species
@@ -415,16 +416,25 @@ def parse_with_interior_whitespace(name, default_species_prefix):
     parts = lower.split()
     if len(parts) == 2:
         # TODO: parse MHC-Id genes and alleles such as "human CD1a"
-        pass
+        raise AlleleParseError("Gene parsing not yet implemented for '%s'" % name)
     elif len(parts) == 3:
         if parts[1] == "class" and parts[2] in {"1", "2", "i", "ii"}:
-            # parse haplotypes and MHC classes such as:
+            # parse MHC classes such as:
             # - "HLA class I"
             # - "H2-b class I"
+            # TODO add support for haplotypes such as:
             # - "ELA-A1 class I"
             # - "H2-r class I"
             # - "BF19 class II"
-            return GeneClass(parts[0], parts[2])
+            species, species_prefix, remaining_string = \
+                get_species_prefix_and_info(parts[0])
+            if species is None or len(remaining_string) > 0:
+                raise AlleleParseError(
+                    "Unable to parse species name '%s' in '%s'" % (
+                        parts[0],
+                        name))
+            mhc_class = normalize_mhc_class_string(parts[2])
+            return GeneClass(species_prefix, mhc_class)
     raise AlleleParseError("Unexpected whitespace in '%s'" % name)
 
 

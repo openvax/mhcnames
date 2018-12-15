@@ -83,7 +83,7 @@ class GeneClass(Species):
 
     def compact_string(self, include_species=True):
         """
-        Compact representation of a Locus, currently same as the
+        Compact representation of an MHC class, currently same as the
         normalized representation.
         """
-        return GeneClass.normalized_string(self, include_species=include_species)
+        return self.normalized_string(include_species=include_species)

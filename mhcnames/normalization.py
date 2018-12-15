@@ -63,7 +63,6 @@ def normalized_string(
 
 def compact_string(
         raw_string,
-        include_species_prefix=False,
         infer_class2_pairing=False,
         default_species_prefix="HLA"):
 
@@ -75,10 +74,6 @@ def compact_string(
     ----------
     raw_string : str
         String corresponding to allele, locus, or other MHC-related name
-
-    include_species_prefix : bool
-        Include species in the normalized. If False, then you would
-        get "A0201" for "A0201", instead of "HLA-A0201"
 
     infer_class2_pairing : bool
         If given only the alpha or beta chain of a Class II allele,
@@ -92,8 +87,7 @@ def compact_string(
         raw_string,
         infer_class2_pairing=infer_class2_pairing,
         default_species_prefix=default_species_prefix)
-    return parsed_object.compact_string(
-        include_species=include_species_prefix)
+    return parsed_object.compact_string()
 
 
 def dataframe_from_list(names, default_species_prefix="HLA"):

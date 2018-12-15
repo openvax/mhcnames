@@ -85,7 +85,7 @@ def restrict_alleles(alleles, mhc_class):
 def normalize_mhc_class_string(mhc_class):
     original_string = mhc_class
     mhc_class = mhc_class.lower()
-    mhc_class = mhc_class.replace("i", "II")
+    mhc_class = mhc_class.replace("i", "I")
     mhc_class = mhc_class.replace("1", "I")
     mhc_class = mhc_class.replace("2", "II")
     if mhc_class not in valid_class_restrictions:
