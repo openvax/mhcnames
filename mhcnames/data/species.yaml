@@ -1,0 +1,337 @@
+# Data copied from IPD-MHC database on December 16th, 2018
+Humans:
+  Homo sapiens:
+    prefix: HLA
+    common name: Human
+    taxon: 9606
+Murids:
+  Mus musculus:
+    prefix: H2
+    common name: Mouse
+    taxon: 10090
+  Rattus norvegicus:
+    prefix: Rano
+    alias: RT1
+    common name:
+      - Norway Rat
+      - Norwegian Rat
+      - Rat
+    taxon: 10116
+  Rattus rattus:
+    prefix: Rara
+    common name: Black Rat
+    taxon: 10117
+Canids:
+  Canis lupus baileyi:
+    prefix: Caba
+    common name: Mexican Gray Wolf
+    taxon: 143281
+  Canis latrans:
+    prefix: Cala
+    common name: Coyote
+    taxon: 9614
+  Canis lupus:
+    prefix: Calu
+    alias: DLA
+    common name:
+    taxon: 9612
+  Canis rufus:
+    prefix: Caru
+    common name: Red Wolf
+    taxon: 45781
+  Canis simensis:
+    prefix: Casi
+    common name: Ethiopian Wolf
+    taxon: 32534
+Salmonids:
+  Oncorhynchus mykiss:
+    prefix: Onmy
+    common name:
+      - Rainbow Trout
+      - Trout
+    taxon: 8022
+  Salmo salar:
+    prefix: Sasa
+    common name:
+      - Atlantic Salmon
+      - Salmon
+    taxon: 8030
+Ovids:
+  Ovis aries:
+    prefix: Ovar
+    alias: OVA
+    common name:
+      - Domestic Sheep
+      - Sheep
+    taxon: 9940
+  Ovis canadensis:
+    prefix: Ovca
+    common name: Bighorn Sheep
+    taxon: 37174
+Bovins:
+  Bos frontalis:
+    prefix: Bofr
+    common name: Gayal
+    taxon: 30520
+  Bos grunniens:
+    prefix: Bogr
+    common name:
+      - Domestic Yak
+      - Yak
+    taxon: 30521
+  Bos sp.:
+    prefix: BoLA
+    common name:
+      - Cattle
+      - Cow
+    taxon: 29061
+  Bubalus bubalis:
+    prefix: Bubu
+    common name: Water Buffalo
+    taxon: 89462
+Equids:
+  Equus caballus:
+    prefix: Eqca
+    alias: ELA
+    common name: Horse
+    taxon: 9796
+Suids:
+  Sus domesticus:
+    prefix: Sudo
+    alias: SLA
+    common name: Domestic Pig
+    taxon: 9825
+  Sus scrofa:
+    prefix: Susc
+    common name: Feral Pig
+    taxon: 9823
+Gallus:
+  Gallus gallus:
+    prefix: Gaga
+    common name: Chicken
+    taxon: 9031
+Non-human primates:
+  Alouatta pigra:
+    prefix: Alpi
+    common name: Guatemalan black howler
+    taxon: 182253
+  Aotus azarai:
+    prefix: Aoaz
+    common name: Azara's Night Monkey
+    taxon: 30591
+  Aotus lemurinus:
+    prefix: Aole
+    common name: Gray-bellied Night Monkey
+    taxon: 43147
+  Aotus nancymaae:
+    prefix: Aona
+    common name: Nancy Ma's Night Monkey
+    taxon: 37293
+  Aotus nigriceps:
+    prefix: Aoni
+    common name: Black-headed Night Monkey
+    taxon: 57175
+  Aotus trivirgatus:
+    prefix: Aotr
+    common name: Three-striped Night Monkey
+    taxon: 9505
+  Aotus vociferans:
+    prefix: Aovo
+    common name: Spix's Night Monkey
+    taxon: 57176
+  Ateles belzebuth:
+    prefix: Atbe
+    common name: White-fronted Spider Monkey
+    taxon: 9507
+  Ateles fusciceps:
+    prefix: Atfu
+    common name: Black-headed Spider Monkey
+    taxon: 9508
+  Callithrix jacchus:
+    prefix: Caja
+    common name: Common Marmoset
+    taxon: 9483
+  Callicebus moloch:
+    prefix: Camo
+    common name: Red-bellied Titi
+    taxon: 9523
+  Callithrix pygmaea:
+    prefix: Capy
+    common name: Pygmy Marmoset
+    taxon: 9493
+  Cebus apella:
+    prefix: Ceap
+    common name: Tufted Capuchin
+    taxon: 9515
+  Cercocebus atys:
+    prefix: Ceat
+    common name: Sooty Mangabey
+    taxon: 9531
+  Cercopithecus mitis:
+    prefix: Cemi
+    common name: Blue Monkey
+    taxon: 36225
+  Cercopithecus neglectus:
+    prefix: Cene
+    common name: De Brazza's monkey
+    taxon: 36227
+  Chlorocebus aethiops:
+    prefix: Chae
+    common name: Grivet
+    taxon: 9534
+  Chlorocebus pygerythrus:
+    prefix: Chpy
+    common name: vervet monkey
+    taxon: 60710
+  Chlorocebus sabaeus:
+    prefix: Chsa
+    common name: Green Monkey
+    taxon: 60711
+  Colobus guereza:
+    prefix: Cogu
+    common name: Mantled Guereza
+    taxon: 33548
+  Gorilla beringei:
+    prefix: Gobe
+    common name: eastern gorilla
+    taxon: 499232
+  Gorilla gorilla:
+    prefix: Gogo
+    common name: Gorilla
+    taxon: 9593
+  Hylobates lar:
+    prefix: Hyla
+    common name: Lar Gibbon
+    taxon: 9580
+  Hylobates moloch:
+    prefix: Hymo
+    common name: Silvery Javan Gibbon
+    taxon: 81572
+  Leontopithecus rosalia:
+    prefix: Lero
+    common name: Golden Lion Tamarin
+    taxon: 30588
+  Lophocebus aterrimus:
+    prefix: Loat
+    common name: Black Crested Mangabey
+    taxon: 75566
+  Macaca arctoides:
+    prefix: Maar
+    common name: Stump-tailed Macaque
+    taxon: 9540
+  Macaca assamensis:
+    prefix: Maas
+    common name: Assam Macaque
+    taxon: 9551
+  Macaca fascicularis:
+    prefix: Mafa
+    common name: Crab-eating Macaque
+    taxon: 9541
+  Macaca fuscata:
+    prefix: Mafu
+    common name: Japanese Macaque
+    taxon: 9542
+  Mandrillus leucophaeus:
+    prefix: Male
+    common name: Drill
+    taxon: 9568
+  Macaca leonina:
+    prefix: Malo
+    common name: Northern Pig-tailed Macaque
+    taxon: 90387
+  Macaca mulatta:
+    prefix: Mamu
+    common name: Rhesus Monkey
+    taxon: 9544
+  Macaca nemestrina:
+    prefix: Mane
+    common name: Southern Pig-tailed Macaque
+    taxon: 9545
+  Macaca silenus:
+    prefix: Masi
+    common name: Lion-tailed Macaque
+    taxon: 54601
+  Mandrillus sphinx:
+    prefix: Masp
+    common name: Mandrill
+    taxon: 9561
+  Macaca thibetana:
+    prefix: Math
+    common name: Milne Edward's Macaque
+    taxon: 54602
+  Papio anubis:
+    prefix: Paan
+    common name: Olive Baboon
+    taxon: 9555
+  Papio cynocephalus:
+    prefix: Pacy
+    common name: Yellow Baboon
+    taxon: 9556
+  Papio hamadryas:
+    prefix: Paha
+    common name: Hamadryas Baboon
+    taxon: 9557
+  Pan paniscus:
+    prefix: Papa
+    common name: Bonobo
+    taxon: 9597
+  Papio papio:
+    prefix: Papp
+    common name: Guinea Baboon
+    taxon: 100937
+  Pan troglodytes:
+    prefix: Patr
+    common name: Common Chimpanzee
+    taxon: 9598
+  Papio ursinus:
+    prefix: Paur
+    common name: Chacma Baboon
+    taxon: 36229
+  Pithecia pithecia:
+    prefix: Pipi
+    common name: White-faced Saki
+    taxon: 43777
+  Pongo abelii:
+    prefix: Poab
+    common name: Sumatran Orangutan
+    taxon: 9601
+  Pongo pygmaeus:
+    prefix: Popy
+    common name: Bornean Orangutan
+    taxon: 9600
+  Rhinopithecus roxellana:
+    prefix: Rhro
+    common name: Golden Snub-nosed Monkey
+    taxon: 61622
+  Saguinus fuscicollis:
+    prefix: Safu
+    common name: Brown-mantled Tamarin
+    taxon: 9487
+  Saguinus geoffroyi:
+    prefix: Sage
+    common name: Geoffroy's Tamarin
+    taxon: 43778
+  Saguinus labiatus:
+    prefix: Sala
+    common name: White-lipped Tamarin
+    taxon: 78454
+  Saguinus mystax:
+    prefix: Samy
+    common name: Moustached Tamarin
+    taxon: 9488
+  Saguinus oedipus:
+    prefix: Saoe
+    common name: Cottontop Tamarin
+    taxon: 9490
+  Saimiri sciureus:
+    prefix: Sasc
+    common name: Common Squirrel Monkey
+    taxon: 9521
+  Semnopithecus entellus:
+    prefix: Seen
+    common name: Northern Plains Gray Langur
+    taxon: 88029
+  Theropithecus gelada:
+    prefix: Thge
+    common name: Gelada
+    taxon: 9565

@@ -4,6 +4,8 @@ import yaml
 from os.path import dirname, join
 from collections import defaultdict
 
+from .helpers import expand_with_uppercase_and_no_dash
+
 package_dir = dirname(__file__)
 data_dir = join(package_dir, "data")
 
@@ -38,22 +40,8 @@ haplotypes = load("haplotypes.yaml")
 # Dictionary mapping species to serotype name to list of alleles
 serotypes = load("serotypes.yaml")
 
-common_species_names = load("common_species_names.yaml")
-
-
-def expand_with_uppercase_and_no_dash(*names):
-    """
-    Returns set of names which includes original input, uppercase,
-    name with all dashes removed, and dash-free uppercase.
-    """
-    result_set = set([])
-    for name in names:
-        result_set.add(name)
-        no_dash = name.replace("-", "")
-        result_set.add(no_dash)
-        result_set.add(name.upper())
-        result_set.add(no_dash.upper())
-    return result_set
+# dictionary mapping group -> scientific name -> info dictionary
+species = load("species.yaml")
 
 
 def _create_uppercase_and_no_dash_allele_aliases():
@@ -187,3 +175,4 @@ def get_serotype(species_prefix, serotype_name):
                     allele_list
                 )
     return None
+
