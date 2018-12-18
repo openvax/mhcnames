@@ -15,82 +15,7 @@
 from __future__ import print_function, division, absolute_import
 
 from collections import defaultdict
-
-
-def expand_strings(*names, chars_to_remove="-_'"):
-    """
-    Returns set of names which includes original input, lowercase, uppercase,
-    and case variants of strings with dash, underline, and apostrophe removed.
-    """
-    result_set = set(names)
-
-    for char in chars_to_remove:
-        for name in list(result_set):
-            result_set.add(name.replace(char, ""))
-
-    for name in list(result_set):
-        result_set.add(name.upper())
-
-    for name in list(result_set):
-        result_set.add(name.lower())
-    return result_set
-
-
-def normalize_string(name, chars_to_remove="-_'"):
-    """
-    Return uppercase string without any surrounding whitespace and
-    without any characters such as '-', '_' or "'"
-    """
-    if " " in name:
-        name = name.strip()
-    name = name.upper()
-    for char in chars_to_remove:
-        if char in name:
-            name = name.replace(char, "")
-    return name
-
-def apply_string_expansion_to_set_members(set_of_strings):
-    """
-    For every string in the given set, include all of its uppercase and
-    dash-less variants in the result set.
-    """
-    result = set([])
-    for x in set_of_strings:
-        for y in expand_strings(x):
-            result.add(y)
-    return result
-
-
-def apply_string_expansion_to_dict_keys(d):
-    """
-    Create a larger dictionary by copying value associated with each key
-    to uppercase and dash-less variants of the key.
-    """
-    result = {}
-    for key, value in d.items():
-        for expanded_key in expand_strings(key):
-            result[expanded_key] = value
-    return result
-
-
-def invert_dictionary(d):
-    """
-    Convert a dictionary of (key, value) pairs into a dictionary
-    of (value, set of key) pairs. If value is a list, tuple, or set
-    then add (value_i, key) for each value_i in a value.
-    """
-    result = defaultdict(set)
-    for k, v in d.items():
-        if isinstance(v, (list, tuple, set)):
-            for vi in v:
-                result[vi].add(k)
-        else:
-            result[v].add(k)
-    return result
-
-
-def invert_and_expand_dictionary(d):
-    return apply_string_expansion_to_dict_keys(invert_dictionary(d))
+from .helpers import normalize_string
 
 
 class NormalizingDictionary(object):
@@ -132,6 +57,33 @@ class NormalizingDictionary(object):
         self.normalized_to_original_keys_dict[k_normalized].add(k)
         self.store[k_normalized] = v
 
+    def __contains__(self, k):
+        k_normalized = self.normalize_fn(k)
+        return k_normalized in self.store
+
+    def original_keys(self, k):
+        """
+        Returns set of original keys which match the normalized representation
+        of the given key.
+        """
+        k_normalized = self.normalize_fn(k)
+        return self.normalized_to_original_keys_dict.get(k_normalized, set())
+
+    def original_key(self, k):
+        """
+        Attempts to get a single original key matching which has
+        the same the normalized representation as the given input,
+        but may raise an exception if there are more than one original
+        key that matches.
+        """
+        ks = list(self.original_keys(k))
+        if len(ks) == 0:
+            raise KeyError(k)
+        elif len(ks) > 1:
+            raise ValueError("Key '%s' matches multiple entries: %s" % (ks,))
+        else:
+            return ks[0]
+
     def get(self, k, v=None):
         return self.store.get(self.normalize_fn(k), v)
 
@@ -159,6 +111,26 @@ class NormalizingDictionary(object):
             self.keys_aligned_with_values(),
             self.values())
 
+    def map_values(self, fn):
+        pairs = [
+            (k, fn(v))
+            for (k, v) in self.items()
+        ]
+        return NormalizingDictionary(
+            *pairs,
+            normalize_fn=self.normalize_fn,
+            default_value_fn=self.default_value_fn)
+
+    def map_keys(self, fn):
+        pairs = [
+            (fn(k), v)
+            for (k, v) in self.items()
+        ]
+        return NormalizingDictionary(
+            *pairs,
+            normalize_fn=self.normalize_fn,
+            default_value_fn=self.default_value_fn)
+
     def invert(self):
         """
         Returns a NormalizingDictionary where every value
@@ -178,3 +150,30 @@ class NormalizingDictionary(object):
             for vi in values:
                 result[vi].add(k)
         return result
+
+    @classmethod
+    def from_dict(cls, d, normalize_fn=normalize_string, default_value_fn=None):
+        return cls(
+            *d.items(),
+            normalize_fn=normalize_fn,
+            default_value_fn=default_value_fn)
+
+    def __str__(self):
+        s = (
+            "<NormalizingDictionary with %d unique items, "
+            "normalize_fn=%s, "
+            "default_value_fn=%s>") % (
+                len(self.store),
+                self.normalize_fn,
+                self.default_value_fn)
+        all_items = list(self.items())
+
+        for i, (k, v) in enumerate(all_items):
+            s += "\n\t%s: %s" % (k, v)
+            if i > 10:
+                s += "\n..."
+                break
+        return s
+
+    def __repr__(self):
+        return str(self)

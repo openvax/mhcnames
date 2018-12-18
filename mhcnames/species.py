@@ -23,6 +23,8 @@ from .data import serotypes as raw_serotypes_dict
 from .data import haplotypes as raw_haplotypes_dict
 from .data import allele_aliases as raw_allele_aliases_dict
 
+from .species_data import prefix_to_common_names
+
 
 class Species(ParsedResult):
     """
@@ -54,13 +56,7 @@ class Species(ParsedResult):
 
         TODO: get this look-up table from a YAML file, instead of hard-coding
         """
-        return {
-            "HLA": "human",
-            "H2": "mouse",
-            "RT1": "rat",
-            "BOLA": "bovine"}.get(
-                self.species_prefix.upper(),
-                self.species_prefix)
+        return prefix_to_common_names.get(self.species_prefix)
 
     @property
     def gene_ontology(self):

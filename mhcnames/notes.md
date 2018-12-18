@@ -6,7 +6,8 @@ In non-human primate (NHP) MHC nomenclature the Mhc symbol is followed by a four
 
 The assignment of genus and species level in non-human primates is based on Groves (Groves C.P. et al., 2005). In the 2012 nomenclature report for non-human primate MHC (de Groot N.G. et al., 2012) a register of officially accepted MHC symbols for NHP is provided.
 
-Non-human primate specific nomenclature
+## Non-human primate specific nomenclature
+
 Within the designations of particular MHC alleles of non-human primates, specific prefixes or suffixes are used:
 
 Within the non-human primate MHC class I region, expansion of the number of genes can be observed. For instance, in macaques 1 to 3 MHC-A genes can be present per haplotype. These genes are identified with sequential Arabic numbers (Mamu-A1, A2, etc.).

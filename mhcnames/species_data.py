@@ -14,63 +14,63 @@
 
 from __future__ import print_function, division, absolute_import
 
-from collections import defaultdict
+from .data import load
+from .normalizing_dictionary import NormalizingDictionary
 
-from .data import species
-from .helpers import (
-    expand_with_uppercase_and_no_dash,
-    apply_string_expansion_to_set_members
-)
+# dictionary mapping group -> scientific name -> info dictionary
+raw_species_dict = load("species.yaml")
 
-species_scientific_names_to_common_names = defaultdict(set)
-species_common_names_to_scientific_names = {}
-species_scientific_names_to_mhc_prefixes = {}
-species_common_names_to_mhc_prefixes = {}
-species_mhc_prefixes_to_scientific_names = {}
-species_mhc_prefixes_to_common_names = {}
-species_mhc_prefixes_to_aliases = {}
-species_mhc_prefix_aliases_to_four_letter_codes = {}
-all_species_common_names = set([])
-all_species_common_names_with_case_variants = set([])
+common_names_to_scientific_names = NormalizingDictionary()
+prefix_to_scientific_name = NormalizingDictionary()
+prefix_to_alias = NormalizingDictionary()
+alias_to_four_letter_code = NormalizingDictionary()
 
-all_species_scientific_names = set([])
-all_species_scientific_names_with_case_variants = set([])
-
-all_mhc_prefixes = set([])
-all_mhc_prefixes_with_case_variants = set([])
-
-for species_group, species_dicts in species.items():
+for species_group, species_dicts in raw_species_dict.items():
     for scientific_name, species_dict in species_dicts.items():
-        all_species_scientific_names.add(scientific_name)
         prefix = species_dict["prefix"]
         alias = species_dict.get("alias")
         if alias:
-            default_prefix = alias
             prefixes = [prefix, alias]
-            species_mhc_prefix_aliases_to_four_letter_codes[alias] = prefix
-            species_mhc_prefixes_to_aliases[prefix] = alias
+            alias_to_four_letter_code[alias] = prefix
+            prefix_to_alias[prefix] = alias
         else:
-            default_prefix = prefix
             prefixes = [prefix]
 
         common_names = species_dict["common name"]
         if type(common_names) is not list:
             common_names = [common_names]
-
         for common_name in common_names:
-            all_species_common_names.add(common_names)
-            for x in expand_with_uppercase_and_no_dash(common_name):
-                species_common_names_to_mhc_prefixes[x] = default_prefix
-        default_common_name = common_names[0]
-        species_scientific_names_to_common_names[scientific_name] = default_common_name
+            common_names_to_scientific_names[common_name] = scientific_name
 
         for prefix in prefixes:
-            all_mhc_prefixes.add(prefix)
-            species_scientific_names_to_mhc_prefixes[scientific_name].extend(prefixes)
-            species_mhc_prefixes_to_scientific_names[prefix] = scientific_name
-            species_mhc_prefixes_to_common_names[prefix] = default_common_name
+            prefix_to_scientific_name[prefix] = scientific_name
 
-"""
-def find_matching_species_prefix(s):
-    if s in
-"""
+
+scientific_name_to_common_names = common_names_to_scientific_names.invert()
+
+prefix_to_common_names = NormalizingDictionary()
+for prefix, scientific_name in prefix_to_scientific_name.items():
+    common_names = scientific_name_to_common_names[scientific_name]
+    scientific_name_to_common_names[scientific_name] = common_names
+    prefix_to_common_names[prefix] = common_names
+
+scientific_name_to_prefixes = prefix_to_scientific_name.invert()
+common_name_to_mhc_prefixes = prefix_to_common_names.invert()
+
+# since each species can have more than one common name, it's useful to
+# map the MHC prefixes and scientific names to shortest common name
+
+
+def keep_shortest_name(names):
+    return min(names, key=len)
+
+prefix_to_default_common_name = \
+    prefix_to_common_names.map_values(keep_shortest_name)
+scientific_to_default_common_name = \
+    scientific_name_to_common_names.map_values(keep_shortest_name)
+
+
+# collect all unique scientific, common, and MHC prefix names for species
+all_scientific_names = set(scientific_name_to_common_names.keys())
+all_prefixes = set(prefix_to_scientific_name.keys())
+all_common_names = set(common_names_to_scientific_names.keys())
