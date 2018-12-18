@@ -29,11 +29,11 @@ def load(
         result = yaml.load(f)
 
     if normalize_first_level_keys:
-        result = normalize_dict(result)
+        result1 = normalize_dict(result)
+        assert False, (result, result1)
 
     if normalize_second_level_keys:
         # turn first layer of values in dictionary into NormalizingDictionary
-        assert False, result
         result = result.map_values(normalize_dict)
 
     return result
