@@ -15,7 +15,20 @@
 from __future__ import print_function, division, absolute_import
 
 from collections import defaultdict
-from .helpers import normalize_string
+
+
+def normalize_string(name, chars_to_remove="-_'"):
+    """
+    Return uppercase string without any surrounding whitespace and
+    without any characters such as '-', '_' or "'"
+    """
+    if " " in name:
+        name = name.strip()
+    name = name.upper()
+    for char in chars_to_remove:
+        if char in name:
+            name = name.replace(char, "")
+    return name
 
 
 class NormalizingDictionary(object):
@@ -93,14 +106,24 @@ class NormalizingDictionary(object):
     def normalized_keys(self):
         return self.store.keys()
 
+    def key_sets_aligned_with_values(self):
+        """
+        Returns all of the original keys associated with each item
+        of values
+        """
+        return [
+            self.normalized_to_original_keys_dict[k]
+            for k in self.normalized_keys()
+        ]
+
     def keys_aligned_with_values(self):
         """
         Returns one of the original keys associated with each item
         of values
         """
         return [
-            self.normalized_to_original_keys_dict[k]
-            for k in self.normalized_keys()
+            list(ks)[0]
+            for ks in self.key_sets_aligned_with_values()
         ]
 
     def values(self):

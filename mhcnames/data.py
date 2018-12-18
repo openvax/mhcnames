@@ -3,7 +3,6 @@ from __future__ import print_function, division, absolute_import
 import yaml
 from os.path import dirname, join
 
-from .helpers import normalize_string
 from .normalizing_dictionary import NormalizingDictionary
 
 package_dir = dirname(__file__)
@@ -12,12 +11,6 @@ data_dir = join(package_dir, "data")
 
 def get_path(yaml_filename):
     return join(data_dir, yaml_filename)
-
-
-def normalize_dict(d):
-    return NormalizingDictionary.from_dict(
-        d,
-        normalize_fn=normalize_string)
 
 
 def load(
@@ -29,12 +22,11 @@ def load(
         result = yaml.load(f)
 
     if normalize_first_level_keys:
-        result1 = normalize_dict(result)
-        assert False, (result, result1)
+        result = NormalizingDictionary.from_dict(result)
 
     if normalize_second_level_keys:
         # turn first layer of values in dictionary into NormalizingDictionary
-        result = result.map_values(normalize_dict)
+        result = result.map_values(NormalizingDictionary.from_dict)
 
     return result
 
