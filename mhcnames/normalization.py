@@ -63,7 +63,7 @@ def normalized_string(
 
 def compact_string(
         raw_string,
-        infer_class2_pairing=True,
+        infer_class2_pairing=False,
         default_species_prefix="HLA"):
 
     """
@@ -87,7 +87,7 @@ def compact_string(
         raw_string,
         infer_class2_pairing=infer_class2_pairing,
         default_species_prefix=default_species_prefix)
-    return parsed_object.compact_string()
+    return parsed_object.compact_string(include_species_prefix=True)
 
 
 def dataframe_from_list(names, default_species_prefix="HLA"):
