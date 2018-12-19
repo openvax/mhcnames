@@ -15,6 +15,7 @@
 from __future__ import print_function, division, absolute_import
 
 from collections import defaultdict
+from six import string_types
 
 
 def normalize_string(name, chars_to_remove="-_'"):
@@ -22,6 +23,8 @@ def normalize_string(name, chars_to_remove="-_'"):
     Return uppercase string without any surrounding whitespace and
     without any characters such as '-', '_' or "'"
     """
+    if not isinstance(name, string_types):
+        return name
     if " " in name:
         name = name.strip()
     name = name.upper()
@@ -65,6 +68,8 @@ class NormalizingDictionary(object):
         return self.store[k_normalized]
 
     def __setitem__(self, k, v):
+        assert k is not None
+        assert v is not None
         k_normalized = self.normalize_fn(k)
         self.original_to_normalized_key_dict[k] = k_normalized
         self.normalized_to_original_keys_dict[k_normalized].add(k)
@@ -101,7 +106,7 @@ class NormalizingDictionary(object):
         return self.store.get(self.normalize_fn(k), v)
 
     def keys(self):
-        return self.original_to_normalized_keys_dict.keys()
+        return self.original_to_normalized_key_dict.keys()
 
     def normalized_keys(self):
         return self.store.keys()
@@ -128,6 +133,10 @@ class NormalizingDictionary(object):
 
     def values(self):
         return self.store.values()
+
+    def __iter__(self):
+        for k in self.keys_aligned_with_values():
+            yield k
 
     def items(self):
         return zip(

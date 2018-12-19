@@ -30,14 +30,12 @@ from .allele_group import AlleleGroup
 from .gene import Gene
 from .gene_class import GeneClass
 from .species import infer_species_prefix_substring, find_matching_species
-from .data import (
-    allele_aliases_with_uppercase_and_no_dash,
-    get_serotype,
-)
+from .serotype_data import get_serotype
 from .mutant_allele import MutantAllele
 from .serotype import Serotype
 from .allele_modifiers import valid_allele_modifiers
 from .mhc_class import normalize_mhc_class_string
+from .data import allele_aliases
 
 
 def parse_species_prefix(name, default_species_prefix=None):
@@ -93,7 +91,7 @@ def parse_gene_if_possible(name, species_info):
     return None, name
 
 
-def normalize_allele_string(species_prefix, allele_sequence_without_species):
+def normalize_allele_string(species, allele_sequence_without_species):
     """
     Look up allele name in a species-specific dictionary of aliases
     and, if it's present, substitute allele name with canonical form.
@@ -107,7 +105,7 @@ def normalize_allele_string(species_prefix, allele_sequence_without_species):
                     allele_sequence_without_species,))
     upper_seq = trimmed.upper()
     species_allele_alias_dict = \
-        allele_aliases_with_uppercase_and_no_dash.get(species_prefix, {})
+        allele_aliases.get(species.prefix, {})
     new_allele_name = species_allele_alias_dict.get(upper_seq)
     if new_allele_name:
         return new_allele_name
@@ -294,7 +292,7 @@ def parse_without_mutation(
         default_species_prefix=default_species_prefix)
 
     str_after_species = normalize_allele_string(
-        species_prefix=species_prefix,
+        species=species,
         allele_sequence_without_species=str_after_species)
 
     if len(str_after_species) == 0:

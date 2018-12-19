@@ -14,18 +14,16 @@
 
 from __future__ import print_function, division, absolute_import
 
-from .data import load
+from .data import species
 from .normalizing_dictionary import NormalizingDictionary
 
-# dictionary mapping group -> scientific name -> info dictionary
-raw_species_dict = load("species.yaml")
 
 common_names_to_scientific_names = NormalizingDictionary()
 prefix_to_scientific_name = NormalizingDictionary()
 prefix_to_alias = NormalizingDictionary()
 alias_to_four_letter_code = NormalizingDictionary()
 
-for species_group, species_dicts in raw_species_dict.items():
+for species_group, species_dicts in species.items():
     for scientific_name, species_dict in species_dicts.items():
         prefix = species_dict["prefix"]
         alias = species_dict.get("alias")
@@ -37,9 +35,13 @@ for species_group, species_dicts in raw_species_dict.items():
             prefixes = [prefix]
 
         common_names = species_dict["common name"]
+
         if type(common_names) is not list:
             common_names = [common_names]
+
         for common_name in common_names:
+            assert common_name is not None, \
+                "Encountered None for 'common name' of %s" % scientific_name
             common_names_to_scientific_names[common_name] = scientific_name
 
         for prefix in prefixes:

@@ -63,7 +63,7 @@ def normalized_string(
 
 def compact_string(
         raw_string,
-        infer_class2_pairing=False,
+        infer_class2_pairing=True,
         default_species_prefix="HLA"):
 
     """

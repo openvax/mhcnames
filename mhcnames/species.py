@@ -36,6 +36,10 @@ class Species(ParsedResult):
         self._gene_set = None
         self._expanded_gene_alias_dict = None
 
+    @property
+    def prefix(self):
+        return self.species_prefix
+
     def __str__(self):
         return "Species(species_prefix='%s')" % (self.species_prefix,)
 

@@ -34,6 +34,9 @@ Canids:
     prefix: Calu
     alias: DLA
     common name:
+      - Gray Wolf
+      - Wolf
+      - Dog
     taxon: 9612
   Canis rufus:
     prefix: Caru
@@ -79,7 +82,7 @@ Bovins:
       - Domestic Yak
       - Yak
     taxon: 30521
-  Bos sp.:
+  Bos taurus:
     prefix: BoLA
     common name:
       - Cattle
