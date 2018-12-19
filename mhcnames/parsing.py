@@ -67,10 +67,6 @@ def get_species_prefix_and_info(name, default_species_prefix=None):
     """
     (species_prefix, remaining_string) = \
         parse_species_prefix(name, default_species_prefix=default_species_prefix)
-    print(
-        "get_species_prefix_and_info: name=%s default_species_prefix=%s" % (
-            name,
-            default_species_prefix))
 
     if species_prefix is None:
         raise AlleleParseError("Unable to infer species for '%s'" % name)
@@ -135,11 +131,6 @@ def parse_serotype(species_prefix, serotype_name):
         species_prefix, serotype_name, allele_list = t
         parsed_allele_objects = []
         for allele in allele_list:
-            print(
-                "parse_serotype: species_prefix=%s serotype_name=%s allele=%s" % (
-                    species_prefix,
-                    serotype_name,
-                    allele))
             parsed_allele_objects.append(
                 parse(allele, default_species_prefix=species_prefix))
         result = Serotype(species_prefix, serotype_name, parsed_allele_objects)
@@ -484,7 +475,6 @@ def parse(
         return _parse_cache[cache_key]
 
     trimmed_name = strip_whitespace_and_trim_outer_quotes(name)
-    print("parse: name=%s, trimmed_name=%s" % (name, trimmed_name))
     if len(trimmed_name) == 0:
         raise ValueError(
             "Cannot parse empty allele name '%s'" % name)

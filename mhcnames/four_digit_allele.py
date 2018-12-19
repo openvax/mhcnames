@@ -57,7 +57,6 @@ class FourDigitAllele(AlleleGroup):
         result = "%s:%s" % (allele_group_str, self.protein_id)
         if include_modifier and self.modifier:
             result += self.modifier
-        print(result)
         return result
 
     def compact_string(self, include_species=False):

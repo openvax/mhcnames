@@ -49,7 +49,6 @@ def normalized_string(
         By default, parse alleles like "A*02:01" as human but it's possible
         to change this to some other species.
     """
-    print("normalize", raw_string)
     parsed_object = parse(
         raw_string,
         infer_class2_pairing=infer_class2_pairing,
