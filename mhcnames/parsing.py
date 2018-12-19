@@ -67,6 +67,11 @@ def get_species_prefix_and_info(name, default_species_prefix=None):
     """
     (species_prefix, remaining_string) = \
         parse_species_prefix(name, default_species_prefix=default_species_prefix)
+    print(
+        "get_species_prefix_and_info: name=%s default_species_prefix=%s" % (
+            name,
+            default_species_prefix))
+
     if species_prefix is None:
         raise AlleleParseError("Unable to infer species for '%s'" % name)
 
@@ -112,10 +117,14 @@ def normalize_allele_string(species, allele_sequence_without_species):
     else:
         return trimmed
 
+
 _serotype_cache = {}
 
 
-def get_serotype_if_exists(species_prefix, serotype_name):
+def parse_serotype(species_prefix, serotype_name):
+    """
+    Returns Serotype or None
+    """
     key = (species_prefix, serotype_name)
     if key in _serotype_cache:
         return _serotype_cache[key]
@@ -126,26 +135,16 @@ def get_serotype_if_exists(species_prefix, serotype_name):
         species_prefix, serotype_name, allele_list = t
         parsed_allele_objects = []
         for allele in allele_list:
+            print(
+                "parse_serotype: species_prefix=%s serotype_name=%s allele=%s" % (
+                    species_prefix,
+                    serotype_name,
+                    allele))
             parsed_allele_objects.append(
                 parse(allele, default_species_prefix=species_prefix))
         result = Serotype(species_prefix, serotype_name, parsed_allele_objects)
     _serotype_cache[key] = result
     return result
-
-
-"""
-def normalize_parsed_object(
-        species_info,
-        parsed_object):
-    if species_info is not None:
-        if isinstance(parsed_object, Gene):
-            old_gene_name = parsed_object.gene_name
-            new_gene_name = species_info.normalize_gene_name_if_exists(old_gene_name)
-
-            if old_gene_name != new_gene_name:
-                parsed_object = parsed_object.copy(gene_name=new_gene_name)
-    return parsed_object
-"""
 
 
 def split_on_all_seps(seq, seps="_:"):
@@ -298,7 +297,7 @@ def parse_without_mutation(
     if len(str_after_species) == 0:
         return species
 
-    serotype_result = get_serotype_if_exists(species_prefix, str_after_species)
+    serotype_result = parse_serotype(species_prefix, str_after_species)
 
     if serotype_result is not None:
         return serotype_result
@@ -415,8 +414,8 @@ def parse_with_interior_whitespace(name, default_species_prefix):
     if len(parts) == 2:
         # TODO: parse MHC-Id genes and alleles such as "human CD1a"
         raise AlleleParseError("Gene parsing not yet implemented for '%s'" % name)
-    elif len(parts) == 3:
-        if parts[1] == "class" and parts[2] in {"1", "2", "i", "ii"}:
+    elif len(parts) >= 3:
+        if parts[-2] == "class" and parts[-1] in {"1", "2", "i", "ii"}:
             # parse MHC classes such as:
             # - "HLA class I"
             # - "H2-b class I"
@@ -424,8 +423,9 @@ def parse_with_interior_whitespace(name, default_species_prefix):
             # - "ELA-A1 class I"
             # - "H2-r class I"
             # - "BF19 class II"
+            species_query = " ".join(parts[:-2])
             species, species_prefix, remaining_string = \
-                get_species_prefix_and_info(parts[0])
+                get_species_prefix_and_info(species_query)
             if species is None or len(remaining_string) > 0:
                 raise AlleleParseError(
                     "Unable to parse species name '%s' in '%s'" % (
@@ -484,6 +484,7 @@ def parse(
         return _parse_cache[cache_key]
 
     trimmed_name = strip_whitespace_and_trim_outer_quotes(name)
+    print("parse: name=%s, trimmed_name=%s" % (name, trimmed_name))
     if len(trimmed_name) == 0:
         raise ValueError(
             "Cannot parse empty allele name '%s'" % name)

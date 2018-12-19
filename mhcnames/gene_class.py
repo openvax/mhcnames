@@ -81,7 +81,7 @@ class GeneClass(Species):
         else:
             return "class %s" % self.mhc_class
 
-    def compact_string(self, include_species=True):
+    def compact_string(self, include_species=False):
         """
         Compact representation of an MHC class, currently same as the
         normalized representation.

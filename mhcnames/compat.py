@@ -14,15 +14,13 @@
 
 from __future__ import print_function, division, absolute_import
 
-import pandas as pd
-
 from .parsing import parse
 
 
 def normalized_string(
         raw_string,
         include_species_prefix=True,
-        infer_class2_pairing=True,
+        infer_class2_pairing=False,
         default_species_prefix="HLA"):
     """
     Parse MHC alleles into their canonical representation.
@@ -51,13 +49,13 @@ def normalized_string(
         By default, parse alleles like "A*02:01" as human but it's possible
         to change this to some other species.
     """
+    print("normalize", raw_string)
     parsed_object = parse(
         raw_string,
         infer_class2_pairing=infer_class2_pairing,
         default_species_prefix=default_species_prefix)
     result = parsed_object.normalized_string(
         include_species=include_species_prefix)
-    print(">>>", raw_string, parsed_object, result)
     return result
 
 
@@ -87,16 +85,4 @@ def compact_string(
         raw_string,
         infer_class2_pairing=infer_class2_pairing,
         default_species_prefix=default_species_prefix)
-    return parsed_object.compact_string(include_species_prefix=True)
-
-
-def dataframe_from_list(names, default_species_prefix="HLA"):
-    parsed_objects = [
-        parse(name, default_species_prefix=default_species_prefix)
-        for name in names
-    ]
-    records = [
-        obj.to_dict()
-        for obj in parsed_objects
-    ]
-    return pd.DataFrame.from_records(records)
+    return parsed_object.compact_string(include_species=False)

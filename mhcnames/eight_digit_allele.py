@@ -63,7 +63,7 @@ class EightDigitAllele(SixDigitAllele):
             result += self.modifier
         return result
 
-    def compact_string(self, include_species=True):
+    def compact_string(self, include_species=False):
         """
         Compact representation of an EightDigitAllele, omits the "*" and ":"
         in allele names.

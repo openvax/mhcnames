@@ -21,12 +21,15 @@ def load(
     with open(path, 'r') as f:
         result = yaml.load(f)
 
-    if normalize_first_level_keys:
-        result = NormalizingDictionary.from_dict(result)
-
     if normalize_second_level_keys:
         # turn first layer of values in dictionary into NormalizingDictionary
-        result = result.map_values(NormalizingDictionary.from_dict)
+        result = {
+            k: NormalizingDictionary.from_dict(v)
+            for (k, v) in result.items()
+        }
+
+    if normalize_first_level_keys:
+        result = NormalizingDictionary.from_dict(result)
 
     return result
 

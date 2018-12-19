@@ -38,6 +38,14 @@ class ParsedResult(Serializable):
             "%s requires implementation of field_names() method" % (
                 cls.__name__))
 
+    def __eq__(self, other):
+        if self.__class__ is not other.__class__:
+            return False
+        for field in self.field_names():
+            if getattr(self, field) != getattr(other, field):
+                return False
+        return True
+
     def to_record(self):
         raise NotImplementedError(
             "%s requires implementation of to_record() method" % (

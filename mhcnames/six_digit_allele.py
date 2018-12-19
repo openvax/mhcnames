@@ -60,7 +60,7 @@ class SixDigitAllele(FourDigitAllele):
             result += self.modifier
         return result
 
-    def compact_string(self, include_species=True):
+    def compact_string(self, include_species=False):
         """
         Compact representation of a SixDigitAllele, omits the "*" and ":"
         in allele names.

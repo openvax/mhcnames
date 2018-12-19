@@ -60,7 +60,7 @@ class FourDigitAllele(AlleleGroup):
         print(result)
         return result
 
-    def compact_string(self, include_species=True):
+    def compact_string(self, include_species=False):
         """
         Compact representation of a FourDigitAllele, omits the "*" and ":"
         in allele names

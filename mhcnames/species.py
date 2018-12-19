@@ -23,7 +23,11 @@ from .data import serotypes as raw_serotypes_dict
 from .data import haplotypes as raw_haplotypes_dict
 from .data import allele_aliases as raw_allele_aliases_dict
 
-from .species_data import prefix_to_common_names
+from .species_data import (
+    prefix_to_default_common_name,
+    prefix_to_scientific_name,
+    normalize_species_prefix
+)
 
 
 class Species(ParsedResult):
@@ -31,7 +35,7 @@ class Species(ParsedResult):
     Representation of a parsed species prefix such as "HLA", "ELA"
     """
     def __init__(self, species_prefix):
-        self.species_prefix = species_prefix
+        self.species_prefix = normalize_species_prefix(species_prefix)
         self._genes = None
         self._gene_set = None
         self._expanded_gene_alias_dict = None
@@ -39,9 +43,6 @@ class Species(ParsedResult):
     @property
     def prefix(self):
         return self.species_prefix
-
-    def __str__(self):
-        return "Species(species_prefix='%s')" % (self.species_prefix,)
 
     def field_names(self):
         return ("species_prefix",)
@@ -57,10 +58,12 @@ class Species(ParsedResult):
         """
         Returns common species name associated with MHC species
         prefix.
-
-        TODO: get this look-up table from a YAML file, instead of hard-coding
         """
-        return prefix_to_common_names.get(self.species_prefix)
+        return prefix_to_default_common_name.get(self.species_prefix)
+
+    @property
+    def scientific_species_name(self):
+        return prefix_to_scientific_name.get(self.species_prefix)
 
     @property
     def gene_ontology(self):

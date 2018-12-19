@@ -37,10 +37,15 @@ regex_string_to_strip_spaces_and_dashes = _create_regex_for_strip_whitespace_and
 
 
 def strip_whitespace_and_dashes(s):
-    match_obj = regex_string_to_strip_spaces_and_dashes.fullmatch(s)
-    if not match_obj:
-        raise AlleleParseError("Unexpected failure on string '%s'" % s)
-    return match_obj.groups()[0]
+    while s.startswith("-"):
+        s = s[1:]
+    while s.startswith(" "):
+        s = s[1:]
+    while s.endswith("-"):
+        s = s[:-1]
+    while s.endswith(" "):
+        s = s[:-1]
+    return s
 
 
 def strip_whitespace_and_trim_outer_quotes(name):

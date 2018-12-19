@@ -38,6 +38,9 @@ def test_hla_short_names():
 
 def test_hla_A2_serotype():
     eq_(compact_string("A2"), "A2")
+    eq_(normalized_string("A2"), "HLA-A2")
+
+    eq_(compact_string("HLA-A2"), "A2")
     eq_(normalized_string("HLA-A2"), "HLA-A2")
 
 

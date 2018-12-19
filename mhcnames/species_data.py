@@ -72,7 +72,9 @@ scientific_to_default_common_name = \
     scientific_name_to_common_names.map_values(keep_shortest_name)
 
 
-# collect all unique scientific, common, and MHC prefix names for species
-all_scientific_names = set(scientific_name_to_common_names.keys())
-all_prefixes = set(prefix_to_scientific_name.keys())
-all_common_names = set(common_names_to_scientific_names.keys())
+def normalize_species_prefix(prefix):
+    try:
+        prefix = prefix_to_scientific_name.original_key(prefix)
+    except KeyError:
+        pass
+    return prefix

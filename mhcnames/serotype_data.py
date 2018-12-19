@@ -19,9 +19,9 @@ from .data import serotypes
 
 
 def _create_serotype_aliases_dict():
-    species_to_alias_to_serotype = NormalizingDictionary(
-        default_value_fn=NormalizingDictionary)
+    species_to_alias_to_serotype = NormalizingDictionary()
     for (species, species_serotypes) in serotypes.items():
+        species_to_alias_to_serotype[species] = NormalizingDictionary()
         for serotype_name in species_serotypes:
             aliases = {serotype_name}
             if serotype_name.startswith("Cw"):
@@ -44,16 +44,16 @@ def get_serotype(species_prefix, serotype_name):
         - normalized serotype name
         - list of alleles in serotype
     """
-    species_dict = species_prefix_to_alias_to_serotype.get(species_prefix, {})
-    allele_list = species_dict.get(serotype_name)
-    if allele_list is None:
+    alias_to_serotype_dict = species_prefix_to_alias_to_serotype.get(species_prefix, {})
+    corrected_serotype = alias_to_serotype_dict.get(serotype_name)
+    if corrected_serotype is None:
         return None
     else:
         corrected_species_prefix = \
             species_prefix_to_alias_to_serotype.original_key(species_prefix)
-        corrected_serotype_name = species_dict.original_key(serotype_name)
+        allele_list = serotypes[corrected_species_prefix][corrected_serotype]
         return (
             corrected_species_prefix,
-            corrected_serotype_name,
+            corrected_serotype,
             allele_list
         )

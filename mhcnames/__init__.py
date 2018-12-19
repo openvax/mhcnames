@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .normalization import normalized_string, compact_string
+from .compat import normalized_string, compact_string
 from .allele_parse_error import AlleleParseError
 from .parsing import parse
 from .gene import Gene
@@ -25,6 +25,8 @@ from .mutation import Mutation
 from .mutant_allele import MutantAllele
 from .alpha_beta_pair import AlphaBetaPair
 from .gene_class import GeneClass
+from .serotype import Serotype
+from .dataframe import dataframe_from_list
 
 __version__ = "1.0.0"
 
@@ -43,4 +45,6 @@ __all__ = [
     "Mutation",
     "MutantAllele",
     "NamedAllele",
+    "Serotype",
+    "dataframe_from_list"
 ]

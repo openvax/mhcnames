@@ -47,7 +47,7 @@ class Gene(Species):
         else:
             return self.gene_name
 
-    def compact_string(self, include_species=True):
+    def compact_string(self, include_species=False):
         """
         Compact representation of a Locus, currently same as the
         normalized representation.

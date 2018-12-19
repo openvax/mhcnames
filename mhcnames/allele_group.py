@@ -31,7 +31,14 @@ class AlleleGroup(Gene):
     """
     def __init__(self, species_prefix, gene_name, group_id):
         Gene.__init__(self, species_prefix, gene_name)
-        self.group_id = group_id
+        self.group_id = self._adjust_formatting(group_id)
+
+    def _adjust_formatting(self, group_id):
+        if self.species_prefix in {"Mamu", "Mafa", "ELA", "DLA", "Ecqa", "Calu", "BoLA"}:
+            if len(group_id) == 2:
+                if group_id.isdigit():
+                    return "0" + group_id
+        return group_id
 
     @classmethod
     def field_names(cls):
@@ -46,16 +53,26 @@ class AlleleGroup(Gene):
             Gene.normalized_string(self, include_species=include_species),
             self.group_id)
 
-    def compact_string(self, include_species=True):
+    def compact_string(self, include_species=False):
         """
         Compact representation of an AlleleGroup, omits the "*"
         in an allele group.
             Normalized: HLA-A*02
             Compact: HLA-A02
         """
-        return "%s%s" % (
-            Gene.compact_string(self, include_species=include_species),
-            self.group_id)
+        gene_string = Gene.compact_string(self, include_species=include_species)
+        requires_sep = (
+            (gene_string[-1].isdigit() and self.group_id[0].isdigit()) or
+            (gene_string[-1].isalpha() and self.group_id[0].isalpha())
+        )
+        if requires_sep:
+            return "%s*%s" % (
+                gene_string,
+                self.group_id)
+        else:
+            return "%s%s" % (
+                gene_string,
+                self.group_id)
 
     def to_allele_group(self):
         """

@@ -53,10 +53,15 @@ class NormalizingDictionary(object):
         self.normalized_to_original_keys_dict = defaultdict(set)
         self.normalize_fn = normalize_fn
         self.default_value_fn = default_value_fn
+        self.update_pairs(pairs)
 
+    def update_pairs(self, pairs):
         # populate dictionary with initial values via calls to __setitem__
         for (k, v) in pairs:
-            self[k] = v
+            self.__setitem__(k, v)
+
+    def update(self, other_dict):
+        self.update_pairs(other_dict.items())
 
     def __getitem__(self, k):
         k_normalized = self.normalize_fn(k)
@@ -85,7 +90,11 @@ class NormalizingDictionary(object):
         of the given key.
         """
         k_normalized = self.normalize_fn(k)
-        return self.normalized_to_original_keys_dict.get(k_normalized, set())
+        original_keys = self.normalized_to_original_keys_dict.get(k_normalized)
+        if original_keys is None:
+            return set()
+        else:
+            return original_keys
 
     def original_key(self, k):
         """
@@ -126,10 +135,10 @@ class NormalizingDictionary(object):
         Returns one of the original keys associated with each item
         of values
         """
-        return [
-            list(ks)[0]
-            for ks in self.key_sets_aligned_with_values()
-        ]
+        list_of_key_sets = self.key_sets_aligned_with_values()
+        for ks in list_of_key_sets:
+            assert len(ks) > 0
+            yield list(ks)[0]
 
     def values(self):
         return self.store.values()
@@ -179,16 +188,26 @@ class NormalizingDictionary(object):
                 values = v
             else:
                 values = [v]
+
             for vi in values:
                 result[vi].add(k)
         return result
 
+    def __len__(self):
+        return len(self.store)
+
     @classmethod
     def from_dict(cls, d, normalize_fn=normalize_string, default_value_fn=None):
-        return cls(
+        result = cls(
             *d.items(),
             normalize_fn=normalize_fn,
             default_value_fn=default_value_fn)
+        if len(d) != 0:
+            assert len(result) > 0
+            assert len(result.store) > 0
+            assert len(result.original_to_normalized_key_dict) > 0
+            assert len(result.normalized_to_original_keys_dict) > 0
+        return result
 
     def __str__(self):
         s = (
