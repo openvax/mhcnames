@@ -20,7 +20,7 @@ from .parsing import parse
 def normalized_string(
         raw_string,
         include_species_prefix=True,
-        infer_class2_pairing=False,
+        infer_class2_pairing=True,
         default_species_prefix="HLA"):
     """
     Parse MHC alleles into their canonical representation.

@@ -28,10 +28,14 @@ HLA:
       - DRB5
     DP:
       - DPA
+      - DPA1
       - DPB
+      - DPB1
     DQ:
       - DQA
+      - DQA1
       - DQB
+      - DQB1
   IIb:
     DO:
       - DOA

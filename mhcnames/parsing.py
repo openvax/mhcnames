@@ -16,7 +16,7 @@ from __future__ import print_function, division, absolute_import
 
 import re
 
-from .alpha_beta_pair import AlphaBetaPair
+from .alpha_beta_pair import AlphaBetaPair, infer_class2_alpha_chain
 from .allele_parse_error import AlleleParseError
 from .parsing_helpers import (
     strip_whitespace_and_trim_outer_quotes,
@@ -35,7 +35,6 @@ from .mutant_allele import MutantAllele
 from .serotype import Serotype
 from .allele_modifiers import valid_allele_modifiers
 from .mhc_class import normalize_mhc_class_string
-from .data import allele_aliases
 
 
 def parse_species_prefix(name, default_species_prefix=None):
@@ -77,42 +76,14 @@ def get_species_prefix_and_info(name, default_species_prefix=None):
     return species, species_prefix, remaining_string
 
 
-def parse_gene_if_possible(name, species_info):
-    """
-    Parse gene such as "A" or "DQB" and return it along with
-    remaining string.
-
-    Return None if not possible.
-    """
-    for n in range(len(name), 0, -1):
-        substring = name[:n]
-        gene_name = species_info.find_matching_gene_name(substring)
-        if gene_name:
-            return gene_name, name[n:]
-    return None, name
-
-
 def normalize_allele_string(species, allele_sequence_without_species):
     """
-    Look up allele name in a species-specific dictionary of aliases
-    and, if it's present, substitute allele name with canonical form.
+    First get rid of any trailing '-' characters or whitespace. Then look
+    up allele name in a species-specific dictionary of aliases and,
+    if it's present, substitute allele name with canonical form.
     """
     trimmed = strip_whitespace_and_dashes(allele_sequence_without_species)
-    if "*" in trimmed:
-        split_by_star = trimmed.split("*")
-        if len(split_by_star) > 2:
-            raise AlleleParseError(
-                "Unexpected number of '*' characters in sequence '%s' " % (
-                    allele_sequence_without_species,))
-    upper_seq = trimmed.upper()
-    species_allele_alias_dict = \
-        allele_aliases.get(species.prefix, {})
-    new_allele_name = species_allele_alias_dict.get(upper_seq)
-    if new_allele_name:
-        return new_allele_name
-    else:
-        return trimmed
-
+    return species.allele_aliases.get(trimmed, trimmed)
 
 _serotype_cache = {}
 
@@ -241,13 +212,32 @@ def parse_allele_after_species_and_gene_name(
 compact_gene_and_allele_regex = re.compile("([A-Za-z]+)([0-9\:]+)[A-Z]?")
 
 
-def parse_gene_name_from_prefix(original_name, str_after_species, gene_seps="*_"):
+def parse_gene_if_possible(species, name):
+    """
+    Parse gene such as "A" or "DQB" and return it along with
+    remaining string.
+
+    Return None if not possible.
+    """
+    for n in range(len(name), 0, -1):
+        substring = name[:n]
+        gene_name = species.find_matching_gene_name(substring)
+        if gene_name:
+            return gene_name, name[n:]
+    return None, name
+
+
+def parse_gene_name_from_prefix(
+        species, original_name, str_after_species, gene_seps="*_"):
     gene_name = None
     for sep in gene_seps:
         if str_after_species.count(sep) == 1:
             gene_name, str_after_gene = str_after_species.split(sep)
             break
     if gene_name is None:
+        gene_name, str_after_gene = parse_gene_if_possible(species, str_after_species)
+    if gene_name is None:
+
         # If the string had neither "*" nor "_" then try to collect the gene
         # name as the non-numerical part at the start of the string.
         match = compact_gene_and_allele_regex.fullmatch(str_after_species)
@@ -288,6 +278,13 @@ def parse_without_mutation(
     if len(str_after_species) == 0:
         return species
 
+    if "-" in str_after_species:
+        if str_after_species.count("-") != 1:
+            raise AlleleParseError("Unexpected number of '-' in '%s'" % name)
+        return parse_known_alpha_beta_pair(
+            str_after_species,
+            default_species_prefix=species.species_prefix)
+
     serotype_result = parse_serotype(species_prefix, str_after_species)
 
     if serotype_result is not None:
@@ -302,9 +299,8 @@ def parse_without_mutation(
     #   - A_01:01
     # However this will not work:
     #   - A_01_01
-    # Also, if no gene separator is used (e.g. A0101) then the parsing
-    # continues further down.
     gene_name, str_after_gene = parse_gene_name_from_prefix(
+        species,
         name,
         str_after_species,
         gene_seps=gene_seps)
@@ -337,7 +333,10 @@ def parse_known_alpha_beta_pair(name, default_species_prefix="HLA"):
     The species information from the first allele
     is used to guide parsing for the second allele.
     """
-    parts = name.split("/")
+    if "/" in name:
+        parts = name.split("/")
+    else:
+        parts = name.split("-")
     if len(parts) != 2:
         raise AlleleParseError(
             "Expected Class II alpha/beta pairing but got %d allele names in '%s'" % (
@@ -476,14 +475,15 @@ def parse(
 
     trimmed_name = strip_whitespace_and_trim_outer_quotes(name)
     if len(trimmed_name) == 0:
-        raise ValueError(
+        raise AlleleParseError(
             "Cannot parse empty allele name '%s'" % name)
-    elif "/" in trimmed_name:
-        result = parse_known_alpha_beta_pair(
+    if " " in trimmed_name or "\t" in trimmed_name:
+        result = parse_with_interior_whitespace(
             trimmed_name,
             default_species_prefix=default_species_prefix)
-    elif " " in trimmed_name or "\t" in trimmed_name:
-        result = parse_with_interior_whitespace(
+    elif "/" in trimmed_name:
+        # parse paired Class II alleles such as 'DRA1*01:01/DRB1*01:01'
+        result = parse_known_alpha_beta_pair(
             trimmed_name,
             default_species_prefix=default_species_prefix)
     else:
@@ -491,10 +491,9 @@ def parse(
             trimmed_name,
             default_species_prefix=default_species_prefix)
 
+    print(result, infer_class2_pairing)
     if infer_class2_pairing and result.__class__ is not AlphaBetaPair:
-        if isinstance(result, Gene) and result.is_class2:
-            raise AlleleParseError(
-                "Inference of paired alpha/beta pair for %s not yet implemented" % (
-                    result,))
+        result = infer_class2_alpha_chain(result)
+
     _parse_cache[cache_key] = result
     return result

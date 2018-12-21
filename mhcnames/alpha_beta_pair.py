@@ -16,6 +16,8 @@ from __future__ import print_function, division, absolute_import
 
 from collections import OrderedDict
 from .parsed_result import ParsedResult
+from .allele_parse_error import AlleleParseError
+from .four_digit_allele import FourDigitAllele
 
 
 class AlphaBetaPair(ParsedResult):
@@ -32,12 +34,12 @@ class AlphaBetaPair(ParsedResult):
         return self.alpha.species_prefix
 
     def normalized_string(self, include_species=True):
-        return "%s/%s" % (
+        return "%s-%s" % (
             self.alpha.normalized_string(include_species=include_species),
             self.beta.normalized_string(include_species=False))
 
     def compact_string(self, include_species=False):
-        return "%s/%s" % (
+        return "%s-%s" % (
             self.alpha.compact_string(include_species=include_species),
             self.beta.compact_string(include_species=False))
 
@@ -58,3 +60,52 @@ class AlphaBetaPair(ParsedResult):
             ("is_mutant", False),
             ("allele", self.normalized_string()),
         ])
+
+
+default_human_alpha_chains = {
+    # The DR alpha chain is effectively constant across the population
+    "DRB": FourDigitAllele("HLA", "DRA1", "01", "01"),
+    # Most common alpha chain for DP is DPA*01:03 but we really
+    # need to change this logic to use a lookup table of pairwise
+    # frequencies for inferring the alpha-beta pairing
+    "DPB": FourDigitAllele("HLA", "DPA1", "01", "03"),
+    # Most common DQ alpha (according to wikipedia) is DQA1*01:02
+    # but like DPA we should use pair frequencies in the future
+    "DQB": FourDigitAllele("HLA", "DQA1", "01", "02")
+}
+
+
+def infer_class2_alpha_chain(beta):
+    """
+    Given a FourDigitAllele, SixDigitAllele or EightDigitAllele
+    for a Class II beta chain, returns the alpha/beta pair of most common
+    FourDigitAlleles.
+    """
+    if not isinstance(beta, FourDigitAllele):
+        raise AlleleParseError(
+            "Inference of class II pairing for %s : %s not yet implemented" % (
+                beta,
+                beta.__class__.__name__))
+
+    print(beta)
+    print(beta.is_class1, beta.is_class2, beta.mhc_class, beta.gene_name)
+    if not beta.is_class2:
+        raise AlleleParseError(
+            "%s must be a Class II allele to infer a matching alpha chain" % beta)
+
+    if beta.species_prefix != "HLA":
+        raise AlleleParseError(
+            "Inference of class II pairing for %s not yet implemented" % beta)
+
+    locus = beta.gene_name[:3]
+    if locus not in default_human_alpha_chains:
+        raise AlleleParseError(
+            "Inference of class II pairing for %s not yet implemented" % beta)
+
+    alpha = default_human_alpha_chains.get(locus)
+
+    if alpha is None:
+        raise AlleleParseError(
+            "Failed to infer class II alpha chain for %s" % beta)
+
+    return AlphaBetaPair(alpha, beta)

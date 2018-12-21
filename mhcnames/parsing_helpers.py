@@ -14,26 +14,7 @@
 
 from __future__ import print_function, division, absolute_import
 
-import re
-
 from .allele_parse_error import AlleleParseError
-
-
-def _create_regex_for_strip_whitespace_and_dashes():
-    optional_space_or_dash = "[-\s]*"
-    anything_except_space_or_dash = "A-Za-z0-9\._\*:"
-    anything_except_space = anything_except_space_or_dash + "-"
-    regex_string_to_strip_spaces_and_dashes = \
-        "%s([%s][%s]*[%s])%s" % (
-            optional_space_or_dash,
-            anything_except_space_or_dash,
-            anything_except_space,
-            anything_except_space_or_dash,
-            optional_space_or_dash
-        )
-    return re.compile(regex_string_to_strip_spaces_and_dashes)
-
-regex_string_to_strip_spaces_and_dashes = _create_regex_for_strip_whitespace_and_dashes()
 
 
 def strip_whitespace_and_dashes(s):

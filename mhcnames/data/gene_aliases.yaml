@@ -1,6 +1,8 @@
 HLA:
   Cw: C
   DPw: DP
+  DRB: DRB1
+
 ##########################################################################
 #
 # Mouse gene aliases copied from
