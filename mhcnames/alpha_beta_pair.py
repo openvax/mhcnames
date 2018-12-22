@@ -87,8 +87,6 @@ def infer_class2_alpha_chain(beta):
                 beta,
                 beta.__class__.__name__))
 
-    print(beta)
-    print(beta.is_class1, beta.is_class2, beta.mhc_class, beta.gene_name)
     if not beta.is_class2:
         raise AlleleParseError(
             "%s must be a Class II allele to infer a matching alpha chain" % beta)

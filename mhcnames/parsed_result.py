@@ -46,6 +46,9 @@ class ParsedResult(Serializable):
                 return False
         return True
 
+    def __hash__(self):
+        return sum(hash(getattr(self, field)) for field in self.field_names())
+
     def to_record(self):
         raise NotImplementedError(
             "%s requires implementation of to_record() method" % (

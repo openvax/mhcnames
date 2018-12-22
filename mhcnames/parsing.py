@@ -76,15 +76,6 @@ def get_species_prefix_and_info(name, default_species_prefix=None):
     return species, species_prefix, remaining_string
 
 
-def normalize_allele_string(species, allele_sequence_without_species):
-    """
-    First get rid of any trailing '-' characters or whitespace. Then look
-    up allele name in a species-specific dictionary of aliases and,
-    if it's present, substitute allele name with canonical form.
-    """
-    trimmed = strip_whitespace_and_dashes(allele_sequence_without_species)
-    return species.allele_aliases.get(trimmed, trimmed)
-
 _serotype_cache = {}
 
 
@@ -271,9 +262,7 @@ def parse_without_mutation(
         name,
         default_species_prefix=default_species_prefix)
 
-    str_after_species = normalize_allele_string(
-        species=species,
-        allele_sequence_without_species=str_after_species)
+    str_after_species = strip_whitespace_and_dashes(str_after_species)
 
     if len(str_after_species) == 0:
         return species
@@ -289,6 +278,9 @@ def parse_without_mutation(
 
     if serotype_result is not None:
         return serotype_result
+
+    # if the remaining string is an allele alias, get its canonical form
+    print(str_after_species, species, species.allele_aliases.get(str_after_species))
 
     # try to heuristically split apart the gene name and any allele information
     # when the requires separators are missing
@@ -337,12 +329,15 @@ def parse_known_alpha_beta_pair(name, default_species_prefix="HLA"):
         parts = name.split("/")
     else:
         parts = name.split("-")
-    if len(parts) != 2:
+    if len(parts) == 3:
+        default_species_prefix, alpha_string, beta_string = parts
+    elif len(parts) == 2:
+        alpha_string, beta_string = parts
+    else:
         raise AlleleParseError(
             "Expected Class II alpha/beta pairing but got %d allele names in '%s'" % (
                 len(parts),
                 name))
-    alpha_string, beta_string = parts
     alpha = parse(alpha_string, default_species_prefix=default_species_prefix)
     beta = parse(
         beta_string,
@@ -491,7 +486,6 @@ def parse(
             trimmed_name,
             default_species_prefix=default_species_prefix)
 
-    print(result, infer_class2_pairing)
     if infer_class2_pairing and result.__class__ is not AlphaBetaPair:
         result = infer_class2_alpha_chain(result)
 

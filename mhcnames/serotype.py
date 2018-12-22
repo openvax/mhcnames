@@ -52,3 +52,5 @@ class Serotype(Gene):
             allele.normalized_string() for allele in self.alleles
         ])
         return d
+
+

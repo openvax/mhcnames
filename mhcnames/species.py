@@ -22,11 +22,13 @@ from .data import gene_aliases as raw_gene_aliases_dict
 from .data import serotypes as raw_serotypes_dict
 from .data import haplotypes as raw_haplotypes_dict
 from .data import allele_aliases as raw_allele_aliases_dict
-
+from .normalizing_dictionary import NormalizingDictionary
 from .species_data import (
     prefix_to_default_common_name,
     prefix_to_scientific_name,
-    normalize_species_prefix
+    normalize_species_prefix,
+    scientific_name_to_prefixes,
+    prefix_to_alias,
 )
 
 
@@ -39,6 +41,10 @@ class Species(ParsedResult):
         self._genes = None
         self._gene_set = None
         self._expanded_gene_alias_dict = None
+        self._serotypes = None
+        self._allele_aliases = None
+        self._gene_aliases = None
+        self._haplotypes = None
 
     @property
     def prefix(self):
@@ -66,6 +72,14 @@ class Species(ParsedResult):
         return prefix_to_scientific_name.get(self.species_prefix)
 
     @property
+    def all_prefixes(self):
+        """
+        Returns all prefixes used for this species, including aliases
+        such as SLA/Susc
+        """
+        return scientific_name_to_prefixes.get(self.scientific_species_name, [])
+
+    @property
     def gene_ontology(self):
         """
         Dictionary containing keys which are a subset of
@@ -81,14 +95,24 @@ class Species(ParsedResult):
         """
         Dictionary mapping non-canonical gene names to their canonical forms.
         """
-        return raw_gene_aliases_dict.get(self.species_prefix, {})
+        if self._gene_aliases is None:
+            gene_aliases = NormalizingDictionary()
+            for prefix in self.all_prefixes:
+                gene_aliases.update(raw_gene_aliases_dict.get(prefix, {}))
+            self._gene_aliases = gene_aliases
+        return self._gene_aliases
 
     @property
     def allele_aliases(self):
         """
         Dictionary mapping non-canonical allele names to their canonical forms.
         """
-        return raw_allele_aliases_dict.get(self.species_prefix, {})
+        if self._allele_aliases is None:
+            allele_aliases = NormalizingDictionary()
+            for prefix in self.all_prefixes:
+                allele_aliases.update(raw_allele_aliases_dict.get(prefix, {}))
+            self._allele_aliases = allele_aliases
+        return self._allele_aliases
 
     @property
     def serotypes(self):
@@ -96,14 +120,24 @@ class Species(ParsedResult):
         Dictionary mapping serotype names to lists of alleles
         (all expected to be for the same gene)
         """
-        return raw_serotypes_dict.get(self.species_prefix, {})
+        if self._serotypes is None:
+            serotypes = NormalizingDictionary()
+            for prefix in self.all_prefixes:
+                serotypes.update(raw_serotypes_dict.get(prefix, {}))
+            self._serotypes = serotypes
+        return self._serotypes
 
     @property
     def haplotypes(self):
         """
         Dictionary mapping haplotype names to lists of alleles (one per gene)
         """
-        return raw_haplotypes_dict(self.species_prefix, {})
+        if self._haplotypes is None:
+            haplotypes = NormalizingDictionary()
+            for prefix in self.all_prefixes:
+                haplotypes.update(raw_haplotypes_dict(prefix, {}))
+            self._haplotypes = haplotypes
+        return self._haplotypes
 
     def genes(self):
         if self._genes is None:
@@ -195,70 +229,39 @@ class Species(ParsedResult):
         return None
 
 
-# Many old-fasioned naming systems like "equine" ELA now correspond
-# to multiple species. For each species-ambiguous prefix, map it to the
-# species which has the most complete gene annotations.
-exemplar_species = {
-    "DLA": "Calu",
-    "ELA": "Eqca",
-    "OLA": "Ovar",
-    "SLA": "Susc",
-    "RT1": "Rano"
-}
-
-special_prefixes = set(exemplar_species.keys())
-
-# map prefixes to Species objects
-species_dict = {}
-for species_prefix, species_gene_ontology in raw_gene_ontology_dict.items():
-    species_dict[species_prefix] = Species(species_prefix)
+# map prefix strings to Species objects
+_species_cache = {}
 
 
-def create_species_aliases():
+def find_matching_species(name, use_aliases=True):
     """
-    Create dictionary of species aliases from both the species->MHC class->gene
-    ontology and the set of MHC names (like RT1) which actually represent
-    multiple species and require an exemplar to be chosen for its gene
-    metadata.
+    Given an unnormalized species prefix string,
+    returns Species object. If `use_aliases` is True,
+    then replace four letter species codes (e.g. 'Susc') with more common
+    prefixes (e.g. 'SLA').
     """
-    aliases = species_dict.copy()
-    for group_name, species_name in exemplar_species.items():
-        aliases[group_name] = species_dict[species_name]
-
-    for key, species in list(species_dict.items()):
-        upper = key.upper()
-        if upper != key:
-            aliases[upper] = species
-        upper_no_dash = upper.replace("-", "")
-        if upper_no_dash not in {key, upper}:
-            aliases[upper_no_dash] = species
-    return aliases
-
-# dictionary mapping alias names to Species objects
-species_aliases_dict = create_species_aliases()
+    key = (name, use_aliases)
+    if key not in _species_cache:
+        if name in prefix_to_scientific_name:
+            prefix = prefix_to_scientific_name.original_key(name)
+            if use_aliases:
+                prefix = prefix_to_alias.get(prefix, prefix)
+            species = Species(prefix)
+        else:
+            species = None
+        _species_cache[key] = species
+    return _species_cache[key]
 
 
-def find_matching_species(name):
+def find_matching_species_prefix(name, use_aliases=True):
     """
-    Returns either SpeciesInfo object or None if species can't be found
+    Given an unnormalized species prefix string,
+    returns normalized prefix string. If `use_aliases` is True,
+    then replace four letter species codes (e.g. 'Susc') with more common
+    prefixes (e.g. 'SLA').
     """
-    if name in species_dict:
-        return species_dict[name]
-    return species_aliases_dict.get(name.upper().replace("-", ""))
-
-
-def find_matching_species_prefix(name):
-    """
-    Returns normalized prefix for given species but will keep
-    RT1, DLA, ELA, OLA, SLA from normalizing to a particular member
-    of their species group.
-    """
-    upper_no_dash = name.upper().replace("-", "")
-    if upper_no_dash in exemplar_species:
-        return upper_no_dash
-    species = find_matching_species(name)
-
-    if species is not None:
+    species = find_matching_species(name, use_aliases=True)
+    if species:
         return species.species_prefix
     else:
         return None
