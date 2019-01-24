@@ -35,6 +35,7 @@ from .mutant_allele import MutantAllele
 from .serotype import Serotype
 from .allele_modifiers import valid_allele_modifiers
 from .mhc_class import normalize_mhc_class_string
+from .named_allele import NamedAllele
 
 
 def parse_species_prefix(name, default_species_prefix=None):
@@ -160,8 +161,7 @@ def parse_allele_after_species_and_gene_name(
                 parsed_fields.append(part[:boundary_index])
                 part = part[boundary_index:]
         else:
-            raise AlleleParseError("Unexpected part of allele name '%s' in '%s'" % (
-                part, original_name))
+            parsed_fields.append(part)
 
     if len(parsed_fields) in {0, 1} and modifier is not None:
             raise AlleleParseError("Unexpected modifier '%s' at end of '%s'" % (
@@ -219,7 +219,7 @@ def parse_gene_if_possible(species, name):
 
 
 def parse_gene_name_from_prefix(
-        species, original_name, str_after_species, gene_seps="*_"):
+        species, original_name, str_after_species, gene_seps="*_-"):
     gene_name = None
     for sep in gene_seps:
         if str_after_species.count(sep) == 1:
@@ -239,6 +239,10 @@ def parse_gene_name_from_prefix(
         raise AlleleParseError("Unable to parse '%s'" % original_name)
 
     return gene_name, str_after_gene
+
+
+def parse_murine_gene(species, gene_name, str_after_gene):
+    return NamedAllele(species.prefix, gene_name, str_after_gene)
 
 
 def parse_without_mutation(
@@ -270,25 +274,31 @@ def parse_without_mutation(
     if "-" in str_after_species:
         if str_after_species.count("-") != 1:
             raise AlleleParseError("Unexpected number of '-' in '%s'" % name)
-        return parse_known_alpha_beta_pair(
-            str_after_species,
-            default_species_prefix=species.species_prefix)
+        # this situation is tricky since it might be either
+        # a class II allele pair
+        #   e.g. DRA1*01:01-DRB1*01:01
+        # or a class I allele where '-' is used instead of '*'
+        #   e.g. 1-HB01 (swine allele)
+        first_part = str_after_species.split("-")[0]
+        if species.find_matching_gene_name(first_part) is None:
+            return parse_known_alpha_beta_pair(
+                str_after_species,
+                default_species_prefix=species.species_prefix)
 
     serotype_result = parse_serotype(species_prefix, str_after_species)
 
     if serotype_result is not None:
         return serotype_result
 
-    # if the remaining string is an allele alias, get its canonical form
-    print(str_after_species, species, species.allele_aliases.get(str_after_species))
-
     # try to heuristically split apart the gene name and any allele information
     # when the requires separators are missing
     # Examples which will parse correctly here:
-    #   - A*0201
-    #   - A*02:01
-    #   - A_0101
-    #   - A_01:01
+    #   A*0201
+    #   A*02:01
+    #   A_0101
+    #   A_01:01
+    #   A-0101
+    #   A-01:01
     # However this will not work:
     #   - A_01_01
     gene_name, str_after_gene = parse_gene_name_from_prefix(
@@ -300,6 +310,20 @@ def parse_without_mutation(
     # use the canonical gene name e.g. "A" and not "a"
     gene_name = species.normalize_gene_name_if_exists(gene_name)
 
+    str_after_gene = strip_whitespace_and_dashes(str_after_gene)
+
+    if len(str_after_gene) == 0:
+        return Gene(species.prefix, gene_name)
+
+    # if the remaining string is an allele string which has
+    # been renamed or deprecated, then get its new/canonical form
+    new_allele_name = species.allele_aliases.get("%s*%s" % (gene_name, str_after_gene))
+    if new_allele_name:
+        gene_name, str_after_gene = new_allele_name.split("*")
+
+    if species.prefix in {"H2", "RT1"}:
+        return parse_murine_gene(species, gene_name, str_after_gene)
+
     # only allele names which allow three digits in second field seem to be
     # human class I names such as "HLA-B*15:120",
     # it's otherwise typical to allow three digits in the first field
@@ -307,6 +331,7 @@ def parse_without_mutation(
         species_prefix == "HLA" and gene_name in {"A", "B", "C"}
     )
     allow_three_digits_in_first_field = not allow_three_digits_in_second_field
+
     return parse_allele_after_species_and_gene_name(
         original_name=name,
         species_prefix=species_prefix,
@@ -329,6 +354,7 @@ def parse_known_alpha_beta_pair(name, default_species_prefix="HLA"):
         parts = name.split("/")
     else:
         parts = name.split("-")
+
     if len(parts) == 3:
         default_species_prefix, alpha_string, beta_string = parts
     elif len(parts) == 2:

@@ -88,7 +88,10 @@ class Species(ParsedResult):
         to dictionaries such as:
             {"DR": ["DRA", "DRB1", "DRB3", "DRB5"]}
         """
-        return raw_gene_ontology_dict.get(self.species_prefix, {})
+        for prefix in self.all_prefixes:
+            if prefix in raw_gene_ontology_dict:
+                return raw_gene_ontology_dict[prefix]
+        return {}
 
     @property
     def gene_aliases(self):

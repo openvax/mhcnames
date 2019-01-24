@@ -101,11 +101,11 @@ Equids:
 Suids:
   Sus domesticus:
     prefix: Sudo
-    alias: SLA
     common name: Domestic Pig
     taxon: 9825
   Sus scrofa:
     prefix: Susc
+    alias: SLA
     common name: Feral Pig
     taxon: 9823
 Gallus:

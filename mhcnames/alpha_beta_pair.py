@@ -16,7 +16,6 @@ from __future__ import print_function, division, absolute_import
 
 from collections import OrderedDict
 from .parsed_result import ParsedResult
-from .allele_parse_error import AlleleParseError
 from .four_digit_allele import FourDigitAllele
 
 
@@ -82,28 +81,21 @@ def infer_class2_alpha_chain(beta):
     FourDigitAlleles.
     """
     if not isinstance(beta, FourDigitAllele):
-        raise AlleleParseError(
-            "Inference of class II pairing for %s : %s not yet implemented" % (
-                beta,
-                beta.__class__.__name__))
+        return beta
 
     if not beta.is_class2:
-        raise AlleleParseError(
-            "%s must be a Class II allele to infer a matching alpha chain" % beta)
+        return beta
 
     if beta.species_prefix != "HLA":
-        raise AlleleParseError(
-            "Inference of class II pairing for %s not yet implemented" % beta)
+        return beta
 
     locus = beta.gene_name[:3]
     if locus not in default_human_alpha_chains:
-        raise AlleleParseError(
-            "Inference of class II pairing for %s not yet implemented" % beta)
+        return beta
 
     alpha = default_human_alpha_chains.get(locus)
 
     if alpha is None:
-        raise AlleleParseError(
-            "Failed to infer class II alpha chain for %s" % beta)
+        return beta
 
     return AlphaBetaPair(alpha, beta)

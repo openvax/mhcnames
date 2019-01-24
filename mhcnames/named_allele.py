@@ -14,10 +14,10 @@
 
 from __future__ import print_function, division, absolute_import
 
-from .allele_group import AlleleGroup
+from .gene import Gene
 
 
-class NamedAllele(AlleleGroup):
+class NamedAllele(Gene):
     """
     Some species, such as mouse (H2) and rats (RT1) do not yet use
     the standard nomenclature format (e.g. Species-Gene*Group:Protein).
@@ -29,8 +29,11 @@ class NamedAllele(AlleleGroup):
     the updated nomenclature (e.g. SLA-1-CHANGDA)
     """
     def __init__(self, species_prefix, gene_name, allele_name):
-        AlleleGroup.__init__(self, species_prefix, gene_name)
+        Gene.__init__(self, species_prefix, gene_name)
         self.allele_name = allele_name
+
+    def field_names(self):
+        return ("species_prefix", "gene_name", "allele_name")
 
     def to_tuple(self):
         return (self.species_prefix, self.gene_name, self.allele_name)
@@ -40,17 +43,19 @@ class NamedAllele(AlleleGroup):
         return cls(t[0], t[1], t[2])
 
     def normalized_string(self, include_species=True):
-        return "%s*%s" % (
-            AlleleGroup.normalized_string(
+        return "%s%s" % (
+            Gene.normalized_string(
+                self,
                 include_species=include_species),
             self.allele_name)
 
     def compact_string(self, include_species=False):
         return "%s%s" % (
-            AlleleGroup.compact_string(
+            Gene.compact_string(
+                self,
                 include_species=include_species),
             self.allele_name)
 
-    def to_dict(self):
-        d = AlleleGroup.to_dict(self)
+    def to_record(self):
+        d = Gene.to_record(self)
         d["allele"] = self.normalized_string()
