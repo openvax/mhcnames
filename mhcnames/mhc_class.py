@@ -1,4 +1,4 @@
-# Copyright (c) 2018. Mount Sinai School of Medicine
+# Copyright (c) 2018-2019. Mount Sinai School of Medicine
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,79 +15,79 @@
 
 from __future__ import print_function, division, absolute_import
 
-from .allele_parse_error import AlleleParseError
-
-class1_subtypes = {
-    "Ia",
-    "Ib",
-    "Ic"
-    "Id"
-}
-
-class2_subtypes = {
-    "IIa",
-    "IIb",
-}
-
-class1_restrictions = {"I"}.union(class1_subtypes)
-class2_restrictions = {"II"}.union(class2_subtypes)
-
-valid_class_restrictions = class1_restrictions.union(class2_restrictions)
-
-classical_subtypes = {"Ia", "IIa"}
+from .species import Species
+from .mhc_class import (
+    normalize_mhc_class_string,
+    is_class1,
+    is_class2,
+    is_valid_restriction
+)
 
 
-def mhc_class_is_more_specific(original_class=None, new_class=None):
-    return (
-        (original_class is None and new_class is not None) or
-        (original_class == "I" and new_class in class1_subtypes) or
-        (original_class == "II" and new_class in class1_subtypes)
-    )
+class MhcClass(Species):
+    """
+    Wrapper class for species combined with MHC classes such as
+    "I", "Ia", "Ib", "II", "IIa", &c
+    which provides some utility functions.
+    """
+    def __init__(self, species_prefix, mhc_class):
+        Species.__init__(self, species_prefix)
+        self.mhc_class = normalize_mhc_class_string(mhc_class)
 
+    @classmethod
+    def field_names(cls):
+        return ("species_prefix", "mhc_class")
 
-def is_class1(mhc_class):
-    return mhc_class in class1_restrictions
+    @property
+    def is_class1(self):
+        return is_class1(self.mhc_class)
 
+    @property
+    def is_class2(self):
+        return is_class2(self.mhc_class)
 
-def is_class2(mhc_class):
-    return mhc_class in class2_restrictions
+    def to_dict(self):
+        return {
+            "species_prefix": self.species_prefix,
+            "mhc_class": self.mhc_class,
+        }
 
+    def genes(self):
+        """
+        Returns all gene names whose MHC class matches this MHC class
+        """
+        return [
+            g
+            for g in Species.genes(self)
+            if is_valid_restriction(self.mhc_class, self.get_mhc_class_of_gene(g))
+        ]
 
-def is_valid_restriction(original_class=None, new_class=None):
-    if original_class is None:
-        return True
+    @classmethod
+    def from_dict(cls, d):
+        return MhcClass(**d)
 
-    if new_class is None:
-        # once we've restricted, can't go backwards
-        return False
+    def to_record(self):
+        d = Species.to_record()
+        d["mhc_class"] = self.mhc_class
+        return d
 
-    if original_class == new_class:
-        return True
+    def normalized_string(self, include_species=True):
+        if include_species:
+            if self.common_species_name:
+                species_str = self.common_species_name
+            else:
+                species_str = self.species_prefix
+            species_str = species_str.lower()
+            print("!!", species_str)
+            combined = "%s class %s" % (species_str, self.mhc_class)
+            print("!!!!", combined)
+            return combined
+        else:
+            return "class %s" % self.mhc_class
 
-    return mhc_class_is_more_specific(original_class, new_class)
-
-
-def restrict_alleles(alleles, mhc_class):
-    if mhc_class == "I":
-        valid_subtypes = class1_subtypes
-    elif mhc_class == "II":
-        valid_subtypes = class2_subtypes
-    else:
-        valid_subtypes = {mhc_class}
-
-    return [
-        allele
-        for allele in alleles
-        if allele.get_mhc_class() in valid_subtypes
-    ]
-
-
-def normalize_mhc_class_string(mhc_class):
-    original_string = mhc_class
-    mhc_class = mhc_class.lower()
-    mhc_class = mhc_class.replace("i", "I")
-    mhc_class = mhc_class.replace("1", "I")
-    mhc_class = mhc_class.replace("2", "II")
-    if mhc_class not in valid_class_restrictions:
-        raise AlleleParseError("Invalid MHC class: '%s'" % original_string)
-    return mhc_class
+    def compact_string(self, include_species=True):
+        """
+        Compact representation of an MHC class, currently same as the
+        normalized representation.
+        """
+        return self.normalized_string(include_species=include_species)

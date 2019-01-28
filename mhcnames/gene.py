@@ -1,4 +1,4 @@
-# Copyright (c) 2018. Mount Sinai School of Medicine
+# Copyright (c) 2018-2019. Mount Sinai School of Medicine
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 
 from __future__ import print_function, division, absolute_import
 
-from .mhc_class import is_class1, is_class2
+from .mhc_class_helpers import is_class1, is_class2
 from .species import Species
 
 

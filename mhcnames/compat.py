@@ -1,4 +1,4 @@
-# Copyright (c) 2018. Mount Sinai School of Medicine
+# Copyright (c) 2018-2019. Mount Sinai School of Medicine
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -84,4 +84,4 @@ def compact_string(
         raw_string,
         infer_class2_pairing=infer_class2_pairing,
         default_species_prefix=default_species_prefix)
-    return parsed_object.compact_string(include_species=False)
+    return parsed_object.compact_string()

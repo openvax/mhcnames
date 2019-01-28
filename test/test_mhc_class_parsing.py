@@ -38,7 +38,7 @@ def check_human_class1_string(s):
 
 def test_human_class_1():
     human_class1_strings = [
-        "human class 1"
+        "human class 1",
         "human class i",
         "human class I",
         "hla class 1",

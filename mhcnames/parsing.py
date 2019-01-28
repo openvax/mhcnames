@@ -1,4 +1,4 @@
-# Copyright (c) 2018. Mount Sinai School of Medicine
+# Copyright (c) 2018-2019. Mount Sinai School of Medicine
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,13 +28,13 @@ from .six_digit_allele import SixDigitAllele
 from .eight_digit_allele import EightDigitAllele
 from .allele_group import AlleleGroup
 from .gene import Gene
-from .gene_class import GeneClass
+from .mhc_class import MhcClass
 from .species import infer_species_prefix_substring, find_matching_species
 from .serotype_data import get_serotype
 from .mutant_allele import MutantAllele
 from .serotype import Serotype
 from .allele_modifiers import valid_allele_modifiers
-from .mhc_class import normalize_mhc_class_string
+from .mhc_class_helpers import normalize_mhc_class_string
 from .named_allele import NamedAllele
 
 
@@ -443,7 +443,7 @@ def parse_with_interior_whitespace(name, default_species_prefix):
                         parts[0],
                         name))
             mhc_class = normalize_mhc_class_string(parts[2])
-            return GeneClass(species_prefix, mhc_class)
+            return MhcClass(species_prefix, mhc_class)
     raise AlleleParseError("Unexpected whitespace in '%s'" % name)
 
 
@@ -479,7 +479,7 @@ def parse(
 
     Returns object with one of the following types:
         - Species
-        - GeneClass
+        - MhcClass
         - Gene
         - AlleleGroup
         - FourDigitAllele
