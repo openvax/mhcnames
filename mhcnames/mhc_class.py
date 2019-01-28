@@ -16,7 +16,7 @@
 from __future__ import print_function, division, absolute_import
 
 from .species import Species
-from .mhc_class import (
+from .mhc_class_helpers import (
     normalize_mhc_class_string,
     is_class1,
     is_class2,
@@ -78,10 +78,7 @@ class MhcClass(Species):
             else:
                 species_str = self.species_prefix
             species_str = species_str.lower()
-            print("!!", species_str)
-            combined = "%s class %s" % (species_str, self.mhc_class)
-            print("!!!!", combined)
-            return combined
+            return "%s class %s" % (species_str, self.mhc_class)
         else:
             return "class %s" % self.mhc_class
 

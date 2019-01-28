@@ -7,6 +7,7 @@ from mhcnames import (
     NamedAllele,
 )
 
+
 def test_mouse_class2_alleles():
     # H2-IAb
     eq_(parse("H2-IAb"), NamedAllele("H2", "IA", "b"))

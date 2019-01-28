@@ -23,11 +23,14 @@ from .data import serotypes as raw_serotypes_dict
 from .data import haplotypes as raw_haplotypes_dict
 from .data import allele_aliases as raw_allele_aliases_dict
 from .normalizing_dictionary import NormalizingDictionary
+
 from .species_data import (
     prefix_to_default_common_name,
     prefix_to_scientific_name,
+    common_names_to_scientific_names,
     normalize_species_prefix,
     scientific_name_to_prefixes,
+    scientific_name_to_canonical_prefix,
     prefix_to_alias,
 )
 
@@ -65,11 +68,11 @@ class Species(ParsedResult):
         Returns common species name associated with MHC species
         prefix.
         """
-        return prefix_to_default_common_name.get(self.species_prefix)
+        return prefix_to_default_common_name.get(self.species_prefix).lower()
 
     @property
     def scientific_species_name(self):
-        return prefix_to_scientific_name.get(self.species_prefix)
+        return prefix_to_scientific_name.get(self.species_prefix).lower()
 
     @property
     def all_prefixes(self):
@@ -231,6 +234,13 @@ class Species(ParsedResult):
                             return mhc_class
         return None
 
+    @classmethod
+    def get(cls, name, use_aliases=True):
+        """
+        Alias for find_matching_species function
+        """
+        return find_matching_species(name, use_aliases=use_aliases)
+
 
 # map prefix strings to Species objects
 _species_cache = {}
@@ -245,13 +255,23 @@ def find_matching_species(name, use_aliases=True):
     """
     key = (name, use_aliases)
     if key not in _species_cache:
-        if name in prefix_to_scientific_name:
-            prefix = prefix_to_scientific_name.original_key(name)
-            if use_aliases:
-                prefix = prefix_to_alias.get(prefix, prefix)
-            species = Species(prefix)
+        if name in common_names_to_scientific_names:
+            scientific_name = common_names_to_scientific_names[name]
+        elif name in prefix_to_scientific_name:
+            scientific_name = prefix_to_scientific_name[name]
         else:
+            # fall back: assume input is already a scientific name,
+            # though this is likely to fail at next step,
+            # causing returned value to be None
+            scientific_name = name
+
+        prefix = scientific_name_to_canonical_prefix.get(scientific_name)
+        if use_aliases:
+            prefix = prefix_to_alias.get(prefix, prefix)
+        if prefix is None:
             species = None
+        else:
+            species = Species(prefix)
         _species_cache[key] = species
     return _species_cache[key]
 

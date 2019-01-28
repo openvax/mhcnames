@@ -22,15 +22,16 @@ common_names_to_scientific_names = NormalizingDictionary()
 prefix_to_scientific_name = NormalizingDictionary()
 prefix_to_alias = NormalizingDictionary()
 alias_to_four_letter_code = NormalizingDictionary()
-
+scientific_name_to_canonical_prefix = NormalizingDictionary()
 for species_group, species_dicts in species.items():
     for scientific_name, species_dict in species_dicts.items():
         prefix = species_dict["prefix"]
+        scientific_name_to_canonical_prefix[scientific_name] = prefix
         alias = species_dict.get("alias")
         if alias:
-            prefixes = [prefix, alias]
             alias_to_four_letter_code[alias] = prefix
             prefix_to_alias[prefix] = alias
+            prefixes = [prefix, alias]
         else:
             prefixes = [prefix]
 

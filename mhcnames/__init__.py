@@ -26,6 +26,7 @@ from .mutant_allele import MutantAllele
 from .alpha_beta_pair import AlphaBetaPair
 from .mhc_class import MhcClass
 from .serotype import Serotype
+from .species import Species
 from .dataframe import dataframe_from_list
 
 __version__ = "1.0.0"
@@ -46,5 +47,6 @@ __all__ = [
     "MutantAllele",
     "NamedAllele",
     "Serotype",
+    "Species",
     "dataframe_from_list"
 ]
