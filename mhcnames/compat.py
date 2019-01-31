@@ -20,6 +20,7 @@ from .parsing import parse
 def normalized_string(
         raw_string,
         include_species_prefix=True,
+        use_species_alias=True,
         infer_class2_pairing=True,
         default_species_prefix="HLA"):
     """
@@ -41,6 +42,11 @@ def normalized_string(
         Include species in the normalized. If False, then you would
         get "A*02:01" for "A0201", instead of "HLA-A*02:01"
 
+    use_species_alias : bool
+        For species which have a newer four-digit code and and older locus
+        name (such as "Ecqa" / "ELA"), use the older species prefix in the
+        result.
+
     infer_class2_pairing : bool
         If given only the alpha or beta chain of a Class II allele,
         try to infer the most likely pairing from population frequencies.
@@ -52,7 +58,8 @@ def normalized_string(
     parsed_object = parse(
         raw_string,
         infer_class2_pairing=infer_class2_pairing,
-        default_species_prefix=default_species_prefix)
+        default_species_prefix=default_species_prefix,
+        use_species_alias=use_species_alias)
     result = parsed_object.normalized_string(
         include_species=include_species_prefix)
     return result
@@ -60,6 +67,7 @@ def normalized_string(
 
 def compact_string(
         raw_string,
+        use_species_alias=True,
         infer_class2_pairing=False,
         default_species_prefix="HLA"):
 
@@ -72,6 +80,11 @@ def compact_string(
     raw_string : str
         String corresponding to allele, locus, or other MHC-related name
 
+    use_species_alias : bool
+        For species which have a newer four-digit code and and older locus
+        name (such as "Ecqa" / "ELA"), use the older species prefix in the
+        result.
+
     infer_class2_pairing : bool
         If given only the alpha or beta chain of a Class II allele,
         try to infer the most likely pairing from population frequencies.
@@ -82,6 +95,7 @@ def compact_string(
     """
     parsed_object = parse(
         raw_string,
+        use_species_alias=use_species_alias,
         infer_class2_pairing=infer_class2_pairing,
         default_species_prefix=default_species_prefix)
     return parsed_object.compact_string()

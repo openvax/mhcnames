@@ -235,25 +235,25 @@ class Species(ParsedResult):
         return None
 
     @classmethod
-    def get(cls, name, use_aliases=True):
+    def get(cls, name, use_species_alias=True):
         """
         Alias for find_matching_species function
         """
-        return find_matching_species(name, use_aliases=use_aliases)
+        return find_matching_species(name, use_species_alias=use_species_alias)
 
 
 # map prefix strings to Species objects
 _species_cache = {}
 
 
-def find_matching_species(name, use_aliases=True):
+def find_matching_species(name, use_species_alias=True):
     """
     Given an unnormalized species prefix string,
     returns Species object. If `use_aliases` is True,
     then replace four letter species codes (e.g. 'Susc') with more common
     prefixes (e.g. 'SLA').
     """
-    key = (name, use_aliases)
+    key = (name, use_species_alias)
     if key not in _species_cache:
         if name in common_names_to_scientific_names:
             scientific_name = common_names_to_scientific_names[name]
@@ -266,7 +266,7 @@ def find_matching_species(name, use_aliases=True):
             scientific_name = name
 
         prefix = scientific_name_to_canonical_prefix.get(scientific_name)
-        if use_aliases:
+        if use_species_alias:
             prefix = prefix_to_alias.get(prefix, prefix)
         if prefix is None:
             species = None
@@ -276,21 +276,23 @@ def find_matching_species(name, use_aliases=True):
     return _species_cache[key]
 
 
-def find_matching_species_prefix(name, use_aliases=True):
+def find_matching_species_prefix(name, use_species_alias=True):
     """
     Given an unnormalized species prefix string,
     returns normalized prefix string. If `use_aliases` is True,
     then replace four letter species codes (e.g. 'Susc') with more common
     prefixes (e.g. 'SLA').
     """
-    species = find_matching_species(name, use_aliases=True)
+    species = find_matching_species(
+        name,
+        use_species_alias=use_species_alias)
     if species:
         return species.species_prefix
     else:
         return None
 
 
-def infer_species_prefix_substring(name):
+def infer_species_prefix_substring(name, use_species_alias=True):
     """
     Trying to parse prefixes of alleles such as:
         HLA-A
@@ -320,7 +322,7 @@ def infer_species_prefix_substring(name):
             parts_split_by_dash[0] + "-" + parts_split_by_dash[1]
         ])
     for seq in candidate_species_substrings:
-        for n in [4, 3, 2]:
+        for n in [None, 4, 3, 2]:
             original_prefix = seq[:n]
             normalized_prefix = find_matching_species_prefix(name[:n])
             if normalized_prefix is not None:

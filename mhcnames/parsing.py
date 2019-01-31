@@ -38,14 +38,18 @@ from .mhc_class_helpers import normalize_mhc_class_string
 from .named_allele import NamedAllele
 
 
-def parse_species_prefix(name, default_species_prefix=None):
+def parse_species_prefix(
+        name,
+        default_species_prefix=None,
+        use_species_alias=True):
     """
     Returns tuple with two elements:
         - species prefix string
         - remaining string after species prefix
     """
-    inferred_prefix_and_original = infer_species_prefix_substring(name)
-
+    inferred_prefix_and_original = infer_species_prefix_substring(
+        name,
+        use_species_alias=use_species_alias)
     if inferred_prefix_and_original is None:
         if default_species_prefix is None:
             return (None, name)
@@ -58,7 +62,10 @@ def parse_species_prefix(name, default_species_prefix=None):
         return species_prefix, remaining_string
 
 
-def get_species_prefix_and_info(name, default_species_prefix=None):
+def get_species_prefix_and_info(
+        name,
+        default_species_prefix=None,
+        use_species_alias=True):
     """
     Returns tuple with elements:
         - Species
@@ -66,7 +73,10 @@ def get_species_prefix_and_info(name, default_species_prefix=None):
         - remaining string after species prefix
     """
     (species_prefix, remaining_string) = \
-        parse_species_prefix(name, default_species_prefix=default_species_prefix)
+        parse_species_prefix(
+            name,
+            default_species_prefix=default_species_prefix,
+            use_species_alias=use_species_alias)
 
     if species_prefix is None:
         raise AlleleParseError("Unable to infer species for '%s'" % name)
@@ -248,7 +258,8 @@ def parse_murine_gene(species, gene_name, str_after_gene):
 def parse_without_mutation(
         name,
         default_species_prefix="HLA",
-        gene_seps="*_"):
+        gene_seps="*_",
+        use_species_alias=True):
     """
     First test to see if MHC name requires any species-specific special logic.
     If the name doesn't fit any of the special species templates then
@@ -341,7 +352,10 @@ def parse_without_mutation(
         allow_three_digits_in_second_field=allow_three_digits_in_second_field)
 
 
-def parse_known_alpha_beta_pair(name, default_species_prefix="HLA"):
+def parse_known_alpha_beta_pair(
+        name,
+        use_species_alias=True,
+        default_species_prefix="HLA"):
     """
     If a name is known to contain "/" then it's
     expected to be of a format like:
@@ -364,16 +378,21 @@ def parse_known_alpha_beta_pair(name, default_species_prefix="HLA"):
             "Expected Class II alpha/beta pairing but got %d allele names in '%s'" % (
                 len(parts),
                 name))
-    alpha = parse(alpha_string, default_species_prefix=default_species_prefix)
+    alpha = parse(
+        alpha_string,
+        default_species_prefix=default_species_prefix,
+        use_species_alias=use_species_alias)
     beta = parse(
         beta_string,
-        default_species_prefix=alpha.species_prefix)
+        default_species_prefix=alpha.species_prefix,
+        use_species_alias=use_species_alias)
     return AlphaBetaPair(alpha, beta)
 
 
 def parse_with_mutations(
         name,
-        default_species_prefix):
+        default_species_prefix,
+        use_species_alias=True):
     """
     Parameters
     ----------
@@ -387,7 +406,8 @@ def parse_with_mutations(
     parts = name.split()
     result_without_mutation = parse_without_mutation(
         parts[0],
-        default_species_prefix=default_species_prefix)
+        default_species_prefix=default_species_prefix,
+        use_species_alias=use_species_alias)
 
     valid_classes = (FourDigitAllele, NamedAllele)
     if result_without_mutation.__class__ not in valid_classes:
@@ -413,7 +433,10 @@ def parse_with_mutations(
     return MutantAllele(result_without_mutation, mutations)
 
 
-def parse_with_interior_whitespace(name, default_species_prefix):
+def parse_with_interior_whitespace(
+        name,
+        default_species_prefix,
+        use_species_alias=True):
     """
     If there's whitespace within an allele description then it's
     either a mutant allele or an error.
@@ -422,7 +445,8 @@ def parse_with_interior_whitespace(name, default_species_prefix):
     if "mutant" in lower:
         return parse_with_mutations(
             name,
-            default_species_prefix=default_species_prefix)
+            default_species_prefix=default_species_prefix,
+            use_species_alias=use_species_alias)
     parts = lower.split()
     if len(parts) == 2:
         # TODO: parse MHC-Id genes and alleles such as "human CD1a"
@@ -438,7 +462,9 @@ def parse_with_interior_whitespace(name, default_species_prefix):
             # - "BF19 class II"
             species_query = " ".join(parts[:-2])
             species, species_prefix, remaining_string = \
-                get_species_prefix_and_info(species_query)
+                get_species_prefix_and_info(
+                    species_query,
+                    use_species_alias=use_species_alias)
             if species is None or len(remaining_string) > 0:
                 raise AlleleParseError(
                     "Unable to parse species name '%s' in '%s'" % (
@@ -454,6 +480,7 @@ _parse_cache = {}
 
 def parse(
         name,
+        use_species_alias=True,
         infer_class2_pairing=False,
         default_species_prefix="HLA"):
     """
@@ -471,6 +498,11 @@ def parse(
     ----------
     name : str
         Raw name of MHC locus or allele
+
+    use_species_alias : bool
+        For species which have a newer four-digit code and and older locus
+        name (such as "Ecqa" / "ELA"), use the older species prefix in the
+        result.
 
     infer_class2_pairing : bool
         If only alpha or beta chain of Class II MHC is given, try
@@ -503,15 +535,18 @@ def parse(
     if " " in trimmed_name or "\t" in trimmed_name:
         result = parse_with_interior_whitespace(
             trimmed_name,
+            use_species_alias=use_species_alias,
             default_species_prefix=default_species_prefix)
     elif "/" in trimmed_name:
         # parse paired Class II alleles such as 'DRA1*01:01/DRB1*01:01'
         result = parse_known_alpha_beta_pair(
             trimmed_name,
+            use_species_alias=use_species_alias,
             default_species_prefix=default_species_prefix)
     else:
         result = parse_without_mutation(
             trimmed_name,
+            use_species_alias=use_species_alias,
             default_species_prefix=default_species_prefix)
 
     if infer_class2_pairing and result.__class__ is not AlphaBetaPair:
