@@ -320,7 +320,7 @@ def infer_species_prefix_substring(name):
             parts_split_by_dash[0] + "-" + parts_split_by_dash[1]
         ])
     for seq in candidate_species_substrings:
-        for n in [2, 3, 4]:
+        for n in [4, 3, 2]:
             original_prefix = seq[:n]
             normalized_prefix = find_matching_species_prefix(name[:n])
             if normalized_prefix is not None:

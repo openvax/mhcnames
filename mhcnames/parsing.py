@@ -388,7 +388,9 @@ def parse_with_mutations(
     result_without_mutation = parse_without_mutation(
         parts[0],
         default_species_prefix=default_species_prefix)
-    if result_without_mutation.__class__ is not FourDigitAllele:
+
+    valid_classes = (FourDigitAllele, NamedAllele)
+    if result_without_mutation.__class__ not in valid_classes:
         raise AlleleParseError(
             "Cannot apply mutations in '%s' to %s" % (
                 name,
