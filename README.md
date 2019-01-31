@@ -74,3 +74,12 @@ digit alleles but every allele is simply given a name, such as:
 
 In the above example "H2"/"RT1" correspond to species, "K"/"9.5" are
 the gene names and "k"/"f" are the allele names.
+
+## References
+
+* [IPD-MHC: nomenclature requirements for the non-human major histocompatibility complex in the next-generation sequencing era](https://link.springer.com/article/10.1007%2Fs00251-018-1072-4)
+* [Comparative MHC nomenclature: report from the ISAG/IUIS-VIC committee 2018]()
+* [ISAG/IUIS-VIC Comparative MHC Nomenclature
+Committee report, 2005](https://link.springer.com/content/pdf/10.1007%2Fs00251-005-0071-4.pdf)
+* [Marsupial MHC Class II β Genes Are Not Orthologous to the Eutherian β Gene Families]()
+* [Nomenclature for factors of the SLA system, update 2008](https://www.ncbi.nlm.nih.gov/pubmed/19317739)
