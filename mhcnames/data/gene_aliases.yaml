@@ -7,14 +7,20 @@ HLA:
 #
 # Mouse gene aliases copied from
 # https://bmcgenomics.biomedcentral.com/articles/10.1186/1471-2164-9-178
+# -and-
+# http://www.imgt.org/IMGTrepertoireMHC/LocusGenes/nomenclatures/mouse/MHC/Mu_MHCnom.html
 #
 ###########################################################################
 H2:
   Qa-1: T23
+  Qa1: T23
   Qa-2: Q7
+  Qa2: Q7
   Ped: Q7
   Qa-10: Q10
+  Qa10: Q10
   Qb-1: Q4
+  Qb1: Q4
   T25: T13
   Bl: T13
   TL: T3
@@ -23,3 +29,18 @@ H2:
   Thy19.4: M2
   D1: D
   K1: K
+  # Class II sub-classes
+  IA: A
+  I-A: A
+  IE: E
+  I-E: E
+  # Class II alpha and beta gene names
+  IAA: AA
+  IAB: AB
+  IEA: EA
+  IEB: EB1
+  I-AA: AA
+  I-AB: AB
+  I-EA: EA
+  I-EB: EB1
+  EB: EB1

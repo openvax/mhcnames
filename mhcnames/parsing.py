@@ -22,6 +22,7 @@ from .parsing_helpers import (
     strip_whitespace_and_trim_outer_quotes,
     strip_whitespace_and_dashes
 )
+from .data import haplotypes
 from .mutation import Mutation
 from .four_digit_allele import FourDigitAllele
 from .six_digit_allele import SixDigitAllele
@@ -33,9 +34,11 @@ from .species import infer_species_prefix_substring, find_matching_species
 from .serotype_data import get_serotype
 from .mutant_allele import MutantAllele
 from .serotype import Serotype
+from .haplotype import Haplotype
 from .allele_modifiers import valid_allele_modifiers
 from .mhc_class_helpers import normalize_mhc_class_string
 from .named_allele import NamedAllele
+from .species import Species
 
 
 def parse_species_prefix(
@@ -108,6 +111,28 @@ def parse_serotype(species_prefix, serotype_name):
                 parse(allele, default_species_prefix=species_prefix))
         result = Serotype(species_prefix, serotype_name, parsed_allele_objects)
     _serotype_cache[key] = result
+    return result
+
+_haplotype_cache = {}
+
+
+def parse_haplotype(species_prefix, haplotype_name):
+    """
+    Returns Haplotype or None
+    """
+    key = (species_prefix, haplotype_name)
+    if key in _haplotype_cache:
+        return _haplotype_cache[key]
+    haplotype_entries = haplotypes.get(species_prefix, {}).get(haplotype_name)
+    if haplotype_entries is None:
+        result = None
+    else:
+        alleles = [
+            parse("%s-%s" % (species_prefix, allele))
+            for allele in haplotype_entries
+        ]
+        result = Haplotype(species_prefix, haplotype_name, alleles)
+    _haplotype_cache[key] = result
     return result
 
 
@@ -278,10 +303,8 @@ def parse_without_mutation(
         default_species_prefix=default_species_prefix)
 
     str_after_species = strip_whitespace_and_dashes(str_after_species)
-
     if len(str_after_species) == 0:
         return species
-
     if "-" in str_after_species:
         if str_after_species.count("-") != 1:
             raise AlleleParseError("Unexpected number of '-' in '%s'" % name)
@@ -297,9 +320,12 @@ def parse_without_mutation(
                 default_species_prefix=species.species_prefix)
 
     serotype_result = parse_serotype(species_prefix, str_after_species)
-
     if serotype_result is not None:
         return serotype_result
+
+    haplotype_result = parse_haplotype(species_prefix, str_after_species)
+    if haplotype_result:
+        return haplotype_result
 
     # try to heuristically split apart the gene name and any allele information
     # when the requires separators are missing
@@ -453,25 +479,27 @@ def parse_with_interior_whitespace(
         raise AlleleParseError("Gene parsing not yet implemented for '%s'" % name)
     elif len(parts) >= 3:
         if parts[-2] == "class" and parts[-1] in {"1", "2", "i", "ii"}:
-            # parse MHC classes such as:
+            mhc_class_string = normalize_mhc_class_string(parts[-1])
+            # Parse MHC classes, haplotypes, or serotypes such as:
             # - "HLA class I"
             # - "H2-b class I"
-            # TODO add support for haplotypes such as:
             # - "ELA-A1 class I"
             # - "H2-r class I"
             # - "BF19 class II"
-            species_query = " ".join(parts[:-2])
-            species, species_prefix, remaining_string = \
-                get_species_prefix_and_info(
-                    species_query,
-                    use_species_alias=use_species_alias)
-            if species is None or len(remaining_string) > 0:
+            unrestricted_string = " ".join(parts[:-2])
+            unrestricted_result = parse(
+                unrestricted_string,
+                default_species_prefix=default_species_prefix)
+            if unrestricted_result.__class__ is Haplotype:
+                return unrestricted_result.restrict_mhc_class(mhc_class_string)
+            elif unrestricted_result.__class__ is Species:
+                return MhcClass(unrestricted_result.species_prefix, mhc_class_string)
+            else:
                 raise AlleleParseError(
-                    "Unable to parse species name '%s' in '%s'" % (
-                        parts[0],
+                    "Unable to parse '%s' in '%s'" % (
+                        unrestricted_string,
                         name))
-            mhc_class = normalize_mhc_class_string(parts[2])
-            return MhcClass(species_prefix, mhc_class)
+
     raise AlleleParseError("Unexpected whitespace in '%s'" % name)
 
 

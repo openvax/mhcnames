@@ -4,17 +4,18 @@ from mhcnames import (
     normalized_string,
     compact_string,
     parse,
-    NamedAllele,
+    Gene,
 )
 
 
-def test_mouse_class2_alleles():
+def test_mouse_class2_gene():
     # H2-IAb
-    eq_(parse("H2-IAb"), NamedAllele("H2", "IA", "b"))
-    eq_(normalized_string("H2-IAb"), "H2-IAb")
-    eq_(compact_string("H2-IAb"), "IAb")
+    gene = Gene("H2", "AB")
+    eq_(parse("H2-IAb"), gene)
+    eq_(normalized_string("H2-IAb"), "H2-AB")
+    eq_(compact_string("H2-IAb"), "AB")
 
     # with hyphen in "H-2"
-    eq_(parse("H-2-IAb"), NamedAllele("H2", "IA", "b"))
-    eq_(normalized_string("H-2-IAb"), "H2-IAb")
-    eq_(compact_string("H-2-IAb"), "IAb")
+    eq_(parse("H-2-IAb"), gene)
+    eq_(normalized_string("H-2-IAb"), "H2-AB")
+    eq_(compact_string("H-2-IAb"), "AB")

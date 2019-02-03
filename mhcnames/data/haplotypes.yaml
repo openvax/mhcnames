@@ -2,7 +2,8 @@
 #
 # Mouse MHC haplotypes copied from:
 # http://www.biolegend.com/media_assets/support_resource/BioLegend_Mouse_Alloantigens.pdf
-#
+# and partially from:
+# http://jackson.jax.org/rs/444-BUH-304/images/MHC_h2_haplotypes.pdf
 ##########################################
 H2:
   a:
@@ -27,6 +28,17 @@ H2:
     - IAd
     - IEd
     - Qa2a
+    - Qa1b
+  f:
+    - Kf
+    - Abf
+    - Aaf
+    - Ebf
+    - Eaf
+    - Df
+    - Lf
+    - Qa2b
+    - T18d
     - Qa1b
   k:
     - Kk
@@ -65,8 +77,30 @@ H2:
     - IAr
     - IEr
     - Qa2b
+  s:
+    - Ks
+    - Abs
+    - Aas
+    - Ebs
+    - Eas
+    - Ds
+    - Ls
+    - Qa2a
+    - T18b
+    - Qa1b
   v:
     - Kv
     - Dv
     - Lv
     - IAv
+  z:
+    - Ku
+    - Abu
+    - Aau
+    - Ebu
+    - Eau
+    - Dz
+    - Lz
+    - Qa2b
+    - T18b
+    - Qa1b

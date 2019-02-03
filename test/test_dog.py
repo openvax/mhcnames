@@ -16,8 +16,11 @@ def test_only_2_digits_in_first_allele_field():
 
 
 def test_alternative_species_code():
-    eq_(normalized_string("Calu-DQA1*00101"),
-        "Calu-DQA1*001:01")
+    eq_(
+        normalized_string("Calu-DQA1*00101", use_species_alias=False), "Calu-DQA1*001:01")
+
+    eq_(
+        normalized_string("Calu-DQA1*00101", use_species_alias=True), "DLA-DQA1*001:01")
 
 
 def test_dog_class1_allele():

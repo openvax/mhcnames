@@ -14,26 +14,27 @@
 
 from __future__ import print_function, division, absolute_import
 
-from serializable import Serializable
+from .parsed_result import ParsedResult
 
-from .mhc_class import (
+from .mhc_class_helpers import (
     is_valid_restriction,
     restrict_alleles,
-    valid_class_types_and_subtypes
 )
 
 
-class Haplotype(Serializable):
-    def __init__(self, species_prefix, haplotype_name, alleles, class_restriction=None):
+class Haplotype(ParsedResult):
+    def __init__(
+            self,
+            species_prefix,
+            haplotype_name,
+            alleles,
+            class_restriction=None):
         self.species_prefix = species_prefix
         self.haplotype_name = haplotype_name
         self.alleles = alleles
-        assert (
-            (class_restriction is None) or
-            (class_restriction in valid_class_types_and_subtypes)
-        )
+        self.class_restriction = class_restriction
 
-    def restrict_alleles(self, class_restriction):
+    def restrict_mhc_class(self, class_restriction):
         assert class_restriction is not None
         if self.class_restriction == class_restriction:
             return self
@@ -42,7 +43,12 @@ class Haplotype(Serializable):
                 "Cannot restrict '%s' to class '%s'" % (
                     self.normalized_string(),
                     class_restriction))
-        return restrict_alleles(self.alleles, class_restriction)
+        restricted_alleles = restrict_alleles(self.alleles, class_restriction)
+        return Haplotype(
+            self.species_prefix,
+            self.haplotype_name,
+            restricted_alleles,
+            class_restriction)
 
     def normalized_string(self, include_species=True):
         if include_species:

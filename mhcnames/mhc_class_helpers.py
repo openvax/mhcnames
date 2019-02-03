@@ -77,7 +77,7 @@ def restrict_alleles(alleles, mhc_class):
     return [
         allele
         for allele in alleles
-        if allele.get_mhc_class() in valid_subtypes
+        if allele.mhc_class in valid_subtypes
     ]
 
 

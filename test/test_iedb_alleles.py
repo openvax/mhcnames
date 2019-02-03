@@ -8,13 +8,14 @@ def test_parse_all_IEDB_allele_names():
     n_total = 0
     n_wrong_iedb_count = 0
     n_total_iedb_count = 0
-    for (allele, count) in zip(df.allele, df.number_of_entries):
+    for (count, allele) in sorted(zip(df.number_of_entries, df.allele)):
         n_total += 1
         n_total_iedb_count += count
         try:
             normalized_string(allele)
         except AlleleParseError as e:
-            print(e)
+            print("%s (%d)" % (allele, count))
+            print("\t" + str(e))
             n_wrong += 1
             n_wrong_iedb_count += count
     n_correct = n_total - n_wrong

@@ -300,6 +300,9 @@ Calu:
 # and partial list from:
 # - https://www.ebi.ac.uk/ipd/mhc/group/RT1/species
 #
+# More explanation about the rat MHC locus here:
+# https://genome.cshlp.org/content/14/4/631.full
+#
 ######################################################
 Rano:
   Ia:
