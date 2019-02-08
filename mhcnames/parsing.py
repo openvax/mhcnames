@@ -280,6 +280,31 @@ def parse_murine_gene(species, gene_name, str_after_gene):
     return NamedAllele(species.prefix, gene_name, str_after_gene)
 
 
+def split_by_hyphen_except_gene_names(species, str_after_species):
+    """
+    Split a string into a list of parts by hyphens except keep
+    gene names such as "M3-1" together
+    """
+    parts = str_after_species.split("-")
+    parts_with_merged_gene_names = []
+    i = 0
+    while i < len(parts):
+        first_part = parts[i]
+        if i + 1 == len(parts):
+            parts_with_merged_gene_names.append(first_part)
+            break
+
+        next_part = parts[i + 1]
+        combined = "%s-%s" % (first_part, next_part)
+        if species.find_matching_gene_name(combined):
+            parts_with_merged_gene_names.append(combined)
+            i += 2
+        else:
+            parts_with_merged_gene_names.append(first_part)
+            i += 1
+    return parts_with_merged_gene_names
+
+
 def parse_without_mutation(
         name,
         default_species_prefix="HLA",
@@ -303,18 +328,29 @@ def parse_without_mutation(
         default_species_prefix=default_species_prefix)
 
     str_after_species = strip_whitespace_and_dashes(str_after_species)
+
     if len(str_after_species) == 0:
         return species
-    if "-" in str_after_species:
-        if str_after_species.count("-") != 1:
-            raise AlleleParseError("Unexpected number of '-' in '%s'" % name)
+
+    hyphen_parts = split_by_hyphen_except_gene_names(
+        species,
+        str_after_species)
+    print(name, str_after_species, hyphen_parts)
+
+    if len(hyphen_parts) == 1:
+        str_after_species = hyphen_parts[0]
+    elif len(hyphen_parts) > 2:
+        # if after collapsing gene names we still have a hyphen
+        # then we expect it to be a Class II alpha-beta pair
+        raise AlleleParseError("Unexpected number of '-' in '%s'" % name)
+    elif len(hyphen_parts) == 2:
         # this situation is tricky since it might be either
         # a class II allele pair
         #   e.g. DRA1*01:01-DRB1*01:01
         # or a class I allele where '-' is used instead of '*'
         #   e.g. 1-HB01 (swine allele)
-        first_part = str_after_species.split("-")[0]
-        if species.find_matching_gene_name(first_part) is None:
+        str_after_species = "-".join(hyphen_parts)
+        if species.find_matching_gene_name(hyphen_parts[0]) is None:
             return parse_known_alpha_beta_pair(
                 str_after_species,
                 default_species_prefix=species.species_prefix)
