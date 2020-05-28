@@ -16,7 +16,7 @@ from __future__ import print_function, division, absolute_import
 
 import pandas as pd
 
-from .parsing import parse
+from .compat import parse
 
 
 def dataframe_from_list(names):

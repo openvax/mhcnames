@@ -39,3 +39,18 @@ def strip_whitespace_and_trim_outer_quotes(name):
             raise AlleleParseError(
                 "Unbalanced double quotes on allele name: %s" % original_name)
     return name
+
+def split_on_all_seps(seq, seps="_:"):
+    """
+    Split given string on all separators specified
+
+    For example, 02_01:01 will be split into:
+        ["02", "01", "01"]
+    """
+    string_parts = [seq]
+    for sep in seps:
+        new_parts = []
+        for subseq in string_parts:
+            new_parts.extend(subseq.split(sep))
+        parts = new_parts
+    return parts

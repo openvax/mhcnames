@@ -637,8 +637,9 @@ Gogo:
       - DRB3
       - DRB5
       - DDRB6
-  Ib:
-    - DMB
+  IIb:
+    DM:
+      - DMB
   I: # unclassified
     - OKO
 

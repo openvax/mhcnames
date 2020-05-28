@@ -50,11 +50,15 @@ class AlphaBetaPair(ParsedResult):
         else:
             return self.beta.mhc_class
 
+    @property
+    def gene_name(self):
+        return "%s/%s" % (self.alpha.gene_name, self.beta.gene_name)
+
     def to_record(self):
         # return a dictionary that has the same elements as Gene.to_dict()
         # along with "allele"
         return OrderedDict([
-            ("gene", "%s/%s" % (self.alpha.gene_name, self.beta.gene_name)),
+            ("gene", self.gene_name),
             ("mhc_class", self.mhc_class),
             ("is_mutant", False),
             ("allele", self.normalized_string()),

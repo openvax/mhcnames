@@ -14,8 +14,11 @@
 
 from __future__ import print_function, division, absolute_import
 
-from .parsing import parse
+from .parser import Parser
 
+def parse(raw_string, **kwargs):
+    parser = Parser(**kwargs)
+    return parser.parse(raw_string)
 
 def normalized_string(
         raw_string,

@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .compat import normalized_string, compact_string
+from .compat import normalized_string, compact_string, parse
 from .allele_parse_error import AlleleParseError
-from .parsing import parse
+from .parser import Parser
 from .gene import Gene
 from .allele_group import AlleleGroup
 from .four_digit_allele import FourDigitAllele
@@ -50,5 +50,6 @@ __all__ = [
     "Haplotype",
     "Serotype",
     "Species",
-    "dataframe_from_list"
+    "dataframe_from_list",
+    "Parser"
 ]

@@ -170,6 +170,12 @@ class Species(ParsedResult):
             all_genes.extend(class1_genes)
         for class2_category in {"II", "IIa", "IIb"}:
             class2_genes_dict = self.gene_ontology.get(class2_category, {})
+            if type(class2_genes_dict) is not dict:
+                raise ValueError(
+                    "Malformed class II gene ontology for '%s', got %s for '%s'" % (
+                        self.species_prefix,
+                        type(class2_genes_dict),
+                        class2_category))
             for class2_genes in class2_genes_dict.values():
                 all_genes.extend(class2_genes)
         return all_genes
