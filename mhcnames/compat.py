@@ -21,7 +21,8 @@ def parse(raw_string, **kwargs):
 def normalized_string(
         raw_string,
         include_species_prefix=True,
-        use_species_alias=True,
+        normalize_species_prefix=True,
+        normalize_allele_aliases=True,
         infer_class2_pairing=True,
         default_species_prefix="HLA"):
     """
@@ -43,10 +44,12 @@ def normalized_string(
         Include species in the normalized. If False, then you would
         get "A*02:01" for "A0201", instead of "HLA-A*02:01"
 
-    use_species_alias : bool
+    normalize_species_prefix : bool
         For species which have a newer four-digit code and and older locus
         name (such as "Ecqa" / "ELA"), use the older species prefix in the
         result.
+
+    normalize_allele_aliases : bool
 
     infer_class2_pairing : bool
         If given only the alpha or beta chain of a Class II allele,
@@ -60,7 +63,8 @@ def normalized_string(
         raw_string,
         infer_class2_pairing=infer_class2_pairing,
         default_species_prefix=default_species_prefix,
-        use_species_alias=use_species_alias)
+        normalize_species_prefix=normalize_species_prefix,
+        normalize_allele_aliases=normalize_allele_aliases)
     result = parsed_object.normalized_string(
         include_species=include_species_prefix)
     return result
@@ -68,7 +72,8 @@ def normalized_string(
 
 def compact_string(
         raw_string,
-        use_species_alias=True,
+        normalize_species_prefix=True,
+        normalize_allele_aliases=True,
         infer_class2_pairing=False,
         default_species_prefix="HLA"):
 
@@ -81,10 +86,12 @@ def compact_string(
     raw_string : str
         String corresponding to allele, locus, or other MHC-related name
 
-    use_species_alias : bool
+    normalize_species_prefix : bool
         For species which have a newer four-digit code and and older locus
         name (such as "Ecqa" / "ELA"), use the older species prefix in the
         result.
+
+    normalize_allele_aliases : bool
 
     infer_class2_pairing : bool
         If given only the alpha or beta chain of a Class II allele,
@@ -96,7 +103,8 @@ def compact_string(
     """
     parsed_object = parse(
         raw_string,
-        use_species_alias=use_species_alias,
+        normalize_species_prefix=normalize_species_prefix,
+        normalize_allele_aliases=normalize_allele_aliases,
         infer_class2_pairing=infer_class2_pairing,
         default_species_prefix=default_species_prefix)
     return parsed_object.compact_string()

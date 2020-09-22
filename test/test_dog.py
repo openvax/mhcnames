@@ -17,11 +17,13 @@ def test_only_2_digits_in_first_allele_field():
 
 def test_species_code_calu_no_alias():
     eq_(
-        normalized_string("Calu-DQA1*00101", use_species_alias=False), "Calu-DQA1*001:01")
+        normalized_string("Calu-DQA1*00101", normalize_species_prefix=False),
+        "Calu-DQA1*001:01")
 
 def test_species_code_calu_alias():
     eq_(
-        normalized_string("Calu-DQA1*00101", use_species_alias=True), "DLA-DQA1*001:01")
+        normalized_string("Calu-DQA1*00101", normalize_species_prefix=True),
+        "DLA-DQA1*001:01")
 
 
 def test_parse_dog_class1_allele_dla_88_508_01():

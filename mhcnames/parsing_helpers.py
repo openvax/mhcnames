@@ -15,7 +15,7 @@ from __future__ import print_function, division, absolute_import
 from .allele_parse_error import AlleleParseError
 
 
-def strip_whitespace_and_dashes(s):
+def strip_whitespace_and_dashes(s : str):
     while s.startswith("-"):
         s = s[1:]
     while s.startswith(" "):
@@ -27,7 +27,7 @@ def strip_whitespace_and_dashes(s):
     return s
 
 
-def strip_whitespace_and_trim_outer_quotes(name):
+def strip_whitespace_and_trim_outer_quotes(name : str):
     original_name = name
     name = name.strip()
     while name.startswith('"'):
@@ -38,7 +38,7 @@ def strip_whitespace_and_trim_outer_quotes(name):
                 "Unbalanced double quotes on allele name: %s" % original_name)
     return name
 
-def split_on_all_seps(seq, seps="_:"):
+def split_on_all_seps(seq : str, seps="_:"):
     """
     Split given string on all separators specified
 
@@ -52,3 +52,12 @@ def split_on_all_seps(seq, seps="_:"):
             new_parts.extend(subseq.split(sep))
         parts = new_parts
     return parts
+
+def contains_any_letters(s : str):
+    """
+    Returns True if any characters in the sequence are letters.
+    """
+    for si in s:
+        if si.isalpha():
+            return True
+    return False

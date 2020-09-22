@@ -32,6 +32,14 @@ class Haplotype(ParsedResult):
         self.alleles = alleles
         self.class_restriction = class_restriction
 
+    @classmethod
+    def field_names(cls):
+        return (
+            "species_prefix",
+            "haplotype_name",
+            "alleles",
+            "class_restriction")
+
     def restrict_mhc_class(self, class_restriction):
         assert class_restriction is not None
         if self.class_restriction == class_restriction:

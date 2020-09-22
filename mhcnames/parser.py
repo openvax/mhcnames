@@ -20,6 +20,7 @@ from .parsing_helpers import (
     strip_whitespace_and_trim_outer_quotes,
     strip_whitespace_and_dashes,
     split_on_all_seps,
+    contains_any_letters
 )
 from .data import haplotypes
 from .mutation import Mutation
@@ -44,27 +45,34 @@ class Parser(object):
     def __init__(
             self,
             default_species_prefix="HLA",
-            use_species_alias=True,
+            normalize_species_prefix=False,
+            normalize_allele_aliases=False,
             infer_class2_pairing=False,
             gene_seps="*_-"):
         """
-        use_species_alias : bool
+        default_species_prefix : str
+            In the absence of a species prefix, should we assume we're parsing
+            a human ("HLA") allele. Set to None to not have a default species.
+
+        normalize_species_prefix : bool
             For species which have a newer four-digit code and and older locus
             name (such as "Ecqa" / "ELA"), use the older species prefix in the
             result.
+
+        normalize_allele_aliases : bool
+            Convert old allele aliases to newer names. For example,
+            change "SLA-2*07we01" to "SLA-2*07:03"
 
         infer_class2_pairing : bool
             If only alpha or beta chain of Class II MHC is given, try
             to infer the missing pair?
 
-        default_species_prefix : str
-            If no species prefix is given, which should should be assumed?
-
         gene_seps : iterable of str
             Possible separators used after gene names
         """
         self.default_species_prefix = default_species_prefix
-        self.use_species_alias = use_species_alias
+        self.normalize_species_prefix = normalize_species_prefix
+        self.normalize_allele_aliases = normalize_allele_aliases
         self.infer_class2_pairing = infer_class2_pairing
         self.gene_seps = gene_seps
 
@@ -81,7 +89,7 @@ class Parser(object):
         """
         inferred_prefix_and_original = infer_species_prefix_substring(
             name,
-            use_species_alias=self.use_species_alias)
+            normalize_species_prefix=self.normalize_species_prefix)
         if inferred_prefix_and_original is None:
             if self.default_species_prefix is None:
                 return (None, name)
@@ -91,8 +99,13 @@ class Parser(object):
             species_prefix, original_prefix = inferred_prefix_and_original
             original_prefix_length = len(original_prefix)
             remaining_string = name[original_prefix_length:]
-            return species_prefix, remaining_string
-
+            if self.normalize_species_prefix:
+                return species_prefix, remaining_string
+            else:
+                return (
+                    strip_whitespace_and_dashes(original_prefix),
+                    remaining_string
+                )
 
     def get_species_prefix_and_info(self, name):
         """
@@ -287,9 +300,8 @@ class Parser(object):
         return gene_name, str_after_gene
 
 
-    def parse_murine_gene(self, species, gene_name, str_after_gene):
+    def parse_murine_allele(self, species, gene_name, str_after_gene):
         return NamedAllele(species.prefix, gene_name, str_after_gene)
-
 
     def split_by_hyphen_except_gene_names(self, species, str_after_species):
         """
@@ -362,14 +374,29 @@ class Parser(object):
             if len(str_after_gene) == 0:
                 return Gene(species.prefix, gene_name)
 
-            # if the remaining string is an allele string which has
-            # been renamed or deprecated, then get its new/canonical form
-            new_allele_name = species.allele_aliases.get("%s*%s" % (gene_name, str_after_gene))
-            if new_allele_name:
-                gene_name, str_after_gene = new_allele_name.split("*")
+            if self.normalize_allele_aliases:
+                # if the remaining string is an allele string which has
+                # been renamed or deprecated, then get its new/canonical form
+                new_allele_name = species.allele_aliases.get("%s*%s" % (gene_name, str_after_gene))
+                if new_allele_name:
+                    gene_name, str_after_gene = new_allele_name.split("*")
 
             if species.prefix in {"H2", "RT1"}:
-                return self.parse_murine_gene(species, gene_name, str_after_gene)
+                return self.parse_murine_allele(species, gene_name, str_after_gene)
+            elif species.prefix in {"Susc", "SLA"}:
+                # parse e.g. "SLA-1-HB03" or "SLA-3-US#11"
+                if str_after_gene[:2] == "HB" or "#" in str_after_gene:
+                    return NamedAllele(
+                        species_prefix,
+                        gene_name,
+                        str_after_gene.upper())
+
+            if contains_any_letters(str_after_gene):
+                # parse e.g. SLA-2-04hb06
+                return NamedAllele(
+                    species_prefix,
+                    gene_name,
+                    str_after_gene.lower())
 
             # only allele names which allow three digits in second field seem to be
             # human class I names such as "HLA-B*15:120",
