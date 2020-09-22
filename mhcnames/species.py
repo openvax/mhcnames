@@ -1,5 +1,3 @@
-# Copyright (c) 2018-2019. Mount Sinai School of Medicine
-#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -285,7 +283,7 @@ def find_matching_species(name, use_species_alias=True):
 def find_matching_species_prefix(name, use_species_alias=True):
     """
     Given an unnormalized species prefix string,
-    returns normalized prefix string. If `use_aliases` is True,
+    returns normalized prefix string. If `use_species_alias` is True,
     then replace four letter species codes (e.g. 'Susc') with more common
     prefixes (e.g. 'SLA').
     """
@@ -330,7 +328,9 @@ def infer_species_prefix_substring(name, use_species_alias=True):
     for seq in candidate_species_substrings:
         for n in [None, 4, 3, 2]:
             original_prefix = seq[:n]
-            normalized_prefix = find_matching_species_prefix(name[:n])
+            normalized_prefix = find_matching_species_prefix(
+                name[:n],
+                use_species_alias=use_species_alias)
             if normalized_prefix is not None:
                 return normalized_prefix, original_prefix
     return None

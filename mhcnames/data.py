@@ -1,5 +1,3 @@
-# Copyright (c) 2018-2019. Mount Sinai School of Medicine
-#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -33,7 +31,7 @@ def load(
         normalize_second_level_keys=False):
     path = get_path(yaml_filename)
     with open(path, 'r') as f:
-        result = yaml.load(f)
+        result = yaml.safe_load(f)
 
     if normalize_second_level_keys:
         # turn first layer of values in dictionary into NormalizingDictionary

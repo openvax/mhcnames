@@ -1,5 +1,3 @@
-# Copyright (c) 2018-2019. Mount Sinai School of Medicine
-#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -41,8 +39,6 @@ from .mhc_class_helpers import normalize_mhc_class_string
 from .named_allele import NamedAllele
 from .species import Species
 
-
-compact_gene_and_allele_regex = re.compile("([A-Za-z]+)([0-9\:]+)[A-Z]?")
 
 class Parser(object):
     def __init__(
@@ -257,6 +253,7 @@ class Parser(object):
                 return gene_name, name[n:]
         return None, name
 
+    compact_gene_and_allele_regex = re.compile("([A-Za-z]+)([0-9\:]+)[A-Z]?")
 
     def parse_gene_name_from_prefix(
             self,
@@ -279,7 +276,7 @@ class Parser(object):
         if gene_name is None:
             # If the string had neither "*" nor "_" then try to collect the gene
             # name as the non-numerical part at the start of the string.
-            match = compact_gene_and_allele_regex.fullmatch(str_after_species)
+            match = Parser.compact_gene_and_allele_regex.fullmatch(str_after_species)
             if match:
                 gene_name, str_after_gene = match.groups()
 
