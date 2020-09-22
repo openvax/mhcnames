@@ -1,5 +1,18 @@
 #########################################
-#
+# Swine MHC haplotypes copied from:
+#   https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5472656/
+##########################################
+SLA:
+  Hp-1a.0:
+    - SLA-1*01:01
+    - SLA-2*01:01
+    - SLA-3*01:01
+  Hp-2.0:
+    - SLA-1*02:01
+    - SLA-1*07:01
+    - SLA-3*02:01
+
+#########################################
 # Mouse MHC haplotypes copied from:
 # http://www.biolegend.com/media_assets/support_resource/BioLegend_Mouse_Alloantigens.pdf
 # and partially from:

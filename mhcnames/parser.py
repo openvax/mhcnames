@@ -179,6 +179,17 @@ class Parser(object):
         else:
             modifier = None
 
+        if contains_any_letters(str_after_gene):
+            # TODO:
+            #  - add modifier to named allele
+            #  - how should this interact with the code below
+            #    and the on-error code that parses class II allele names
+            # parse e.g. SLA-2-04hb06
+            return NamedAllele(
+                species_prefix,
+                gene_name,
+                str_after_gene.lower())
+
         parts = split_on_all_seps(str_after_gene)
 
         parsed_fields = []
@@ -390,13 +401,6 @@ class Parser(object):
                         species_prefix,
                         gene_name,
                         str_after_gene.upper())
-
-            if contains_any_letters(str_after_gene):
-                # parse e.g. SLA-2-04hb06
-                return NamedAllele(
-                    species_prefix,
-                    gene_name,
-                    str_after_gene.lower())
 
             # only allele names which allow three digits in second field seem to be
             # human class I names such as "HLA-B*15:120",

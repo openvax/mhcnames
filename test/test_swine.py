@@ -27,7 +27,6 @@ def test_SLA_1_0101_no_seps():
         FourDigitAllele("SLA", "1", "01", "01"))
 
 
-
 def test_SLA_2_07we01_no_normalization():
     # SLA-2*07we01 is the provisional allele name for SLA-2*07:03
     eq_(parse("SLA-2*07we01", normalize_allele_aliases=False),
@@ -42,13 +41,12 @@ def test_SLA_2_07we01_normalize():
 def test_SLA_2_jh01_no_normalization():
     # SLA-2*jh01 is the provisional allele name for 2*15:01
     eq_(parse("SLA-2*jh01", normalize_allele_aliases=False),
-        FourDigitAllele("SLA", "2", "15", "01"))
+        NamedAllele("SLA", "2", "jh01"))
 
 def test_SLA_2_jh01_normalize():
     # SLA-2*jh01 is the provisional allele name for 2*15:01
-    eq_(parse("SLA-2*jh01", normalize_allele_aliases=False),
-        NamedAllele("SLA", "2", "jh01"))
-
+    eq_(parse("SLA-2*jh01", normalize_allele_aliases=True),
+        FourDigitAllele("SLA", "2", "15", "01"))
 
 def test_SLA_2_w09pt22_no_normalization():
     # SLA-2*w09pt22 is the provisional allele name for 2*09:03
