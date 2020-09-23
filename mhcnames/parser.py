@@ -178,7 +178,7 @@ class Parser(object):
             str_after_gene = str_after_gene[:-1]
         else:
             modifier = None
-
+        """
         if contains_any_letters(str_after_gene):
             # TODO:
             #  - add modifier to named allele
@@ -189,7 +189,7 @@ class Parser(object):
                 species_prefix,
                 gene_name,
                 str_after_gene.lower())
-
+        """
         parts = split_on_all_seps(str_after_gene)
 
         parsed_fields = []
@@ -314,6 +314,8 @@ class Parser(object):
     def parse_murine_allele(self, species, gene_name, str_after_gene):
         return NamedAllele(species.prefix, gene_name, str_after_gene)
 
+
+
     def split_by_hyphen_except_gene_names(self, species, str_after_species):
         """
         Split a string into a list of parts by hyphens except keep
@@ -401,6 +403,11 @@ class Parser(object):
                         species_prefix,
                         gene_name,
                         str_after_gene.upper())
+                elif contains_any_letters(str_after_gene):
+                    return NamedAllele(
+                        species_prefix,
+                        gene_name,
+                        str_after_gene.lower())
 
             # only allele names which allow three digits in second field seem to be
             # human class I names such as "HLA-B*15:120",
