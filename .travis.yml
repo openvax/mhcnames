@@ -22,13 +22,7 @@ cache:
   directories:
     - $HOME/.cache/pyensembl/
 before_install:
-  # download different versions of mini-conda for py2 vs. py3
-  - |
-    if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
-      wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh;
-    else
-      wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
-    fi
+  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
   - bash miniconda.sh -b -p $HOME/miniconda
   - export PATH="$HOME/miniconda/bin:$PATH"
   # reset the shell's lookup table for program name to path mappings
@@ -51,7 +45,6 @@ env:
   global:
     # MHC_BUNDLE_PASS
     - secure: "WbchjXY8MhdOb/eoHb75Sx80ucT70bNsvWtFTszXqXOkEsvA4EB4QkgdCRUvK1p6pOAnNYjFwctacJv76PlHJUnaZUv3KYCIGHQaJI6r82/u7BzALKl4DAP2gUhxVjmnHd/CaK6USiDemdROw6x5RToN9q/0wD6CLMYFatcjSgeLJ6J1fCIDA9frQWy7U04khIA5rNrIVBSpChifLBxnHm0oTXA0vExb5iNjMFLtkTIVOx6PQCeBv3XQdvzBTmdhA16zWPFwQq2lBJ+dFIsC4PprO+gPzL3afS/Mmk88pArAVv0/RZeAGOtvJKVdAs+h66ioVq0r6/3klkiNwNTC8f4c8UfVaQSuAIJ5/Kj+5XmNxQAje5ZQ8U+YDmm3FXRx6vaV83134LOHWVX1rK9lspqGfrkoidYQq6ENfnlN5G1G/TZiE2aX72eU65f+vUbgNWRSAnemd2Sa0s9P92XzKqwvd9QLSMNvDAnbvW2n8Pl48hIj9zbAemI1V52Ro6yuWPiNkfpbfhQ9QYd6Okwyz7A2aHh99ulc+RxLZgDpJP/KNNzywQvWyJtGigI+6/PAW0rJ8E3Z2lDL3ZAcRtc0Hom/gR3lAhJBmhbIWfSer4INTJ0JG4spOS/KBJvh42Aon1W73fwf8Nao9AXWDACNg5HOFoE6yk6ICsVBgcC2tDI="
-    # using Theano for now, TODO: experiment with switching to
     - KERAS_BACKEND=tensorflow
 install:
   - >
@@ -70,7 +63,6 @@ before_script:
   - mhcflurry-downloads fetch
 script:
   - ./lint.sh
-  # -a '!skip' lets us skip certain tests on travis (relevant for vaxrank)
   # this command runs both mhctools and vaxrank tests. Sometimes they don't print output for a long
   # time; travis_wait extends the time allowed with no output.
   - >
@@ -86,4 +78,4 @@ deploy:
       secure: "ZzskPyarYLTHTxxTAvD4IVmA7m/YsLlo4ARdXaSGPoIvsMRcv44PxodU+tSBSHW1GdiYzeZvpOa5dVBYr/SrnDVeGUhf6TEzw/oUuTgE22cXpBLPpXO2XOFW0Qy8HNaNJJyyZ2BX9hxhBhTRV2llDbaB02tfPjG/7ApUZT9oJzm6rAW+Ukzjw5tWbpP2cDJc3MhcPwtMGpXILcwA0OTxX61WketGe++Drefwy0jtsrzNEQyezXUY1n12AIgVh8xNbqWGKo0jf9PtddFUO4t6r+X+ITNtZKspsE9RQwqVZLdoKmWG2PSX2dcGRKAXSXrflfvmx7VhSJcsHSKZGbY70QoUTz2hjNgT6nCRq2EMen5RSZUOPFJVla4TSXNj5CUigtEDweqk+jZxi8CqrNrsAKVhudT8kyHrEmtFCsx5DGKZ3gN2CzQbkXKU4VMG/6endBeGZoMNLqPBzCQP9bbAzCsMu8bYFCGByFTpB5KeiPosLftaTaYd7URnwZvZJmXUVJ1MYs+T/bTY74O7Enix2rKa9V7Cw1y2V6/tVzyTzTAW3eX9yokOePZoMutHKvdEh5AWdsa1KZTmRHJeUeA+aY5owXEiu7I4ElsdsRiYC/2vlvlVrbw02vR5GSXZH89xOOXNFKQEnrGagYmglw4Ao625N5Clh4RUAeQ38jViS6Q="
   on:
     branch: master
-    condition: $TRAVIS_PYTHON_VERSION = "2.7"
+    condition: $TRAVIS_PYTHON_VERSION = "3.6"
