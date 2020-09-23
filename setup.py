@@ -1,5 +1,3 @@
-# Copyright (c) 2014-2018. Mount Sinai School of Medicine
-#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -25,7 +23,7 @@ try:
     with open(readme_path, 'r') as f:
         readme_markdown = f.read()
 except:
-    logging.warn("Failed to load %s" % readme_path)
+    logging.warning("Failed to load %s" % readme_path)
     readme_markdown = ""
 
 with open('mhcnames/__init__.py', 'r') as f:
@@ -43,11 +41,11 @@ if __name__ == '__main__':
         version=version,
         description="Python library for MHC nomenclature parsing",
         author="Alex Rubinsteyn",
-        author_email="alex.rubinsteyn@mssm.edu",
-        url="https://github.com/hammerlab/mhcnames",
+        author_email="alex.rubinsteyn@unc.edu",
+        url="https://github.com/openvax/mhcnames",
         license="http://www.apache.org/licenses/LICENSE-2.0.html",
         classifiers=[
-            'Development Status :: 3 - Alpha',
+            'Development Status :: 4 - Beta',
             'Environment :: Console',
             'Operating System :: OS Independent',
             'Intended Audience :: Science/Research',
@@ -59,5 +57,5 @@ if __name__ == '__main__':
         long_description=readme_markdown,
         long_description_content_type='text/markdown',
         packages=['mhcnames'],
-        package_data={'mhcnames': 'data/*.yaml'},
+        package_data={'mhcnames': ["data/*.yaml"]},
     )
