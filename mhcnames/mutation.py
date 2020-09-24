@@ -16,7 +16,7 @@ import re
 
 from serializable import Serializable
 
-from .allele_parse_error import AlleleParseError
+from .allele_parse_error import ParseError
 
 
 class Mutation(Serializable):
@@ -35,7 +35,7 @@ class Mutation(Serializable):
         seq = seq.upper()
         result = cls.mutation_regex.fullmatch(seq)
         if result is None:
-            raise AlleleParseError("Allele mutation malformed: '%s'" % seq)
+            raise ParseError("Allele mutation malformed: '%s'" % seq)
         aa_original = result.group(1)
         pos = int(result.group(2))
         aa_mutant = result.group(3)

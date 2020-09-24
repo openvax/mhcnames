@@ -12,7 +12,7 @@
 
 from __future__ import print_function, division, absolute_import
 
-from .allele_parse_error import AlleleParseError
+from .allele_parse_error import ParseError
 
 
 def strip_whitespace_and_dashes(s : str):
@@ -34,7 +34,7 @@ def strip_whitespace_and_trim_outer_quotes(name : str):
         if name.endswith('"'):
             name = name[1:-1].strip()
         else:
-            raise AlleleParseError(
+            raise ParseError(
                 "Unbalanced double quotes on allele name: %s" % original_name)
     return name
 

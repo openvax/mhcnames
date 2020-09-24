@@ -15,7 +15,7 @@ from __future__ import print_function, division, absolute_import
 import re
 
 from .alpha_beta_pair import AlphaBetaPair, infer_class2_alpha_chain
-from .allele_parse_error import AlleleParseError
+from .allele_parse_error import ParseError
 from .parsing_helpers import (
     strip_whitespace_and_trim_outer_quotes,
     strip_whitespace_and_dashes,
@@ -40,15 +40,20 @@ from .mhc_class_helpers import normalize_mhc_class_string
 from .named_allele import NamedAllele
 from .species import Species
 
+# default values for Parser parameters, reused in the 'parse' function below
+DEFAULT_SPECIES_PREFIX = "HLA"
+NORMALIZE_SPECIES_PREFIX = False
+NORMALIZE_ALLELE_ALIASES = False
+INFER_CLASS2_PAIRING = False
+GENE_SEPS = "*_-"
 
 class Parser(object):
     def __init__(
             self,
-            default_species_prefix="HLA",
-            normalize_species_prefix=False,
-            normalize_allele_aliases=False,
-            infer_class2_pairing=False,
-            gene_seps="*_-"):
+            default_species_prefix=DEFAULT_SPECIES_PREFIX,
+            normalize_species_prefix=NORMALIZE_SPECIES_PREFIX,
+            normalize_allele_aliases=NORMALIZE_ALLELE_ALIASES,
+            gene_seps=GENE_SEPS):
         """
         default_species_prefix : str
             In the absence of a species prefix, should we assume we're parsing
@@ -63,17 +68,12 @@ class Parser(object):
             Convert old allele aliases to newer names. For example,
             change "SLA-2*07we01" to "SLA-2*07:03"
 
-        infer_class2_pairing : bool
-            If only alpha or beta chain of Class II MHC is given, try
-            to infer the missing pair?
-
         gene_seps : iterable of str
             Possible separators used after gene names
         """
         self.default_species_prefix = default_species_prefix
         self.normalize_species_prefix = normalize_species_prefix
         self.normalize_allele_aliases = normalize_allele_aliases
-        self.infer_class2_pairing = infer_class2_pairing
         self.gene_seps = gene_seps
 
         self._parse_cache = {}
@@ -117,11 +117,11 @@ class Parser(object):
         (species_prefix, remaining_string) = self.parse_species_prefix(name)
 
         if species_prefix is None:
-            raise AlleleParseError("Unable to infer species for '%s'" % name)
+            raise ParseError("Unable to infer species for '%s'" % name)
 
         species = find_matching_species(species_prefix)
         if species is None:
-            raise AlleleParseError("Unknown species '%s' in '%s'" % (species_prefix, name))
+            raise ParseError("Unknown species '%s' in '%s'" % (species_prefix, name))
         return species, species_prefix, remaining_string
 
 
@@ -178,18 +178,7 @@ class Parser(object):
             str_after_gene = str_after_gene[:-1]
         else:
             modifier = None
-        """
-        if contains_any_letters(str_after_gene):
-            # TODO:
-            #  - add modifier to named allele
-            #  - how should this interact with the code below
-            #    and the on-error code that parses class II allele names
-            # parse e.g. SLA-2-04hb06
-            return NamedAllele(
-                species_prefix,
-                gene_name,
-                str_after_gene.lower())
-        """
+
         parts = split_on_all_seps(str_after_gene)
 
         parsed_fields = []
@@ -208,7 +197,7 @@ class Parser(object):
                     n_parsed = len(parsed_fields)
                     remaining_length = len(part)
                     if remaining_length == 1:
-                        raise AlleleParseError("Unable to parse '%s'" % original_name)
+                        raise ParseError("Unable to parse '%s'" % original_name)
                     if (allow_three_digits_in_first_field and n_parsed == 0 and
                             (remaining_length == 3 or remaining_length > 4)):
                         boundary_index = 3
@@ -223,8 +212,14 @@ class Parser(object):
                 parsed_fields.append(part)
 
         if len(parsed_fields) in {0, 1} and modifier is not None:
-                raise AlleleParseError("Unexpected modifier '%s' at end of '%s'" % (
+                raise ParseError("Unexpected modifier '%s' at end of '%s'" % (
                     modifier, original_name))
+
+        for field in parsed_fields:
+            if not field.isdigit():
+                raise ParseError(
+                    "Expected all fields to be digits in '%s'" % (
+                        original_name,))
 
         if len(parsed_fields) == 0:
             return Gene(species_prefix, gene_name)
@@ -257,8 +252,6 @@ class Parser(object):
                 parsed_fields[2],
                 parsed_fields[3],
                 modifier=modifier)
-
-
 
 
     def parse_gene_if_possible(self, species, name):
@@ -306,7 +299,7 @@ class Parser(object):
 
         if gene_name is None:
             # failed to figure out a gene name, give up
-            raise AlleleParseError("Unable to parse '%s'" % original_name)
+            raise ParseError("Unable to parse '%s'" % original_name)
 
         return gene_name, str_after_gene
 
@@ -424,7 +417,7 @@ class Parser(object):
                 str_after_gene=str_after_gene,
                 allow_three_digits_in_first_field=allow_three_digits_in_first_field,
                 allow_three_digits_in_second_field=allow_three_digits_in_second_field)
-        except AlleleParseError:
+        except ParseError:
             hyphen_parts = self.split_by_hyphen_except_gene_names(
                 species,
                 str_after_species)
@@ -434,7 +427,7 @@ class Parser(object):
             elif len(hyphen_parts) > 2:
                 # if after collapsing gene names we still have a hyphen
                 # then we expect it to be a Class II alpha-beta pair
-                raise AlleleParseError("Unexpected number of '-' in '%s'" % name)
+                raise ParseError("Unexpected number of '-' in '%s'" % name)
             elif len(hyphen_parts) == 2:
                 # this situation is tricky since it might be either
                 # a class II allele pair
@@ -453,7 +446,7 @@ class Parser(object):
             if haplotype_result:
                 return haplotype_result
             else:
-                raise AlleleParseError("Unable to parse '%s'" % name)
+                raise ParseError("Unable to parse '%s'" % name)
 
 
 
@@ -477,12 +470,16 @@ class Parser(object):
         elif len(parts) == 2:
             alpha_string, beta_string = parts
         else:
-            raise AlleleParseError(
+            raise ParseError(
                 "Expected Class II alpha/beta pairing but got %d allele names in '%s'" % (
                     len(parts),
                     name))
-        alpha = self.parse(alpha_string)
-        beta = self.parse(beta_string)
+        alpha = self.parse(alpha_string, infer_class2_pairing=False)
+        beta = self.parse(beta_string, infer_class2_pairing=False)
+        if not isinstance(alpha, AlleleGroup):
+            raise ParseError("Unexpected Class II alpha chain in '%s'" % name)
+        if not isinstance(beta, AlleleGroup):
+            raise ParseError("Unexpected Class II beta chain in '%s'" % name)
         return AlphaBetaPair(alpha, beta)
 
 
@@ -499,7 +496,7 @@ class Parser(object):
 
         valid_classes = (FourDigitAllele, NamedAllele)
         if result_without_mutation.__class__ not in valid_classes:
-            raise AlleleParseError(
+            raise ParseError(
                 "Cannot apply mutations in '%s' to %s" % (
                     name,
                     result_without_mutation.__class__.__name__))
@@ -512,7 +509,7 @@ class Parser(object):
             if p.upper() != "MUTANT" and p != ""
         ]
         if len(mutation_strings) == 0:
-            raise AlleleParseError(
+            raise ParseError(
                 "Expected '%s' to have mutations but none found" % name)
         mutations = [
             Mutation.parse(mutation_string)
@@ -532,7 +529,7 @@ class Parser(object):
         parts = lower.split()
         if len(parts) == 2:
             # TODO: parse MHC-Id genes and alleles such as "human CD1a"
-            raise AlleleParseError("Gene parsing not yet implemented for '%s'" % name)
+            raise ParseError("Gene parsing not yet implemented for '%s'" % name)
         elif len(parts) >= 3:
             if parts[-2] == "class" and parts[-1] in {"1", "2", "i", "ii"}:
                 mhc_class_string = normalize_mhc_class_string(parts[-1])
@@ -549,14 +546,14 @@ class Parser(object):
                 elif unrestricted_result.__class__ is Species:
                     return MhcClass(unrestricted_result.species_prefix, mhc_class_string)
                 else:
-                    raise AlleleParseError(
+                    raise ParseError(
                         "Unable to parse '%s' in '%s'" % (
                             unrestricted_string,
                             name))
 
-        raise AlleleParseError("Unexpected whitespace in '%s'" % name)
+        raise ParseError("Unexpected whitespace in '%s'" % name)
 
-    def parse(self, name):
+    def parse(self, name, infer_class2_pairing=INFER_CLASS2_PAIRING):
         """
         Parse any MHC related string, from gene loci to fully specified 8 digit
         alleles, alpha/beta pairings of Class II MHCs, with expression modifiers
@@ -573,6 +570,10 @@ class Parser(object):
         name : str
             Raw name of MHC locus or allele
 
+        infer_class2_pairing : bool
+            If only alpha or beta chain of Class II MHC is given, try
+            to infer the missing pair?
+
         Returns object with one of the following types:
             - Species
             - MhcClass
@@ -586,13 +587,13 @@ class Parser(object):
             - NamedAllele
             - MutantNamedAllele
         """
-
-        if name in self._parse_cache:
-            return self._parse_cache[name]
+        key = (name, infer_class2_pairing)
+        if key in self._parse_cache:
+            return self._parse_cache[key]
 
         trimmed_name = strip_whitespace_and_trim_outer_quotes(name)
         if len(trimmed_name) == 0:
-            raise AlleleParseError(
+            raise ParseError(
                 "Cannot parse empty allele name '%s'" % name)
         if " " in trimmed_name or "\t" in trimmed_name:
             result = self.parse_with_interior_whitespace(trimmed_name)
@@ -602,8 +603,73 @@ class Parser(object):
         else:
             result = self.parse_without_mutation(trimmed_name)
 
-        if self.infer_class2_pairing and result.__class__ is not AlphaBetaPair:
+        if infer_class2_pairing:
             result = infer_class2_alpha_chain(result)
 
-        self._parse_cache[name] = result
+        self._parse_cache[key] = result
         return result
+
+
+_parser_cache = {}
+
+def cached_parser(
+        default_species_prefix=DEFAULT_SPECIES_PREFIX,
+        normalize_species_prefix=NORMALIZE_SPECIES_PREFIX,
+        normalize_allele_aliases=NORMALIZE_ALLELE_ALIASES,
+        infer_class2_pairing=INFER_CLASS2_PAIRING,
+        gene_seps=GENE_SEPS):
+    """
+    Construct a Parser instance if this combination of arguments hasn't
+    been used before, otherwise retrieve an existing parser.
+    """
+    key = (
+        ("normalize_species_prefix", normalize_species_prefix),
+        ("normalize_allele_aliases", normalize_allele_aliases),
+        ("default_species_prefix", default_species_prefix),
+        ("gene_seps", gene_seps),
+    )
+    if key in _parser_cache:
+        return _parser_cache[key]
+    else:
+        parser = Parser(
+            normalize_species_prefix=normalize_species_prefix,
+            normalize_allele_aliases=normalize_allele_aliases,
+            default_species_prefix=default_species_prefix,
+            gene_seps=gene_seps)
+        _parser_cache[key] = parser
+        return parser
+
+def parse(
+        raw_string,
+        default_species_prefix=DEFAULT_SPECIES_PREFIX,
+        normalize_species_prefix=NORMALIZE_SPECIES_PREFIX,
+        normalize_allele_aliases=NORMALIZE_ALLELE_ALIASES,
+        infer_class2_pairing=INFER_CLASS2_PAIRING):
+    """
+    Parse MHC alleles into a structured representation.
+
+    Parameters
+    ----------
+    raw_string : str
+       String corresponding to allele, locus, or other MHC-related name
+
+    default_species_prefix : str
+       By default, parse alleles like "A*02:01" as human but it's possible
+       to change this to some other species.
+
+    normalize_species_prefix : bool
+       For species which have a newer four-digit code and and older locus
+       name (such as "Ecqa" / "ELA"), use the older species prefix in the
+       result.
+
+    normalize_allele_aliases : bool
+
+    infer_class2_pairing : bool
+       If given only the alpha or beta chain of a Class II allele,
+       try to infer the most likely pairing from population frequencies.
+    """
+    parser = cached_parser(
+            normalize_species_prefix=normalize_species_prefix,
+            normalize_allele_aliases=normalize_allele_aliases,
+            default_species_prefix=default_species_prefix)
+    return parser.parse(raw_string, infer_class2_pairing=infer_class2_pairing)

@@ -106,6 +106,8 @@ Suids:
   Sus scrofa:
     prefix: Susc
     alias: SLA
+    # TODO: reflect this in the Species object
+    haplotype prefix: Hp
     common name: Feral Pig
     taxon: 9823
 Gallus:

@@ -12,11 +12,7 @@
 
 from __future__ import print_function, division, absolute_import
 
-from .parser import Parser
-
-def parse(raw_string, **kwargs):
-    parser = Parser(**kwargs)
-    return parser.parse(raw_string)
+from .parser import parse
 
 def normalized_string(
         raw_string,
@@ -26,7 +22,7 @@ def normalized_string(
         infer_class2_pairing=True,
         default_species_prefix="HLA"):
     """
-    Parse MHC alleles into their canonical representation.
+    Transform MHC alleles into a canonical string representation.
 
     Examples:
         A2 -> HLA-A2

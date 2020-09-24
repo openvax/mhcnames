@@ -10,9 +10,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .compat import normalized_string, compact_string, parse
-from .allele_parse_error import AlleleParseError
-from .parser import Parser
+from .compat import normalized_string, compact_string
+from .allele_parse_error import ParseError
+from .parser import Parser, parse
 from .gene import Gene
 from .allele_group import AlleleGroup
 from .four_digit_allele import FourDigitAllele
@@ -33,7 +33,7 @@ __version__ = "1.0.0"
 __all__ = [
     "normalized_string",
     "compact_string",
-    "AlleleParseError",
+    "ParseError",
     "parse",
     "Gene",
     "MhcClass",

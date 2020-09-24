@@ -12,7 +12,7 @@
 
 from __future__ import print_function, division, absolute_import
 
-from .allele_parse_error import AlleleParseError
+from .allele_parse_error import ParseError
 
 class1_subtypes = {
     "Ia",
@@ -86,5 +86,5 @@ def normalize_mhc_class_string(mhc_class):
     mhc_class = mhc_class.replace("1", "I")
     mhc_class = mhc_class.replace("2", "II")
     if mhc_class not in valid_class_restrictions:
-        raise AlleleParseError("Invalid MHC class: '%s'" % original_string)
+        raise ParseError("Invalid MHC class: '%s'" % original_string)
     return mhc_class

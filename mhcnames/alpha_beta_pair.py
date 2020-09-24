@@ -65,7 +65,7 @@ class AlphaBetaPair(ParsedResult):
 
 default_human_alpha_chains = {
     # The DR alpha chain is effectively constant across the population
-    "DRB": FourDigitAllele("HLA", "DRA1", "01", "01"),
+    "DRB": FourDigitAllele("HLA", "DRA", "01", "01"),
     # Most common alpha chain for DP is DPA*01:03 but we really
     # need to change this logic to use a lookup table of pairwise
     # frequencies for inferring the alpha-beta pairing
@@ -82,6 +82,9 @@ def infer_class2_alpha_chain(beta):
     for a Class II beta chain, returns the alpha/beta pair of most common
     FourDigitAlleles.
     """
+    if isinstance(beta, AlphaBetaPair):
+        return beta
+
     if not isinstance(beta, FourDigitAllele):
         return beta
 

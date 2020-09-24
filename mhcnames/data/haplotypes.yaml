@@ -3,6 +3,10 @@
 #   https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5472656/
 ##########################################
 SLA:
+  # TODO:
+  #   no one writes "SLA-Hp-1a.0", pigs actually have a distinct prefix
+  #   "Hp" for haplotypes which is distinct from the prefix used for
+  #   gene names and alleles
   Hp-1a.0:
     - SLA-1*01:01
     - SLA-2*01:01
