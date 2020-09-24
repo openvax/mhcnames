@@ -14,7 +14,8 @@ from __future__ import print_function, division, absolute_import
 
 from collections import OrderedDict
 from .parsed_result import ParsedResult
-from .four_digit_allele import FourDigitAllele
+from .numeric_alleles import FourDigitAllele
+from .named_allele import NamedAllele
 
 
 class AlphaBetaPair(ParsedResult):
@@ -27,10 +28,24 @@ class AlphaBetaPair(ParsedResult):
         return ("alpha", "beta")
 
     @property
+    def is_class1(self):
+        return False
+
+    @property
+    def is_class2(self):
+        return True
+
+    @property
+    def species(self):
+        return self.alpha.species
+
+    @property
     def species_prefix(self):
         return self.alpha.species_prefix
 
-    def normalized_string(self, include_species=True):
+    def normalized_string(
+            self,
+            include_species=True):
         return "%s-%s" % (
             self.alpha.normalized_string(include_species=include_species),
             self.beta.normalized_string(include_species=False))
@@ -65,27 +80,27 @@ class AlphaBetaPair(ParsedResult):
 
 default_human_alpha_chains = {
     # The DR alpha chain is effectively constant across the population
-    "DRB": FourDigitAllele("HLA", "DRA", "01", "01"),
+    "DRB": FourDigitAllele.get("HLA", "DRA", "01", "01"),
     # Most common alpha chain for DP is DPA*01:03 but we really
     # need to change this logic to use a lookup table of pairwise
     # frequencies for inferring the alpha-beta pairing
-    "DPB": FourDigitAllele("HLA", "DPA1", "01", "03"),
+    "DPB": FourDigitAllele.get("HLA", "DPA1", "01", "03"),
     # Most common DQ alpha (according to wikipedia) is DQA1*01:02
     # but like DPA we should use pair frequencies in the future
-    "DQB": FourDigitAllele("HLA", "DQA1", "01", "02")
+    "DQB": FourDigitAllele.get("HLA", "DQA1", "01", "02")
 }
 
 
 def infer_class2_alpha_chain(beta):
     """
-    Given a FourDigitAllele, SixDigitAllele or EightDigitAllele
+    Given a AlleleTwoNumericFields, AlleleThreeNumericFields or AlleleEightDigit
     for a Class II beta chain, returns the alpha/beta pair of most common
     FourDigitAlleles.
     """
     if isinstance(beta, AlphaBetaPair):
         return beta
 
-    if not isinstance(beta, FourDigitAllele):
+    if not isinstance(beta, (NamedAllele, FourDigitAllele)):
         return beta
 
     if not beta.is_class2:

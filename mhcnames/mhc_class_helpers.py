@@ -12,7 +12,7 @@
 
 from __future__ import print_function, division, absolute_import
 
-from .allele_parse_error import ParseError
+from .parse_error import ParseError
 
 class1_subtypes = {
     "Ia",

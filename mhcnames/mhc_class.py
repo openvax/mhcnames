@@ -12,29 +12,45 @@
 
 
 from __future__ import print_function, division, absolute_import
-
-from .species import Species
 from .mhc_class_helpers import (
     normalize_mhc_class_string,
     is_class1,
     is_class2,
     is_valid_restriction
 )
+from .parse_error import ParseError
+from .parsed_result import ParsedResult
+from .species import Species
 
 
-class MhcClass(Species):
+class MhcClass(ParsedResult):
     """
     Wrapper class for species combined with MHC classes such as
     "I", "Ia", "Ib", "II", "IIa", &c
     which provides some utility functions.
     """
-    def __init__(self, species_prefix, mhc_class):
-        Species.__init__(self, species_prefix)
+    def __init__(self, species, mhc_class):
+        self.species = species
         self.mhc_class = normalize_mhc_class_string(mhc_class)
 
     @classmethod
     def field_names(cls):
-        return ("species_prefix", "mhc_class")
+        return ("species", "mhc_class")
+
+    @property
+    def species_prefix(self):
+        return self.species.prefix
+
+    @classmethod
+    def get(cls, species_prefix, mhc_class):
+        species = Species.get(species_prefix)
+        if species is None:
+            return None
+        try:
+            mhc_class = normalize_mhc_class_string(mhc_class)
+        except ParseError:
+            return None
+        return MhcClass(species, mhc_class)
 
     @property
     def is_class1(self):
@@ -56,7 +72,7 @@ class MhcClass(Species):
         """
         return [
             g
-            for g in Species.genes(self)
+            for g in self.species.genes()
             if is_valid_restriction(self.mhc_class, self.get_mhc_class_of_gene(g))
         ]
 
@@ -65,7 +81,7 @@ class MhcClass(Species):
         return MhcClass(**d)
 
     def to_record(self):
-        d = Species.to_record()
+        d = self.species.to_record()
         d["mhc_class"] = self.mhc_class
         return d
 

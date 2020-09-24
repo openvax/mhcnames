@@ -13,17 +13,34 @@
 from __future__ import print_function, division, absolute_import
 
 from .mhc_class_helpers import is_class1, is_class2
+from .parsed_result import ParsedResult
 from .species import Species
 
 
-class Gene(Species):
-    def __init__(self, species_prefix, gene_name):
-        Species.__init__(self, species_prefix)
+class Gene(ParsedResult):
+    def __init__(self, species, gene_name):
+        self.species = species
         self.gene_name = gene_name
+
+    @classmethod
+    def field_names(cls):
+        """
+        Returns name of fields used in constructor
+        """
+        return ("species", "gene_name")
+
+    @property
+    def name(self):
+        # alias for gene_name
+        return self.gene_name
+
+    @property
+    def species_prefix(self):
+        return self.species.prefix
 
     @property
     def mhc_class(self):
-        return self.get_mhc_class_of_gene(self.gene_name)
+        return self.species.get_mhc_class_of_gene(self.gene_name)
 
     @property
     def is_class1(self):
@@ -32,6 +49,24 @@ class Gene(Species):
     @property
     def is_class2(self):
         return is_class2(self.mhc_class)
+
+    @classmethod
+    def get(cls, species_prefix, gene_name : str):
+        """
+        Returns Gene if gene name is in ontology, otherwise None
+        """
+        # use the canonical gene name e.g. "A" and not "a"
+        if species_prefix.__class__ is Species:
+            species = species_prefix
+        else:
+            species = Species.get(species_prefix)
+
+        if species is None:
+            return None
+        gene_name = species.find_matching_gene_name(gene_name)
+        if gene_name is None:
+            return None
+        return Gene(species, gene_name)
 
     def normalized_string(self, include_species=True):
         if include_species:
@@ -52,22 +87,6 @@ class Gene(Species):
         """
         return Gene.normalized_string(self, include_species=include_species)
 
-    @classmethod
-    def field_names(cls):
-        """
-        Returns name of fields used in constructor
-        """
-        return ("species_prefix", "gene_name")
-
-    def to_gene(self):
-        """
-        Descendant classes use this method to project their fields down
-        to a Gene object.
-        """
-        if self.__class__ is Gene:
-            return self
-        else:
-            return Gene(self.species_prefix, self.gene_name)
 
     def to_record(self):
         """
@@ -76,7 +95,20 @@ class Gene(Species):
             - is_mutant
             - get_mhc_class
         """
-        d = Species.to_record()
+        d = self.species.to_record()
         d["gene"] = self.normalized_string()
         d["mhc_class"] = self.mhc_class
         return d
+
+
+    def to_gene(self):
+        """
+        Descendant classes use this method to project their fields down
+        to a Gene object.
+
+        TODO: move this out to all the individual classes?
+        """
+        if self.__class__ is Gene:
+            return self
+        else:
+            return Gene(self.species, self.gene_name)

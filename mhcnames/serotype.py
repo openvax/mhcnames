@@ -16,7 +16,7 @@ from .gene import Gene
 
 
 class Serotype(Gene):
-    def __init__(self, species_prefix, name, alleles):
+    def __init__(self, species, name, alleles):
         if len(alleles) == 0:
             raise ValueError("Cannot create Serotype without alleles")
 

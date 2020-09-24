@@ -15,15 +15,11 @@ from __future__ import print_function, division, absolute_import
 from .gene import Gene
 from .mutation import Mutation
 from .named_allele import NamedAllele
-from .four_digit_allele import FourDigitAllele
+from .parsed_result import ParsedResult
 
 
-class MutantAllele(Gene):
+class MutantAllele(ParsedResult):
     def __init__(self, original_allele, mutations):
-        Gene.__init__(
-            self,
-            species_prefix=original_allele.species_prefix,
-            gene_name=original_allele.gene_name)
         self.original_allele = original_allele
         self.mutations = mutations
 
@@ -33,6 +29,26 @@ class MutantAllele(Gene):
             "original_allele",
             "mutations",
         )
+
+    @property
+    def species(self):
+        return self.original_allele.species
+
+    @property
+    def species_prefix(self):
+        return self.species.prefix
+
+    @property
+    def gene_name(self):
+        return self.gene.name
+
+    @property
+    def gene(self):
+        return self.original_allele.gene
+
+    @property
+    def gene_name(self):
+        return self.gene.name
 
     def to_dict(self):
         d = Gene.to_dict(self)
@@ -46,8 +62,8 @@ class MutantAllele(Gene):
         original_allele_class = d.pop("original_allele_class")
         if original_allele_class == "NamedAllele":
             original_allele = NamedAllele.from_dict(d)
-        elif original_allele_class == "FourDigitAllele":
-            original_allele = FourDigitAllele.from_dict(d)
+        elif original_allele_class == "AlleleTwoNumericFields":
+            original_allele = AlleleTwoNumericFields.from_dict(d)
         else:
             raise ValueError(
                 "Unable to create MutantAllele from %s" % original_allele_class)

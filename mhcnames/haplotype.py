@@ -23,11 +23,11 @@ from .mhc_class_helpers import (
 class Haplotype(ParsedResult):
     def __init__(
             self,
-            species_prefix,
+            species,
             haplotype_name,
             alleles,
             class_restriction=None):
-        self.species_prefix = species_prefix
+        self.species = species
         self.haplotype_name = haplotype_name
         self.alleles = alleles
         self.class_restriction = class_restriction
@@ -35,10 +35,14 @@ class Haplotype(ParsedResult):
     @classmethod
     def field_names(cls):
         return (
-            "species_prefix",
+            "species",
             "haplotype_name",
             "alleles",
             "class_restriction")
+
+    @property
+    def species_prefix(self):
+        return self.species.prefix
 
     def restrict_mhc_class(self, class_restriction):
         assert class_restriction is not None

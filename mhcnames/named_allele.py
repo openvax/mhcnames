@@ -13,9 +13,9 @@
 from __future__ import print_function, division, absolute_import
 
 from .gene import Gene
+from .parsed_result import ParsedResult
 
-
-class NamedAllele(Gene):
+class NamedAllele(ParsedResult):
     """
     Some species, such as mouse (H2) and rats (RT1) do not yet use
     the standard nomenclature format (e.g. Species-Gene*Group:Protein).
@@ -26,34 +26,57 @@ class NamedAllele(Gene):
     Also, some older swine (SLA) alleles seem to have not been translated into
     the updated nomenclature (e.g. SLA-1-CHANGDA)
     """
-    def __init__(self, species_prefix, gene_name, allele_name):
-        Gene.__init__(self, species_prefix, gene_name)
+    def __init__(self, gene, allele_name):
+        self.gene = gene
         self.allele_name = allele_name
 
     def field_names(self):
-        return ("species_prefix", "gene_name", "allele_name")
+        return ("gene", "allele_name")
 
-    def to_tuple(self):
-        return (self.species_prefix, self.gene_name, self.allele_name)
+    @property
+    def species(self):
+        return self.gene.species
+
+    @property
+    def species_prefix(self):
+        return self.species.prefix
+
+    @property
+    def gene_name(self):
+        return self.gene.name
+
+    @property
+    def mhc_class(self):
+        return self.gene.mhc_class
+
+    @property
+    def is_class1(self):
+        return self.gene.is_class1
+
+    @property
+    def is_class2(self):
+        return self.gene.is_class2
 
     @classmethod
-    def from_tuple(cls, t):
-        return cls(t[0], t[1], t[2])
+    def get(cls, species_prefix, gene_name, allele_name):
+        gene = Gene.get(species_prefix, gene_name)
+        if gene is None:
+            return None
+        return NamedAllele(gene, allele_name)
 
     def normalized_string(self, include_species=True):
         return "%s%s" % (
-            Gene.normalized_string(
-                self,
+            self.gene.normalized_string(
                 include_species=include_species),
             self.allele_name)
 
     def compact_string(self, include_species=False):
         return "%s%s" % (
-            Gene.compact_string(
-                self,
+            self.gene.compact_string(
                 include_species=include_species),
             self.allele_name)
 
     def to_record(self):
-        d = Gene.to_record(self)
+        d = self.gene.to_record()
         d["allele"] = self.normalized_string()
+        d["is_mutant"] = False

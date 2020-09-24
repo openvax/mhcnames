@@ -47,12 +47,23 @@ class Species(ParsedResult):
         self._gene_aliases = None
         self._haplotypes = None
 
+    def field_names(self):
+        return ("species_prefix",)
+
     @property
     def prefix(self):
         return self.species_prefix
 
-    def field_names(self):
-        return ("species_prefix",)
+    @classmethod
+    def get(cls, species_name, normalize_species_prefix=True):
+        """
+        Alias for find_matching_species function
+        """
+        if species_name.__class__ is Species:
+            species_name = species_name.prefix
+        return find_matching_species(
+            species_name,
+            normalize_species_prefix=normalize_species_prefix)
 
     def to_record(self):
         return OrderedDict([
@@ -237,15 +248,6 @@ class Species(ParsedResult):
                         if candidate_gene_name == gene_name:
                             return mhc_class
         return None
-
-    @classmethod
-    def get(cls, name, normalize_species_prefix=True):
-        """
-        Alias for find_matching_species function
-        """
-        return find_matching_species(
-            name,
-            normalize_species_prefix=normalize_species_prefix)
 
 
 # map prefix strings to Species objects

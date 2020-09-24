@@ -14,13 +14,11 @@ from __future__ import print_function, division, absolute_import
 
 import re
 
-from .allele_group import AlleleGroup
 from .allele_modifiers import valid_allele_modifiers
-from .allele_parse_error import ParseError
+from .parse_error import ParseError
 from .alpha_beta_pair import AlphaBetaPair, infer_class2_alpha_chain
 from .data import haplotypes
-from .eight_digit_allele import EightDigitAllele
-from .four_digit_allele import FourDigitAllele
+
 from .gene import Gene
 from .haplotype import Haplotype
 from .mhc_class import MhcClass
@@ -28,13 +26,19 @@ from .mhc_class_helpers import normalize_mhc_class_string
 from .mutant_allele import MutantAllele
 from .mutation import Mutation
 from .named_allele import NamedAllele
+from .numeric_alleles import (
+    TwoDigitAllele,
+    AlleleGroup,
+    FourDigitAllele,
+    SixDigitAllele,
+    EightDigitAllele
+)
 from .parsing_helpers import (
     strip_whitespace_and_trim_outer_quotes,
     strip_whitespace_and_dashes,
-    split_on_all_seps,
+    split_allele_fields,
     contains_any_letters
 )
-from .six_digit_allele import SixDigitAllele
 from .serotype import Serotype
 from .serotype_data import get_serotype
 from .species import Species, infer_species_prefix_substring, find_matching_species
@@ -181,37 +185,11 @@ class Parser(object):
         else:
             modifier = None
 
-        parts = split_on_all_seps(str_after_gene)
-
-        parsed_fields = []
-        for part in parts:
-            if part.isdigit():
-                if (allow_three_digits_in_first_field and
-                        len(parsed_fields) == 0 and
-                        len(part) > 4):
-                    parsed_fields.append(part[:3])
-                    part = part[3:]
-                if (allow_three_digits_in_second_field and
-                        len(parsed_fields) == 1 and
-                        len(part) > 4):
-                    parsed_fields.append(part[3:])
-                while part:
-                    n_parsed = len(parsed_fields)
-                    remaining_length = len(part)
-                    if remaining_length == 1:
-                        raise ParseError("Unable to parse '%s'" % original_name)
-                    if (allow_three_digits_in_first_field and n_parsed == 0 and
-                            (remaining_length == 3 or remaining_length > 4)):
-                        boundary_index = 3
-                    elif (allow_three_digits_in_second_field and n_parsed == 1 and
-                            (remaining_length == 3 or remaining_length > 4)):
-                        boundary_index = 3
-                    else:
-                        boundary_index = 2
-                    parsed_fields.append(part[:boundary_index])
-                    part = part[boundary_index:]
-            else:
-                parsed_fields.append(part)
+        parsed_fields = split_allele_fields(
+            original_name,
+            str_after_gene,
+            allow_three_digits_in_first_field,
+            allow_three_digits_in_second_field)
 
         if len(parsed_fields) in {0, 1} and modifier is not None:
                 raise ParseError("Unexpected modifier '%s' at end of '%s'" % (
@@ -222,39 +200,47 @@ class Parser(object):
                 raise ParseError(
                     "Expected all fields to be digits in '%s'" % (
                         original_name,))
+        species = Species.get(
+            species_prefix,
+            normalize_species_prefix=self.normalize_species_prefix)
+        if not species:
+            raise ParseError("Unknown species in '%s'" % original_name)
+        gene = Gene.get(species, gene_name)
+        if not gene:
+            raise ParseError("Unknown gene in '%s'" % original_name)
 
         if len(parsed_fields) == 0:
-            return Gene(species_prefix, gene_name)
-        elif len(parsed_fields) == 1:
-            return AlleleGroup(
-                species_prefix,
-                gene_name,
-                parsed_fields[0])
-        elif len(parsed_fields) == 2:
-            return FourDigitAllele(
-                species_prefix,
-                gene_name,
-                parsed_fields[0],
-                parsed_fields[1],
-                modifier=modifier)
-        elif len(parsed_fields) == 3:
-            return SixDigitAllele(
-                species_prefix,
-                gene_name,
-                parsed_fields[0],
-                parsed_fields[1],
-                parsed_fields[2],
-                modifier=modifier)
-        elif len(parsed_fields) == 4:
-            return EightDigitAllele(
-                species_prefix,
-                gene_name,
-                parsed_fields[0],
-                parsed_fields[1],
-                parsed_fields[2],
-                parsed_fields[3],
-                modifier=modifier)
+            return gene
 
+        # TODO: distinguish between an AlleleGroup and TwoDigitAllele
+        allele_group = AlleleGroup(gene, parsed_fields[0])
+
+        if len(parsed_fields) == 1:
+            return allele_group
+
+        four_digit_allele = FourDigitAllele(
+            allele_group,
+            protein_id=parsed_fields[1],
+            modifier=modifier)
+
+        if len(parsed_fields) == 2:
+            return four_digit_allele
+
+        six_digit_allele = SixDigitAllele(
+            four_digit_allele,
+            coding_sequence_id=parsed_fields[2],
+            modifier=modifier)
+
+        if len(parsed_fields) == 3:
+            return six_digit_allele
+
+        if len(parsed_fields) == 4:
+            return EightDigitAllele(
+                    six_digit_allele=six_digit_allele,
+                    genomic_sequence_id=parsed_fields[3],
+                    modifier=modifier)
+
+        raise ParseError("Too many allele fields in '%s'" % original_name)
 
     def parse_gene_if_possible(self, species, name):
         """
@@ -274,13 +260,12 @@ class Parser(object):
 
     compact_gene_and_allele_regex = re.compile("([A-Za-z]+)([0-9\:]+)[A-Z]?")
 
-    def parse_gene_name_from_prefix(
+    def parse_gene_from_prefix(
             self,
             species,
             original_name,
             str_after_species):
         gene_name, str_after_gene = self.parse_gene_if_possible(species, str_after_species)
-
 
         if gene_name is None:
             for sep in self.gene_seps:
@@ -303,13 +288,8 @@ class Parser(object):
             # failed to figure out a gene name, give up
             raise ParseError("Unable to parse '%s'" % original_name)
 
-        return gene_name, str_after_gene
-
-
-    def parse_murine_allele(self, species, gene_name, str_after_gene):
-        return NamedAllele(species.prefix, gene_name, str_after_gene)
-
-
+        gene = Gene(species, gene_name)
+        return gene, str_after_gene
 
     def split_by_hyphen_except_gene_names(self, species, str_after_species):
         """
@@ -370,38 +350,38 @@ class Parser(object):
             #   A-01:01
             # However this will not work:
             #   - A_01_01
-            gene_name, str_after_gene = self.parse_gene_name_from_prefix(
+            gene, str_after_gene = self.parse_gene_from_prefix(
                 species,
                 name,
                 str_after_species)
-            # use the canonical gene name e.g. "A" and not "a"
-            gene_name = species.normalize_gene_name_if_exists(gene_name)
 
             str_after_gene = strip_whitespace_and_dashes(str_after_gene)
 
             if len(str_after_gene) == 0:
-                return Gene(species.prefix, gene_name)
+                return gene
 
+            gene_name = gene.name
             if self.normalize_allele_aliases:
                 # if the remaining string is an allele string which has
                 # been renamed or deprecated, then get its new/canonical form
-                new_allele_name = species.allele_aliases.get("%s*%s" % (gene_name, str_after_gene))
+                # TODO: make this an optional transformation after parsing
+                new_allele_name = species.allele_aliases.get(
+                    "%s*%s" % (gene_name, str_after_gene))
                 if new_allele_name:
                     gene_name, str_after_gene = new_allele_name.split("*")
 
             if species.prefix in {"H2", "RT1"}:
-                return self.parse_murine_allele(species, gene_name, str_after_gene)
+                # mouse or rat alleles
+                return self.NamedAllele(gene, str_after_gene)
             elif species.prefix in {"Susc", "SLA"}:
                 # parse e.g. "SLA-1-HB03" or "SLA-3-US#11"
                 if str_after_gene[:2] == "HB" or "#" in str_after_gene:
                     return NamedAllele(
-                        species_prefix,
-                        gene_name,
+                        gene,
                         str_after_gene.upper())
                 elif contains_any_letters(str_after_gene):
                     return NamedAllele(
-                        species_prefix,
-                        gene_name,
+                        gene,
                         str_after_gene.lower())
 
             # only allele names which allow three digits in second field seem to be
@@ -420,6 +400,7 @@ class Parser(object):
                 allow_three_digits_in_first_field=allow_three_digits_in_first_field,
                 allow_three_digits_in_second_field=allow_three_digits_in_second_field)
         except ParseError:
+            raise
             hyphen_parts = self.split_by_hyphen_except_gene_names(
                 species,
                 str_after_species)
@@ -449,9 +430,6 @@ class Parser(object):
                 return haplotype_result
             else:
                 raise ParseError("Unable to parse '%s'" % name)
-
-
-
 
     def parse_known_alpha_beta_pair(self, name):
         """
@@ -535,10 +513,7 @@ class Parser(object):
                 species_common_name,
                 normalize_species_prefix=self.normalize_species_prefix)
             gene_name = species.find_matching_gene_name(gene_name)
-            if not species or not gene_name:
-                raise ParseError("Gene parsing not yet implemented for '%s'" % name)
-            # TODO: change Gene to take a Species object instead of a prefix
-            return Gene(species.prefix, gene_name)
+            return Gene(species, gene_name)
 
         elif len(parts) >= 3:
             if parts[-2] == "class" and parts[-1] in {"1", "2", "i", "ii"}:
@@ -589,9 +564,9 @@ class Parser(object):
             - MhcClass
             - Gene
             - AlleleGroup
-            - FourDigitAllele
-            - SixDigitAllele
-            - EightDigitAllele
+            - AlleleTwoNumericFields
+            - AlleleThreeNumericFields
+            - AlleleEightDigit
             - MutantFourDigitAllele
             - AlphaBetaPair
             - NamedAllele

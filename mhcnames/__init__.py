@@ -11,13 +11,16 @@
 # limitations under the License.
 
 from .compat import normalized_string, compact_string
-from .allele_parse_error import ParseError
+from .parse_error import ParseError
 from .parser import Parser, parse
 from .gene import Gene
-from .allele_group import AlleleGroup
-from .four_digit_allele import FourDigitAllele
-from .six_digit_allele import SixDigitAllele
-from .eight_digit_allele import EightDigitAllele
+from .numeric_alleles import (
+    AlleleGroup,
+    TwoDigitAllele,
+    FourDigitAllele,
+    SixDigitAllele,
+    EightDigitAllele
+)
 from .named_allele import NamedAllele
 from .mutation import Mutation
 from .mutant_allele import MutantAllele
@@ -38,6 +41,7 @@ __all__ = [
     "Gene",
     "MhcClass",
     "AlleleGroup",
+    "TwoDigitAllele",
     "FourDigitAllele",
     "SixDigitAllele",
     "EightDigitAllele",

@@ -16,7 +16,7 @@ import re
 
 from serializable import Serializable
 
-from .allele_parse_error import ParseError
+from .parse_error import ParseError
 
 
 class Mutation(Serializable):
