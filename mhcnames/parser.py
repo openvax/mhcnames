@@ -14,31 +14,31 @@ from __future__ import print_function, division, absolute_import
 
 import re
 
-from .alpha_beta_pair import AlphaBetaPair, infer_class2_alpha_chain
+from .allele_group import AlleleGroup
+from .allele_modifiers import valid_allele_modifiers
 from .allele_parse_error import ParseError
+from .alpha_beta_pair import AlphaBetaPair, infer_class2_alpha_chain
+from .data import haplotypes
+from .eight_digit_allele import EightDigitAllele
+from .four_digit_allele import FourDigitAllele
+from .gene import Gene
+from .haplotype import Haplotype
+from .mhc_class import MhcClass
+from .mhc_class_helpers import normalize_mhc_class_string
+from .mutant_allele import MutantAllele
+from .mutation import Mutation
+from .named_allele import NamedAllele
 from .parsing_helpers import (
     strip_whitespace_and_trim_outer_quotes,
     strip_whitespace_and_dashes,
     split_on_all_seps,
     contains_any_letters
 )
-from .data import haplotypes
-from .mutation import Mutation
-from .four_digit_allele import FourDigitAllele
 from .six_digit_allele import SixDigitAllele
-from .eight_digit_allele import EightDigitAllele
-from .allele_group import AlleleGroup
-from .gene import Gene
-from .mhc_class import MhcClass
-from .species import infer_species_prefix_substring, find_matching_species
-from .serotype_data import get_serotype
-from .mutant_allele import MutantAllele
 from .serotype import Serotype
-from .haplotype import Haplotype
-from .allele_modifiers import valid_allele_modifiers
-from .mhc_class_helpers import normalize_mhc_class_string
-from .named_allele import NamedAllele
-from .species import Species
+from .serotype_data import get_serotype
+from .species import Species, infer_species_prefix_substring, find_matching_species
+
 
 # default values for Parser parameters, reused in the 'parse' function below
 DEFAULT_SPECIES_PREFIX = "HLA"
@@ -119,7 +119,9 @@ class Parser(object):
         if species_prefix is None:
             raise ParseError("Unable to infer species for '%s'" % name)
 
-        species = find_matching_species(species_prefix)
+        species = Species.get(
+            species_prefix,
+            normalize_species_prefix=self.normalize_species_prefix)
         if species is None:
             raise ParseError("Unknown species '%s' in '%s'" % (species_prefix, name))
         return species, species_prefix, remaining_string
@@ -528,8 +530,16 @@ class Parser(object):
             return self.parse_with_mutations(name)
         parts = lower.split()
         if len(parts) == 2:
-            # TODO: parse MHC-Id genes and alleles such as "human CD1a"
-            raise ParseError("Gene parsing not yet implemented for '%s'" % name)
+            species_common_name, gene_name = parts
+            species = Species.get(
+                species_common_name,
+                normalize_species_prefix=self.normalize_species_prefix)
+            gene_name = species.find_matching_gene_name(gene_name)
+            if not species or not gene_name:
+                raise ParseError("Gene parsing not yet implemented for '%s'" % name)
+            # TODO: change Gene to take a Species object instead of a prefix
+            return Gene(species.prefix, gene_name)
+
         elif len(parts) >= 3:
             if parts[-2] == "class" and parts[-1] in {"1", "2", "i", "ii"}:
                 mhc_class_string = normalize_mhc_class_string(parts[-1])
