@@ -1,10 +1,10 @@
 from nose.tools import eq_
-from mhcnames import parse, AlleleTwoNumericFields, compact_string, normalized_string
+from mhcnames import parse, FourDigitAllele, compact_string, normalized_string
 
 
 def test_parse_dog_class2_allele_dla_dqa1_001_01():
     eq_(parse("DLA-DQA1*00101"),
-        AlleleTwoNumericFields("DLA", "DQA1", "001", "01"))
+        FourDigitAllele.get("DLA", "DQA1", "001", "01"))
 
 def test_normalized_string_dog_class2_allele_dla_dqa1_001_01():
     eq_(normalized_string("DLA-DQA1*00101"),
@@ -27,7 +27,7 @@ def test_species_code_calu_alias():
 
 
 def test_parse_dog_class1_allele_dla_88_508_01():
-    expected = AlleleTwoNumericFields("DLA", "88", "508", "01")
+    expected = FourDigitAllele.get("DLA", "88", "508", "01")
     parsed = parse("DLA-88*50801")
     eq_(parsed, expected)
 

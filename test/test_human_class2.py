@@ -4,15 +4,15 @@ from mhcnames import (
     normalized_string,
     compact_string,
     AlphaBetaPair,
-    AlleleTwoNumericFields,
+    FourDigitAllele,
     parse,
 )
 
 
 def test_parse_human_class2_DRB1_01_02():
     expected = AlphaBetaPair(
-        AlleleTwoNumericFields("HLA", "DRA", "01", "01"),
-        AlleleTwoNumericFields("HLA", "DRB1", "01", "02"),
+        FourDigitAllele.get("HLA", "DRA", "01", "01"),
+        FourDigitAllele.get("HLA", "DRB1", "01", "02"),
     )
     for name in ["DRB1_0102",
                  "DRB101:02",
@@ -55,8 +55,8 @@ def test_compact_string_string_human_class2_DRB1_01_02():
 
 def test_parse_human_class2_alpha_beta_DPA1_01_05_DPB1_100_01():
     expected = AlphaBetaPair(
-        AlleleTwoNumericFields("HLA", "DPA1", "01", "05"),
-        AlleleTwoNumericFields("HLA", "DPB1", "100", "01")
+        FourDigitAllele.get("HLA", "DPA1", "01", "05"),
+        FourDigitAllele.get("HLA", "DPB1", "100", "01")
     )
     for name in ["DPA10105-DPB110001",
                  "HLA-DPA1*01:05-DPB1*100:01",
@@ -68,8 +68,8 @@ def test_parse_human_class2_alpha_beta_DPA1_01_05_DPB1_100_01():
 
 def test_parse_all_parameters_true_human_class2_alpha_beta_DPA1_01_05_DPB1_100_01():
     expected = AlphaBetaPair(
-        AlleleTwoNumericFields("HLA", "DPA1", "01", "05"),
-        AlleleTwoNumericFields("HLA", "DPB1", "100", "01")
+        FourDigitAllele.get("HLA", "DPA1", "01", "05"),
+        FourDigitAllele.get("HLA", "DPB1", "100", "01")
     )
     for name in ["DPA10105-DPB110001",
                  "HLA-DPA1*01:05-DPB1*100:01",

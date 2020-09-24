@@ -8,7 +8,7 @@ from nose.tools import eq_
 
 
 def check_human_class1_string(s):
-    expected_parsed_result = MhcClass("HLA", "I")
+    expected_parsed_result = MhcClass.get("HLA", "I")
     expected_string_repr = "human class I"
     parsed_result = parse(s)
     eq_(

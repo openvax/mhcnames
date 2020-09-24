@@ -8,7 +8,7 @@ from mhcnames import (
 
 
 def test_mouse_class1_alleles_H2_Kk():
-    H2Kk = NamedAllele("H2", "K", "k")
+    H2Kk = NamedAllele.get("H2", "K", "k")
 
     eq_(parse("H2-Kk"), H2Kk)
     eq_(normalized_string("H2-Kk"), "H2-Kk")
@@ -20,7 +20,7 @@ def test_mouse_class1_alleles_H2_Kk():
     eq_(compact_string("H-2-Kk"), "Kk")
 
 def test_mouse_class1_alleles_H2_Db():
-    H2Db = NamedAllele("H2", "D", "b")
+    H2Db = NamedAllele.get("H2", "D", "b")
 
     eq_(parse("H2-Db"), H2Db)
     eq_(normalized_string("H2-Db"), "H2-Db")
@@ -32,4 +32,4 @@ def test_mouse_class1_alleles_H2_Db():
     eq_(compact_string("H-2-Db"), "Db")
 
 def test_H2_Kd_without_seps():
-    eq_(parse("H2Kd"), NamedAllele("H2", "K", "d"))
+    eq_(parse("H2Kd"), NamedAllele.get("H2", "K", "d"))
