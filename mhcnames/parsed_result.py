@@ -19,12 +19,42 @@ class ParsedResult(Serializable):
     """
     Base class for all parsed objects in mhcnames.
     """
-    def normalized_string(self, include_species=True):
+    """
+    def _field_name_value_pairs(self):
+        results = []
+        for field_name in self.field_names():
+            field_value = getattr(self, field_name)
+            if isinstance(field_value, ParsedResult):
+                results.extend(field_value._field_name_value_pairs())
+            else:
+                results.append((field_name, field_value))
+        return results
+
+    def _field_name_string_pairs(self):
+        results = []
+        for k, v in self._field_name_value_pairs():
+            if isinstance(v, str):
+                results.append((k, "'%s'" % v))
+            else:
+                results.append((k, "%s" % v))
+        return results
+    
+    def __str__(self):
+        return "%s(%s)" % (
+            self.__class__.__name__,
+            ", ".join(
+                ["%s=%s" % (k, v_str)
+                for (k, v_str) in self._field_name_string_pairs()]))
+                
+    def __repr__(self):
+        return str(self)
+    """
+    def normalized_string(self, include_species=True, use_species_alias=True):
         raise NotImplementedError(
             "%s requires implementation of normalized_string() method" % (
                 self.__class__.__name__))
 
-    def compact_string(self, include_species=False):
+    def compact_string(self, include_species=False, use_species_alias=True):
         """
         Compact representation, defaults to omitting species
         """

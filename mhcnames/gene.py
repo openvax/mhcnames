@@ -12,13 +12,16 @@
 
 from __future__ import print_function, division, absolute_import
 
+from pytypes import typechecked
+
 from .mhc_class_helpers import is_class1, is_class2
 from .parsed_result import ParsedResult
 from .species import Species
 
 
 class Gene(ParsedResult):
-    def __init__(self, species, gene_name):
+    @typechecked
+    def __init__(self, species : Species, gene_name : str):
         self.species = species
         self.gene_name = gene_name
 
@@ -68,24 +71,35 @@ class Gene(ParsedResult):
             return None
         return Gene(species, gene_name)
 
-    def normalized_string(self, include_species=True):
+    def normalized_string(
+            self,
+            include_species=True,
+            use_species_alias=True):
         if include_species:
             # non-classical genes located outside the MHC locus
             # get identified with the common species name if possible
             if self.mhc_class == "Id":
                 species_str = self.common_species_name
+            elif use_species_alias:
+                species_str = self.species.historic_alias
             else:
                 species_str = self.species_prefix
             return "%s-%s" % (species_str, self.gene_name)
         else:
             return self.gene_name
 
-    def compact_string(self, include_species=False):
+    def compact_string(
+            self,
+            include_species=False,
+            use_species_alias=True):
         """
         Compact representation of a Locus, currently same as the
         normalized representation.
         """
-        return Gene.normalized_string(self, include_species=include_species)
+        return Gene.normalized_string(
+            self,
+            include_species=include_species,
+            use_species_alias=use_species_alias)
 
 
     def to_record(self):
@@ -100,15 +114,3 @@ class Gene(ParsedResult):
         d["mhc_class"] = self.mhc_class
         return d
 
-
-    def to_gene(self):
-        """
-        Descendant classes use this method to project their fields down
-        to a Gene object.
-
-        TODO: move this out to all the individual classes?
-        """
-        if self.__class__ is Gene:
-            return self
-        else:
-            return Gene(self.species, self.gene_name)

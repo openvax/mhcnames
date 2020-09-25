@@ -12,15 +12,18 @@
 
 from __future__ import print_function, division, absolute_import
 
+
 import re
 
 from serializable import Serializable
+from pytypes import typechecked
 
 from .parse_error import ParseError
 
 
 class Mutation(Serializable):
-    def __init__(self, pos, aa_original, aa_mutant):
+    @typechecked
+    def __init__(self, pos : int, aa_original : str, aa_mutant : str):
         self.pos = pos
         self.aa_original = aa_original
         self.aa_mutant = aa_mutant

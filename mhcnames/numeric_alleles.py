@@ -12,6 +12,10 @@
 
 from __future__ import print_function, division, absolute_import
 
+from typing import Union
+
+from pytypes import typechecked
+
 from .gene import Gene
 from .parsed_result import ParsedResult
 
@@ -28,7 +32,8 @@ class AlleleGroup(ParsedResult):
     are closely related but not every allele in a group is also
     in the similarly named serotype (and vice versa).
     """
-    def __init__(self, gene, group_id):
+    @typechecked
+    def __init__(self, gene : Gene, group_id : str):
         self.gene = gene
         self.group_id = self._adjust_formatting(group_id)
 
@@ -65,19 +70,23 @@ class AlleleGroup(ParsedResult):
             "group_id"
         )
 
-    def normalized_string(self, include_species=True):
+    def normalized_string(self, include_species=True, use_species_alias=True):
         return "%s*%s" % (
-            self.gene.normalized_string(include_species=include_species),
+            self.gene.normalized_string(
+                include_species=include_species,
+                use_species_alias=use_species_alias),
             self.group_id)
 
-    def compact_string(self, include_species=False):
+    def compact_string(self, include_species=False, use_species_alias=True):
         """
         Compact representation of an AlleleGroup, omits the "*"
         in an allele group.
             Normalized: HLA-A*02
             Compact: HLA-A02
         """
-        gene_string = self.gene.compact_string(include_species=include_species)
+        gene_string = self.gene.compact_string(
+            include_species=include_species,
+            use_species_alias=use_species_alias)
         requires_sep = (
             (gene_string[-1].isdigit() and self.group_id[0].isdigit()) or
             (gene_string[-1].isalpha() and self.group_id[0].isalpha())
@@ -114,8 +123,12 @@ class TwoDigitAllele(ParsedResult):
     A few species have a single numeric field for identifying unique MHC
     proteins, e.g. Anpl-UAA*01
     """
-
-    def __init__(self, gene, protein_id, modifier=None):
+    @typechecked
+    def __init__(
+            self,
+            gene : Gene,
+            protein_id : str,
+            modifier : Union[None, str]=None):
         self.gene = gene
         self.protein_id = protein_id
         self.modifier = modifier
@@ -132,7 +145,6 @@ class TwoDigitAllele(ParsedResult):
     def species(self):
         return self.allele_group.species
 
-
     @property
     def species_prefix(self):
         return self.species.prefix
@@ -148,17 +160,23 @@ class TwoDigitAllele(ParsedResult):
             return None
         return TwoDigitAllele(gene, protein_id)
 
-    def normalized_string(self, include_species=True, include_modifier=True):
+    def normalized_string(
+            self,
+            include_species=True,
+            use_species_alias=True,
+            include_modifier=True):
         """
         Return allele strings like "Anpl-UAA*01"
         """
-        allele_group_str = self.gene.normalized_string(include_species=include_species)
+        allele_group_str = self.gene.normalized_string(
+            include_species=include_species,
+            use_species_alias=use_species_alias)
         result = "%s*%s" % (allele_group_str, self.protein_id)
         if include_modifier and self.modifier:
             result += self.modifier
         return result
 
-    def compact_string(self, include_species=False):
+    def compact_string(self, include_species=False, use_species_alias=True):
         """
         Compact representation of a TwoDigitAllele, omits the "*" and ":"
         in allele names
@@ -166,7 +184,9 @@ class TwoDigitAllele(ParsedResult):
             Compact: HLA-A0201
         """
         return "%s%s" % (
-            self.gene.compact_string(include_species=include_species),
+            self.gene.compact_string(
+                include_species=include_species,
+                use_species_alias=use_species_alias),
             self.protein_id)
 
     def to_record(self):
@@ -187,8 +207,12 @@ class FourDigitAllele(ParsedResult):
     using this kind of notation: "HLA-A*02:01" or more generally:
             Species-Gene*Group:ProteinID
     """
-
-    def __init__(self, allele_group, protein_id, modifier=None):
+    @typechecked
+    def __init__(
+            self,
+            allele_group : AlleleGroup,
+            protein_id : str,
+            modifier : Union[None, str] = None):
         self.allele_group = allele_group
         self.protein_id = protein_id
         self.modifier = modifier
@@ -218,6 +242,10 @@ class FourDigitAllele(ParsedResult):
         return self.allele_group.gene_name
 
     @property
+    def group_id(self):
+        return self.allele_group.group_id
+
+    @property
     def mhc_class(self):
         return self.gene.mhc_class
 
@@ -242,17 +270,23 @@ class FourDigitAllele(ParsedResult):
             return None
         return FourDigitAllele(allele_group, protein_id, modifier=modifier)
 
-    def normalized_string(self, include_species=True, include_modifier=True):
+    def normalized_string(
+            self,
+            include_species=True,
+            use_species_alias=True,
+            include_modifier=True):
         """
         Return allele strings like "HLA-A*02:01"
         """
-        allele_group_str = self.allele_group.normalized_string(include_species=include_species)
+        allele_group_str = self.allele_group.normalized_string(
+            include_species=include_species,
+            use_species_alias=use_species_alias)
         result = "%s:%s" % (allele_group_str, self.protein_id)
         if include_modifier and self.modifier:
             result += self.modifier
         return result
 
-    def compact_string(self, include_species=False):
+    def compact_string(self, include_species=False, use_species_alias=True):
         """
         Compact representation of a FourDigitAllele, omits the "*" and ":"
         in allele names
@@ -260,7 +294,9 @@ class FourDigitAllele(ParsedResult):
             Compact: HLA-A0201
         """
         return "%s%s" % (
-            self.allele_group.compact_string(include_species=include_species),
+            self.allele_group.compact_string(
+                include_species=include_species,
+                use_species_alias=use_species_alias),
             self.protein_id)
 
     def to_record(self):
@@ -277,11 +313,13 @@ class FourDigitAllele(ParsedResult):
 
 
 class SixDigitAllele(ParsedResult):
+
+    @typechecked
     def __init__(
             self,
-            four_digit_allele,
-            coding_sequence_id,
-            modifier=None):
+            four_digit_allele : FourDigitAllele,
+            coding_sequence_id : str,
+            modifier : Union[None, str]=None):
         self.four_digit_allele = four_digit_allele
         self.coding_sequence_id = coding_sequence_id
         self.modifier = modifier
@@ -314,6 +352,15 @@ class SixDigitAllele(ParsedResult):
     @property
     def allele_group(self):
         return self.four_digit_allele.allele_group
+
+    @property
+    def group_id(self):
+        return self.allele_group.group_id
+
+    @property
+    def protein_id(self):
+        return self.four_digit_allele.protein_id
+
 
     @property
     def mhc_class(self):
@@ -384,11 +431,13 @@ class SixDigitAllele(ParsedResult):
 
 
 class EightDigitAllele(ParsedResult):
+
+    @typechecked
     def __init__(
             self,
-            six_digit_allele,
-            genomic_sequence_id,
-            modifier=None):
+            six_digit_allele : SixDigitAllele,
+            genomic_sequence_id : str,
+            modifier : Union[None, str]=None):
         self.six_digit_allele = six_digit_allele
         self.genomic_sequence_id = genomic_sequence_id
         self.modifier = modifier
@@ -426,6 +475,18 @@ class EightDigitAllele(ParsedResult):
         return self.six_digit_allele.four_digit_allele
 
     @property
+    def group_id(self):
+        return self.allele_group.group_id
+
+    @property
+    def protein_id(self):
+        return self.four_digit_allele.protein_id
+
+    @property
+    def coding_sequence_id(self):
+        return self.six_digit_allele.coding_sequence_id
+
+    @property
     def mhc_class(self):
         return self.gene.mhc_class
 
@@ -461,7 +522,11 @@ class EightDigitAllele(ParsedResult):
             genomic_sequence_id=genomic_sequence_id,
             modifier=modifier)
 
-    def normalized_string(self, include_species=True, include_modifier=True):
+    def normalized_string(
+            self,
+            include_species=True,
+            use_species_alias=True,
+            include_modifier=True):
         """
         Return allele strings like "HLA-A*02:01"
         """
@@ -469,13 +534,14 @@ class EightDigitAllele(ParsedResult):
             self.six_digit_allele.normalized_string(
                 self,
                 include_species=include_species,
+                use_species_alias=use_species_alias,
                 include_modifier=False),
             self.genomic_sequence_id)
         if include_modifier and self.modifier:
             result += self.modifier
         return result
 
-    def compact_string(self, include_species=False):
+    def compact_string(self, include_species=False, use_species_alias=True):
         """
         Compact representation of an EightDigitAllele, omits the "*" and ":"
         in allele names.
@@ -483,7 +549,9 @@ class EightDigitAllele(ParsedResult):
             Compact: HLA-A02010101
         """
         return "%s%s" % (
-            self.six_digit_allele.compact_string(include_species=include_species),
+            self.six_digit_allele.compact_string(
+                include_species=include_species,
+                use_species_alias=use_species_alias),
             self.genomic_sequence_id)
 
     def to_record(self):

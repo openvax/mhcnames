@@ -12,14 +12,22 @@
 
 from __future__ import print_function, division, absolute_import
 
+from typing import List, Union
+from pytypes import typechecked
+
 from .gene import Gene
 from .mutation import Mutation
 from .named_allele import NamedAllele
+from .numeric_alleles import FourDigitAllele
 from .parsed_result import ParsedResult
 
 
 class MutantAllele(ParsedResult):
-    def __init__(self, original_allele, mutations):
+    @typechecked
+    def __init__(
+            self,
+            original_allele : Union[NamedAllele, FourDigitAllele],
+            mutations : List[Mutation]):
         self.original_allele = original_allele
         self.mutations = mutations
 
@@ -62,8 +70,8 @@ class MutantAllele(ParsedResult):
         original_allele_class = d.pop("original_allele_class")
         if original_allele_class == "NamedAllele":
             original_allele = NamedAllele.from_dict(d)
-        elif original_allele_class == "AlleleTwoNumericFields":
-            original_allele = AlleleTwoNumericFields.from_dict(d)
+        elif original_allele_class == "FourDigitAllele":
+            original_allele = FourDigitAllele.from_dict(d)
         else:
             raise ValueError(
                 "Unable to create MutantAllele from %s" % original_allele_class)

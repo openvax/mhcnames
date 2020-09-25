@@ -12,6 +12,7 @@
 
 from __future__ import print_function, division, absolute_import
 
+from pytypes import typechecked
 from collections import OrderedDict
 from .parsed_result import ParsedResult
 from .numeric_alleles import FourDigitAllele
@@ -19,7 +20,8 @@ from .named_allele import NamedAllele
 
 
 class AlphaBetaPair(ParsedResult):
-    def __init__(self, alpha, beta):
+    @typechecked
+    def __init__(self, alpha : ParsedResult, beta : ParsedResult):
         self.alpha = alpha
         self.beta = beta
 
@@ -45,14 +47,21 @@ class AlphaBetaPair(ParsedResult):
 
     def normalized_string(
             self,
-            include_species=True):
+            include_species=True,
+            use_species_alias=True):
         return "%s-%s" % (
-            self.alpha.normalized_string(include_species=include_species),
-            self.beta.normalized_string(include_species=False))
+            self.alpha.normalized_string(
+                include_species=include_species,
+                use_species_alias=use_species_alias),
+            self.beta.normalized_string(
+                include_species=False))
 
-    def compact_string(self, include_species=False):
+    def compact_string(
+            self, include_species=False, use_species_alias=True):
         return "%s-%s" % (
-            self.alpha.compact_string(include_species=include_species),
+            self.alpha.compact_string(
+                include_species=include_species,
+                use_species_alias=use_species_alias),
             self.beta.compact_string(include_species=False))
 
     @property

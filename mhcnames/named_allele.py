@@ -12,6 +12,8 @@
 
 from __future__ import print_function, division, absolute_import
 
+from pytypes import typechecked
+
 from .gene import Gene
 from .parsed_result import ParsedResult
 
@@ -26,7 +28,9 @@ class NamedAllele(ParsedResult):
     Also, some older swine (SLA) alleles seem to have not been translated into
     the updated nomenclature (e.g. SLA-1-CHANGDA)
     """
-    def __init__(self, gene, allele_name):
+
+    @typechecked
+    def __init__(self, gene : Gene, allele_name : str):
         self.gene = gene
         self.allele_name = allele_name
 
@@ -64,16 +68,24 @@ class NamedAllele(ParsedResult):
             return None
         return NamedAllele(gene, allele_name)
 
-    def normalized_string(self, include_species=True):
+    def normalized_string(
+            self,
+            include_species=True,
+            use_species_alias=True):
         return "%s%s" % (
             self.gene.normalized_string(
-                include_species=include_species),
+                include_species=include_species,
+                use_species_alias=use_species_alias),
             self.allele_name)
 
-    def compact_string(self, include_species=False):
+    def compact_string(
+            self,
+            include_species=False,
+            use_species_alias=True):
         return "%s%s" % (
             self.gene.compact_string(
-                include_species=include_species),
+                include_species=include_species,
+                use_species_alias=use_species_alias),
             self.allele_name)
 
     def to_record(self):

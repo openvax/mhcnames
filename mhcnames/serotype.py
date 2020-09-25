@@ -12,36 +12,70 @@
 
 from __future__ import print_function, division, absolute_import
 
+from typing import List, Union
+
+from pytypes import typechecked
+
 from .gene import Gene
+from .species import Species
+from .named_allele import NamedAllele
+from .numeric_alleles import FourDigitAllele
+from .parsed_result import ParsedResult
 
+class Serotype(ParsedResult):
 
-class Serotype(Gene):
-    def __init__(self, species, name, alleles):
+    @typechecked
+    def __init__(
+            self, species : Species,
+            name : str, alleles : Union[List[FourDigitAllele], List[NamedAllele]]):
         if len(alleles) == 0:
             raise ValueError("Cannot create Serotype without alleles")
 
-        gene_names = {allele.gene_name for allele in alleles}
-        if len(gene_names) != 1:
+        genes = list({allele.gene for allele in alleles})
+        if len(genes) != 1:
             raise ValueError(
                 "Serotype cannot span multiple genes: %s" % (
-                    gene_names,))
-        gene_name = list(gene_names)[0]
-        Gene.__init__(self, species_prefix, gene_name)
+                    [gene.name for gene in genes],))
+        gene = genes[0]
+        if gene.species != species:
+            raise ValueError(
+                "Species inferred from given alleles (%s) is different from %s" % (
+                    gene.species,
+                    species,
+                ))
+        self.species = species
+        self.gene = gene
         self.name = name
         self.alleles = alleles
 
+    @property
+    def species_prefix(self):
+        return self.species.prefix
+
+    @property
+    def gene_name(self):
+        return self.gene.name
+
     @classmethod
     def field_names(cls):
-        return ("species_prefix", "name", "alleles")
+        return ("species", "name", "alleles")
 
-    def normalized_string(self, include_species=True):
+    def normalized_string(
+            self,
+            include_species=True,
+            use_species_alias=True):
         if include_species:
-            return "%s-%s" % (self.species_prefix, self.name)
+            return "%s-%s" % (
+                self.species.normalized_string(
+                    use_species_alias=use_species_alias),
+                self.name)
         else:
             return self.name
 
-    def compact_string(self, include_species=False):
-        return Serotype.normalized_string(self, include_species=include_species)
+    def compact_string(self, include_species=False, use_species_alias=True):
+        return self.normalized_string(
+            include_species=include_species,
+            use_species_alias=use_species_alias)
 
     def to_record(self):
         d = Gene.to_record(self)

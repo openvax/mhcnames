@@ -10,7 +10,7 @@ from mhcnames import (
 
 def test_mouse_class2_gene():
     # H2-IAb
-    gene = Gene("H2", "AB")
+    gene = Gene.get("H2", "AB")
     eq_(parse("H2-IAb"), gene)
     eq_(normalized_string("H2-IAb"), "H2-AB")
     eq_(compact_string("H2-IAb"), "AB")

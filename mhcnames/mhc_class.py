@@ -10,8 +10,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from __future__ import print_function, division, absolute_import
+
+from pytypes import typechecked
+
 from .mhc_class_helpers import (
     normalize_mhc_class_string,
     is_class1,
@@ -29,7 +31,8 @@ class MhcClass(ParsedResult):
     "I", "Ia", "Ib", "II", "IIa", &c
     which provides some utility functions.
     """
-    def __init__(self, species, mhc_class):
+    @typechecked
+    def __init__(self, species : Species, mhc_class : str):
         self.species = species
         self.mhc_class = normalize_mhc_class_string(mhc_class)
 
@@ -40,6 +43,10 @@ class MhcClass(ParsedResult):
     @property
     def species_prefix(self):
         return self.species.prefix
+
+    @property
+    def common_species_name(self):
+        return self.species.common_species_name
 
     @classmethod
     def get(cls, species_prefix, mhc_class):
@@ -85,20 +92,23 @@ class MhcClass(ParsedResult):
         d["mhc_class"] = self.mhc_class
         return d
 
-    def normalized_string(self, include_species=True):
+    def normalized_string(self, include_species=True, use_species_alias=True):
         if include_species:
             if self.common_species_name:
-                species_str = self.common_species_name
+                species_str = self.common_species_name.lower()
+            elif use_species_alias:
+                species_str = self.species.historic_alias
             else:
-                species_str = self.species_prefix
-            species_str = species_str.lower()
+                species_str = self.species.prefix
             return "%s class %s" % (species_str, self.mhc_class)
         else:
             return "class %s" % self.mhc_class
 
-    def compact_string(self, include_species=True):
+    def compact_string(self, include_species=True, use_species_alias=True):
         """
         Compact representation of an MHC class, currently same as the
         normalized representation.
         """
-        return self.normalized_string(include_species=include_species)
+        return self.normalized_string(
+            include_species=include_species,
+            use_species_alias=use_species_alias)
