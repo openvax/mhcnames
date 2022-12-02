@@ -1,3 +1,5 @@
+# *DEPRECATED: you should use [mhcgnomes](https://pypi.org/project/mhcgnomes/) instead*
+
 <a href="https://travis-ci.org/openvax/mhcnames">
     <img src="https://travis-ci.org/openvax/mhcnames.svg?branch=master" alt="Build Status" />
 </a>
