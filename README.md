@@ -1,3 +1,7 @@
+> **⚠️ DEPRECATED:** mhcnames is no longer maintained. Please use [mhcgnomes](https://github.com/openvax/mhcgnomes) instead, which provides a superset of mhcnames functionality with support for more MHC nomenclature systems.
+
+---
+
 # **DEPRECATED: you should use [mhcgnomes](https://pypi.org/project/mhcgnomes/) instead**
 
 <a href="https://travis-ci.org/openvax/mhcnames">
