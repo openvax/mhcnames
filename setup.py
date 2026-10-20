@@ -12,29 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
-import logging
 import re
+from pathlib import Path
 
 from setuptools import setup
 
-readme_dir = os.path.dirname(__file__)
-readme_path = os.path.join(readme_dir, 'README.md')
-
-try:
-    with open(readme_path, 'r') as f:
-        readme_markdown = f.read()
-except:
-    logging.warn("Failed to load %s" % readme_path)
-    readme_markdown = ""
-
-try:
-    import pypandoc
-    readme_restructured = pypandoc.convert(readme_markdown, to='rst', format='md')
-except:
-    readme_restructured = readme_markdown
-    logging.warn("Conversion of long_description from MD to RST failed")
-    pass
+readme_markdown = Path(__file__).with_name('README.md').read_text(encoding='utf-8')
 
 with open('mhcnames/__init__.py', 'r') as f:
     version = re.search(
@@ -52,7 +35,7 @@ if __name__ == '__main__':
         description="Python library for MHC nomenclature parsing",
         author="Alex Rubinsteyn",
         author_email="alex.rubinsteyn@mssm.edu",
-        url="https://github.com/hammerlab/mhcnames",
+        url="https://github.com/openvax/mhcnames",
         license="http://www.apache.org/licenses/LICENSE-2.0.html",
         classifiers=[
             'Development Status :: 3 - Alpha',
@@ -61,9 +44,15 @@ if __name__ == '__main__':
             'Intended Audience :: Science/Research',
             'License :: OSI Approved :: Apache Software License',
             'Programming Language :: Python',
+            'Programming Language :: Python :: 3.11',
+            'Programming Language :: Python :: 3.12',
+            'Programming Language :: Python :: 3.13',
+            'Programming Language :: Python :: 3.14',
             'Topic :: Scientific/Engineering :: Bio-Informatics',
         ],
         install_requires=['six>=1.9.0'],
-        long_description=readme_restructured,
+        python_requires='>=3.11',
+        long_description=readme_markdown,
+        long_description_content_type='text/markdown',
         packages=['mhcnames'],
     )

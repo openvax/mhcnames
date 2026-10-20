@@ -1,8 +1,15 @@
-# Releasing MHCnames
+# Releasing mhcnames
 
-This document explains what do once your [Pull Request](https://www.atlassian.com/git/tutorials/making-a-pull-request/) has been reviewed and all final changes applied. Now you're ready merge your branch into master and release it to the world:
+This package is deprecated in favor of [mhcgnomes](https://github.com/openvax/mhcgnomes).
+Compatibility releases still use the following checks:
 
-1. Bump the [version](http://semver.org/) on __init__.py, as part of the PR you want to release.
-2. Merge your branch into master.
-3. After the MHCnames unit tests complete successfully on Travis, the latest version
-of the code (with the version specified above) will be pushed to [PyPI](https://pypi.python.org/pypi) automatically. If you're curious about how automatic deployment is achieved, see our [Travis configuration](https://github.com/hammerlab/mhcnames/blob/master/.travis.yml#L37).
+1. Bump `mhcnames.__version__` in a pull request.
+2. Run `./lint.sh` and `./test.sh`, then merge only after the Python 3.11–3.14 CI matrix passes.
+3. From clean, up-to-date `master`, build and check both distributions:
+
+   ```sh
+   python -m build
+   python -m twine check --strict dist/*
+   ```
+
+4. Upload the distributions to PyPI, tag the merged commit with the version, and verify the published metadata.
