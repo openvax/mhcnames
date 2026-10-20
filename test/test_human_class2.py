@@ -1,4 +1,4 @@
-from nose.tools import eq_
+from test.helpers import eq_
 
 from mhcnames import (
     normalize_allele_name,

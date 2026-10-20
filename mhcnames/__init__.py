@@ -7,7 +7,7 @@ from .species import (
 )
 from .allele_parse_error import AlleleParseError
 
-__version__ = "0.4.8"
+__version__ = "0.4.9"
 
 __all__ = [
     "AlleleName",

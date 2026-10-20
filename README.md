@@ -4,18 +4,15 @@
 
 # **DEPRECATED: you should use [mhcgnomes](https://pypi.org/project/mhcgnomes/) instead**
 
-<a href="https://travis-ci.org/openvax/mhcnames">
-    <img src="https://travis-ci.org/openvax/mhcnames.svg?branch=master" alt="Build Status" />
-</a>
-<a href="https://coveralls.io/github/openvax/mhcnames?branch=master">
-    <img src="https://coveralls.io/repos/openvax/mhcnames/badge.svg?branch=master&service=github" alt="Coverage Status" />
-</a>
+[![Tests](https://github.com/openvax/mhcnames/actions/workflows/tests.yml/badge.svg)](https://github.com/openvax/mhcnames/actions/workflows/tests.yml)
 <a href="https://pypi.python.org/pypi/mhcnames/">
     <img src="https://img.shields.io/pypi/v/mhcnames.svg?maxAge=1000" alt="PyPI" />
 </a>
 
 # mhcnames
 All the fun and adventure of MHC nomenclature, now in Python
+
+Python 3.11 or later is required. New projects should use `mhcgnomes` instead.
 
 ## Example
 

@@ -8,7 +8,7 @@ from mhcnames import (
     parse_allele_name,
     AlleleName,
 )
-from nose.tools import eq_
+from test.helpers import eq_
 
 def test_SLA_1_0101_with_seps():
     eq_(

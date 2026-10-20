@@ -1,4 +1,4 @@
-from nose.tools import eq_
+from test.helpers import eq_
 from mhcnames import parse_allele_name, AlleleName
 
 def test_dog_class2_allele():
